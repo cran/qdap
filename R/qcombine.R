@@ -34,9 +34,9 @@ qcombine <- function(mat, combined.columns, elim.old = TRUE){
     L1 <- lapply(combined.columns, function(x) {
         if (is.numeric(x)) {
             x <- names(mat)[x]
-        }      
+        }    
         if(all(x %in% colnames(mat))){
-            return(unlist(rowSums(mat[, x])))
+            return(unlist(rowSums(mat[, x, drop = FALSE])))
         }
         if(all(!x %in% colnames(mat))){
             return(unlist(rep(NA, nrow(mat))))
@@ -49,9 +49,14 @@ qcombine <- function(mat, combined.columns, elim.old = TRUE){
     DF <- data.frame(do.call(cbind, L1))
     DF <- DF[ !sapply(DF, function(x) all(is.na(x)))]
     if(elim.old) {
-        mat <- mat[, !names(mat) %in% unique(unlist(combined.columns))]
+        for (i in  seq_len(length(combined.columns))) {
+            CC <- sapply(combined.columns[[i]], function(x) {
+                which(x == names(mat))[1]
+            })
+            nms <- colnames(mat)[!1:ncol(mat) %in% CC]
+            mat <- mat[ , !1:ncol(mat) %in% CC]
+            colnames(mat) <- nms
+        }
     }
     data.frame(mat, DF, check.names = FALSE)
 }
-
-

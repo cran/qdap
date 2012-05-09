@@ -16,13 +16,13 @@
 #' pronoun I.
 #' @param rm.bracket logical If TRUE all brackets and bracketed text are 
 #' removed from analysis.
-#' @param char.keep A character vector of symbols (i.e. punctuation) that 
+#' @param char.keep A character vector of symbols (i.e., punctuation) that 
 #' \code{word_list} should keep.  The default is to remove every symbol except 
 #' apostrophes.
 #' @param apostrophe.remove logical.  If TRUE removes apostrophes from the 
 #' output.
 #' @param \ldots Other arguments passed to \code{\link[qdap]{strip}}.
-#' @return An object of class \code{"word_list"} is a list of lists of verctors 
+#' @return An object of class \code{"word_list"} is a list of lists of vectors 
 #' or dataframes containing the following components: 
 #' \item{cwl}{complete word list; raw words}
 #' \item{swl}{stop word list; same as rwl with stop words removed}

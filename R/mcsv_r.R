@@ -12,14 +12,16 @@
 #' Default is \code{"L1"}.
 #' @param pos where to do the removal. By default, uses the current environment. 
 #' @param envir the environment to use. 
-#' @param \dots data.frame object(s) to write to a file
+#' @param \dots data.frame object(s) to write to a file or a list of data.frame 
+#' objects.  If the objects in a list are unnamed V + digit will be assigned.
 #' @param dir optional directory names.  If NULL a directory will be created in 
 #' the working directory with the data and time stamp as the folder name.
-#' @param open logical.  If TURE opens the directory upon completion.
+#' @param open logical.  If TRUE opens the directory upon completion.
 #' @return \code{mcsv_r} - reads in multiple csv files at once.
 #' @rdname multicsv
-#' @note \code{mcsv_r} is useful for reading in multiple csv files from 
-#' \code{cm_csv.temp} for interaction with \code{cm_range2long}.
+#' @note \code{\link[qdap]{mcsv_r}} is useful for reading in multiple csv files 
+#' from \code{\link[qdap]{cm_df.temp}} for interaction with 
+#' \code{\link[qdap]{cm_range2long}}.
 #' @details mcsv is short for "multiple csv" and the suffix c(_r, _w) stands for 
 #' "read" (r) or "write" (w).
 #' @seealso \code{\link[qdap]{cm_range2long}},
@@ -86,7 +88,15 @@ function(..., dir = NULL, open = FALSE){
     x <- match.call(expand.dots = FALSE)
     z <- as.character(x[[2]])
     x2 <- list(...)
+    if (length(x2) == 1 && !sapply(x2, is.data.frame)) {
+        x2 <- unlist(x2, recursive = FALSE)
+        z <- names(x2)
+        z[z == ""] <- paste0("V", which(z == ""))
+    }
     names(x2) <- z
+    if (is.null(dir)) {
+        
+    }
     y <- folder(folder.name = dir)
     files <- paste0(y, "/", z, ".csv")
     invisible(lapply(seq_along(x2), function(i){

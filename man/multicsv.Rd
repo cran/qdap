@@ -28,13 +28,15 @@
 
   \item{envir}{the environment to use.}
 
-  \item{\dots}{data.frame object(s) to write to a file}
+  \item{\dots}{data.frame object(s) to write to a file or a
+  list of data.frame objects.  If the objects in a list are
+  unnamed V + digit will be assigned.}
 
   \item{dir}{optional directory names.  If NULL a directory
   will be created in the working directory with the data
   and time stamp as the folder name.}
 
-  \item{open}{logical.  If TURE opens the directory upon
+  \item{open}{logical.  If TRUE opens the directory upon
   completion.}
 }
 \value{
@@ -55,9 +57,9 @@
   stands for "read" (r) or "write" (w).
 }
 \note{
-  \code{mcsv_r} is useful for reading in multiple csv files
-  from \code{cm_csv.temp} for interaction with
-  \code{cm_range2long}.
+  \code{\link[qdap]{mcsv_r}} is useful for reading in
+  multiple csv files from \code{\link[qdap]{cm_df.temp}}
+  for interaction with \code{\link[qdap]{cm_range2long}}.
 }
 \examples{
 \dontrun{

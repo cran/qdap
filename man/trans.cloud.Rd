@@ -14,7 +14,7 @@
     proportional = FALSE, max.word.size = NULL,
     min.word.size = 0.5, legend = NULL, legend.cex = 0.8,
     legend.location = c(-0.03, 1.03), char.keep = "~~",
-    char2space = NULL)
+    char2space = "~~")
 }
 \arguments{
   \item{text.var}{The text variable.}
@@ -103,7 +103,7 @@
   used to position the legend.}
 
   \item{char.keep}{A character vector of symbol character
-  (i.e. punctuation) that strip should keep.  The default
+  (i.e., punctuation) that strip should keep.  The default
   is to strip everything except apostrophes. This enables
   the use of special characters to be turned into spaces or
   for characters to be retained.}
@@ -131,17 +131,49 @@ terms <- list(
 
 with(DATA, trans.cloud(state, person, target.words=terms,
     cloud.colors=qcv(red, green, blue, black, gray65),
-    expand.target=FALSE, proportional=TRUE))
+    expand.target=FALSE, proportional=TRUE, legend=c(names(terms),
+    "other")))
 
 with(DATA, trans.cloud(state, person, target.words=terms,
     stopwords=exclude(with(DATA, unique(bag.o.words(state))),
         unique(unlist(terms))),
     cloud.colors=qcv(red, green, blue, black, gray65),
-    expand.target=FALSE, proportional=TRUE))
+    expand.target=FALSE, proportional=TRUE, legend=names(terms)))
+
+with(mraja1, trans.cloud(dialogue, person,
+    target.words=list(positive=positive.words, negative=negative.words,
+         negator=negation.words, amplifier=increase.amplification.words),
+    cloud.colors=qcv(green, red, black, orange, gray65),
+    expand.target=FALSE, proportional=TRUE, legend=names(terms)))
+
+#color the negated phrases opposite:
+DATA <- qdap::DATA
+DATA[1, 4] <- "This is not good!"
+DATA[8, 4] <- "I don't distrust you."
+
+DATA$state <- space_fill(DATA$state, paste0(negation.words, " "),
+    rm.extra = FALSE)
+
+txt <- gsub("~~", " ", breaker(DATA$state))
+rev.neg <- sapply(negation.words, paste, negative.words)
+rev.pos <- sapply(negation.words, paste, positive.words)
+
+
+tw <- list(
+    positive=c(positive.words, rev.neg[rev.neg \%in\% txt]),
+    negative=c(negative.words, rev.pos[rev.pos \%in\% txt])
+)
+
+
+with(DATA, trans.cloud(state, person,
+    target.words=tw,
+    cloud.colors=qcv(darkgreen, red, gray65),
+    expand.target=FALSE, proportional=TRUE, legend=names(tw)))
 }
 }
 \seealso{
-  \code{\link[wordcloud]{wordcloud}}
+  \code{\link[wordcloud]{wordcloud}},
+  \code{\link[qdap]{gradient_cloud}}
 }
 \keyword{wordcloud}
 

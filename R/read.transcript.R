@@ -23,7 +23,7 @@
 #' (default is text ...).
 #' @param quote2bracket logical. If TRUE replaces curly quotes with curly braces 
 #' (default is FALSE).  If FALSE curly quotes are removed.
-#' @param rm.empty.rows logical.  If TURE \code{\link[qdap]{read.transcript}}  
+#' @param rm.empty.rows logical.  If TRUE \code{\link[qdap]{read.transcript}}  
 #' attempts to remove empty rows.
 #' @param na.strings A vector of character strings which are to be interpreted 
 #' as NA values.
@@ -35,6 +35,9 @@
 #' beginning to read data.
 #' @param nontext2factor logical.  If TRUE attempts to convert any non text to a 
 #' factor.
+#' @param text Character string: if file is not supplied and this is, then data 
+#' are read from the value of text. Notice that a literal string can be used to 
+#' include (small) data sets within R code.
 #' @param \ldots Further arguments to be passed to \code{\link[utils]{read.table}}.
 #' @return Returns a dataframe of dialogue and people.
 #' @note If a transcript is a .docx file read transcript expects two columns 
@@ -46,16 +49,17 @@
 #' @author Bryan Goodrich and Tyler Rinker <tyler.rinker@@gmail.com>.
 #' @references \url{https://github.com/trinker/qdap/wiki/Reading-.docx-\%5BMS-Word\%5D-Transcripts-into-R}
 #' @keywords transcript
+#' @seealso \code{\link[qdap]{dir_map}}
 #' @export
 #' @import XML gdata RCurl
 #' @examples
 #' \dontrun{
 #' #Note: to view the document below use the path:
-#' gsub("trans1.docx", "", system.file("extdata/trans1.docx", package = "qdap"))
-#' (doc1 <- system.file("extdata/trans1.docx", package = "qdap"))
-#' (doc2 <- system.file("extdata/trans2.docx", package = "qdap"))
-#' (doc3 <- system.file("extdata/trans3.docx", package = "qdap"))
-#' (doc4 <- system.file("extdata/trans4.xlsx", package = "qdap"))
+#' gsub("trans1.docx", "", system.file("extdata/transcripts/trans1.docx", package = "qdap"))
+#' (doc1 <- system.file("extdata/transcripts/trans1.docx", package = "qdap"))
+#' (doc2 <- system.file("extdata/transcripts/trans2.docx", package = "qdap"))
+#' (doc3 <- system.file("extdata/transcripts/trans3.docx", package = "qdap"))
+#' (doc4 <- system.file("extdata/transcripts/trans4.xlsx", package = "qdap"))
 #' 
 #' dat1 <- read.transcript(doc1)
 #' truncdf(dat1, 40)
@@ -67,20 +71,31 @@
 #' ## read.transcript(doc2) #throws an error (need skip)
 #' dat3 <- read.transcript(doc2, skip = 1); truncdf(dat3, 40)
 #' 
-#' ## read.transcript(doc3, skip = 1) #throws an error; wrong sep
+#' ## read.transcript(doc3, skip = 1) #incorrect read; wrong sep
 #' dat4 <- read.transcript(doc3, sep = "-", skip = 1); truncdf(dat4, 40)
 #' 
 #' dat5 <- read.transcript(doc4); truncdf(dat5, 40) #an .xlsx file
+#' trans <- "sam: Computer is fun. Not too fun.
+#' greg: No it's not, it's dumb.
+#' teacher: What should we do?
+#' sam: You liar, it stinks!"
+#' 
+#' read.transcript(text=trans)
 #' }
 read.transcript <-
 function(file, col.names = NULL, text.var = NULL, merge.broke.tot = TRUE, 
     header = FALSE, dash = "", ellipsis = "...", quote2bracket = FALSE, 
     rm.empty.rows = TRUE, na.strings = c("999", "NA", "", " "), 
-    sep = NULL, skip = 0, nontext2factor = TRUE, ...) {
-    y <- unlist(strsplit(file, "\\."))
-    y <- y[[length(y)]]
+    sep = NULL, skip = 0, nontext2factor = TRUE, text, ...) {
+    if (missing(file) && !missing(text)) {
+        file <- textConnection(text)
+        on.exit(close(file))
+        y <- "text"
+    } else {
+        y <- tools::file_ext(file)
+    }
     if (is.null(sep)) {
-        if (y == "docx") {
+        if (y %in% c("docx", "txt", "text")) {
             sep <- ":"
         } else {
             sep <- ","
@@ -103,6 +118,12 @@ function(file, col.names = NULL, text.var = NULL, merge.broke.tot = TRUE,
                 blank.lines.skip = rm.empty.rows, ...)
             },
         doc = stop("convert file to docx"),
+        txt = {
+            x <- read.table(file=file, header = header, sep = sep, skip=skip)
+        },
+        text = {
+            x <- read.table(text=text, header = header, sep = sep, skip=skip)
+        },
         stop("invalid file extension:\n \bfile must be a .docx .csv .xls or .xlsx" )
     )
     if (nontext2factor) {

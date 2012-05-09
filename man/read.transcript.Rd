@@ -7,7 +7,7 @@
     ellipsis = "...", quote2bracket = FALSE,
     rm.empty.rows = TRUE,
     na.strings = c("999", "NA", "", " "), sep = NULL,
-    skip = 0, nontext2factor = TRUE, ...)
+    skip = 0, nontext2factor = TRUE, text, ...)
 }
 \arguments{
   \item{file}{The name of the file which the data are to be
@@ -42,7 +42,7 @@
   quotes with curly braces (default is FALSE).  If FALSE
   curly quotes are removed.}
 
-  \item{rm.empty.rows}{logical.  If TURE
+  \item{rm.empty.rows}{logical.  If TRUE
   \code{\link[qdap]{read.transcript}} attempts to remove
   empty rows.}
 
@@ -60,6 +60,11 @@
 
   \item{nontext2factor}{logical.  If TRUE attempts to
   convert any non text to a factor.}
+
+  \item{text}{Character string: if file is not supplied and
+  this is, then data are read from the value of text.
+  Notice that a literal string can be used to include
+  (small) data sets within R code.}
 
   \item{\ldots}{Further arguments to be passed to
   \code{\link[utils]{read.table}}.}
@@ -85,11 +90,11 @@
 \examples{
 \dontrun{
 #Note: to view the document below use the path:
-gsub("trans1.docx", "", system.file("extdata/trans1.docx", package = "qdap"))
-(doc1 <- system.file("extdata/trans1.docx", package = "qdap"))
-(doc2 <- system.file("extdata/trans2.docx", package = "qdap"))
-(doc3 <- system.file("extdata/trans3.docx", package = "qdap"))
-(doc4 <- system.file("extdata/trans4.xlsx", package = "qdap"))
+gsub("trans1.docx", "", system.file("extdata/transcripts/trans1.docx", package = "qdap"))
+(doc1 <- system.file("extdata/transcripts/trans1.docx", package = "qdap"))
+(doc2 <- system.file("extdata/transcripts/trans2.docx", package = "qdap"))
+(doc3 <- system.file("extdata/transcripts/trans3.docx", package = "qdap"))
+(doc4 <- system.file("extdata/transcripts/trans4.xlsx", package = "qdap"))
 
 dat1 <- read.transcript(doc1)
 truncdf(dat1, 40)
@@ -101,10 +106,16 @@ truncdf(dat2b, 40)
 ## read.transcript(doc2) #throws an error (need skip)
 dat3 <- read.transcript(doc2, skip = 1); truncdf(dat3, 40)
 
-## read.transcript(doc3, skip = 1) #throws an error; wrong sep
+## read.transcript(doc3, skip = 1) #incorrect read; wrong sep
 dat4 <- read.transcript(doc3, sep = "-", skip = 1); truncdf(dat4, 40)
 
 dat5 <- read.transcript(doc4); truncdf(dat5, 40) #an .xlsx file
+trans <- "sam: Computer is fun. Not too fun.
+greg: No it's not, it's dumb.
+teacher: What should we do?
+sam: You liar, it stinks!"
+
+read.transcript(text=trans)
 }
 }
 \author{
@@ -112,6 +123,9 @@ dat5 <- read.transcript(doc4); truncdf(dat5, 40) #an .xlsx file
 }
 \references{
   \url{https://github.com/trinker/qdap/wiki/Reading-.docx-\%5BMS-Word\%5D-Transcripts-into-R}
+}
+\seealso{
+  \code{\link[qdap]{dir_map}}
 }
 \keyword{transcript}
 

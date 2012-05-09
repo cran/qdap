@@ -2,7 +2,7 @@
 #' 
 #' \code{termco} - Search a transcript by any number of grouping variables for 
 #' categories (themes) of grouped root terms.  While there are other termco 
-#' functions in the termco family (e.g. \code{\link[qdap]{termco.d}}) 
+#' functions in the termco family (e.g., \code{\link[qdap]{termco.d}}) 
 #' \code{termco} is a more powerful and flexible wrapper intended for general 
 #' use.
 #' 
@@ -21,7 +21,7 @@
 #' @param digits Integer; number of decimal places to round when printing.   
 #' @param apostrophe.remove logical.  If TRUE removes apostrophes from the text 
 #' before examining.
-#' @param char.keep A character vector of symbol character (i.e. punctuation) 
+#' @param char.keep A character vector of symbol character (i.e., punctuation) 
 #' that strip should keep.  The default is to strip everything except 
 #' apostrophes. \code{\link[qdap]{termco}} attempts to auto detect characters to 
 #' keep based on the elements in \code{match.list}. 
@@ -43,14 +43,14 @@
 #' @section Warning: Percentages are calculated as a ratio of counts of 
 #' \code{match.list} elements to word counts.  Word counts do not contain 
 #' symbols or digits.  Using symbols, digits or small segments of full words 
-#' (e.g. "to") could total more than 100\%.
+#' (e.g., "to") could total more than 100\%.
 #' @rdname termco  
 #' @note The match.list/match.string is (optionally) case and character 
 #' sensitive.  Spacing is an important way to grab specific words and requires 
 #' careful thought.  Using "read" will find the words "bread", "read" "reading", 
 #' and "ready".  If you want to search for just the word "read" you'd supply a 
 #' vector of c(" read ", " reads", " reading", " reader").  To search for non 
-#' character arguments (i.e. numbers and symbols) additional arguments from 
+#' character arguments (i.e., numbers and symbols) additional arguments from 
 #' strip must be passed.
 #' @seealso \code{\link[qdap]{termco.c}}
 #' @keywords word-search
@@ -59,7 +59,9 @@
 #' \dontrun{
 #' #termco examples:
 #' 
-#' # General form for match.list
+#' term <- c("the ", "she", " wh")
+#' with(raj.act.1,  termco(dialogue, person, term))
+#' # General form for match.list as themes
 #' #
 #' # ml <- list(
 #' #     cat1 = c(),
@@ -111,7 +113,6 @@
 #' termco(DATA$state, DATA$person, syns)
 #' 
 #' #termco.d examples:
-#' term.match(DATA$state, qcv(i, the))
 #' termco.d(DATA$state, DATA$person, c(" the", " i'"))
 #' termco.d(DATA$state, DATA$person, c(" the", " i'"), ignore.case=FALSE)
 #' termco.d(DATA$state, DATA$person, c(" the ", " i'"))
@@ -130,6 +131,9 @@ function (text.var, grouping.var = NULL, match.list, short.term = TRUE,
     ignore.case = TRUE, elim.old = TRUE, percent = TRUE, digits = 2, 
     apostrophe.remove = FALSE, char.keep = NULL, digit.remove = NULL, 
     zero.replace = 0, ...) {
+    if (!is.list(match.list)) {
+        names(match.list) <- NULL
+    }  
     x <- unlist(match.list)
     a <- grepl("[^a-zA-Z[:space:]]", x)
     if (any(a)) {
@@ -166,35 +170,57 @@ function (text.var, grouping.var = NULL, match.list, short.term = TRUE,
     preIND <- match.list
     IND <- unlist(lapply(preIND, length))
     new.names <- paste0("term(", names(IND)[IND != 1], ")")
-    CC <- match.list[sapply(match.list, length) > 1]
+    CC <- match.list[names(match.list) != ""]
     ML <- unlist(match.list)
     TD <- termco.d(text.var = text.var, grouping.var = grouping.var, 
         match.string = ML, ignore.case = ignore.case, percent = percent, 
         apostrophe.remove = apostrophe.remove, char.keep = NULL, 
         digit.remove = FALSE, digits = digits, zero.replace = zero.replace, ...)
+    colnames(TD[[3]]) <- colnames(TD[[1]])
     if (is.list(preIND)) {
         if(length(IND) == sum(IND)){
             o <- TD
         } else {
             o <- termco.c(TD, combined.columns = CC, new.name = new.names, 
-                zero.replace = zero.replace, short.term = short.term, 
+                zero.replace = zero.replace, short.term = TRUE, 
                 elim.old = elim.old, percent = percent, digits = digits)
         }
     } else {
         o <- TD
     }
+    colnames(o[[3]]) <- colnames(o[[2]]) <- colnames(o[[1]])
+    if (is.list(match.list) && length(CC) != length(match.list)){
+        lens <- sapply(match.list, length)
+        if(any(names(match.list) %in% "")) {
+            blanks <- names(match.list) %in% ""
+            if (any(lens[blanks] > 1)) {
+                stop("Vectors in match.list must be named or of length one")
+            }
+            names(match.list)[blanks] <- unlist(match.list[blanks])
+        }
+    }
     o[1:3] <- lapply(o[1:3], function(x) {
+        nms2 <- colnames(x)[!colnames(x) %in% names(match.list)]
+        mat <- x[, !colnames(x) %in% names(match.list), drop=FALSE]
+        colnames(mat) <- nms2
+        mat2 <- x[, names(match.list), drop=FALSE]
+        x <- data.frame(mat, mat2, check.names = FALSE)
         colnames(x)[1] <- NAME
         rownames(x) <- NULL
         x
     })
+    if (!short.term & is.list(match.list)) {
+        o[1:3] <- lapply(o[1:3], function(x) {
+            colnames(x)[-c(1:2)] <- paste0("term(", colnames(x)[-c(1:2)], ")")
+            return(x)
+        })
+    }
     if (short.term) {
-      o <- termco2short.term(o)
+        o <- termco2short.term(o)
     }
     class(o) <- "termco"
     o
 }
-
 
 #' Search for Terms
 #' 
@@ -203,7 +229,7 @@ function (text.var, grouping.var = NULL, match.list, short.term = TRUE,
 #' 
 #' @param match.string A vector of terms to search for.  When using inside of 
 #' \code{term.match} the term(s) must be words or partial words but do not have 
-#' to be when using \code{\link[qdap]{termco.d}} (i.e. they can be phrases, 
+#' to be when using \code{\link[qdap]{termco.d}} (i.e., they can be phrases, 
 #' symbols etc.).
 #' @rdname termco
 #' @export
@@ -291,7 +317,7 @@ function(text.var, terms, return.list=TRUE, apostrophe.remove=FALSE) {
 #' Convert a termco dataframe to a matrix
 #' 
 #' \code{termco2mat} - Convert a termco dataframe to a matrix for use with 
-#' visualization functions (e.g. heatmap2 of the gplots package).
+#' visualization functions (e.g., \code{\link[gplots]{heatmap.2}}).
 #' 
 #' @param dataframe A termco (or termco.d) dataframe or object.
 #' @param drop.wc logical.  If TRUE the word count column will be dropped.
@@ -387,7 +413,8 @@ function(x, digits = NULL, percent = NULL, zero.replace = NULL, ...) {
     rnp <- raw_pro_comb(x$raw[, -c(1:2), drop = FALSE], 
         x$prop[, -c(1:2), drop = FALSE], digits = digits, percent = percent, 
         zero.replace = zero.replace, override = TRUE)  
-    rnp <- data.frame(x$raw[, 1:2], rnp, check.names = FALSE)     
+    rnp <- data.frame(x$raw[, 1:2], rnp, check.names = FALSE)  
+    colnames(rnp) <- colnames(x[[1]])   
     print(rnp)
     options(width=WD)
 }

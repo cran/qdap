@@ -24,13 +24,15 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' (DIR <- gsub("trans1.docx", "", system.file("extdata/trans1.docx", 
-#'     package = "qdap")))
+#' (DIR <- system.file("extdata/transcripts", package = "qdap"))
 #' dir_map(DIR)
 #' }
 dir_map <- 
 function(loc, obj.prefix = "dat", col.names = c("person", "dialogue"), 
     file = NULL, copy2clip = TRUE) {
+    if (Sys.info()["sysname"] != "Windows") {
+        writeClipboard <- NULL
+    }    
     WD <- getwd()
     setwd(loc)
     fls <- dir()
@@ -39,8 +41,8 @@ function(loc, obj.prefix = "dat", col.names = c("person", "dialogue"),
         ifelse(pos > -1L, substring(x, pos + 1L), "")
     }
     exts <- sapply(fls, file_ext)
-    if (any(!exts %in% c("docx", "csv", "xlsx"))) {
-        warning("read.transcript only works with .docx, .csv or .xlsx")
+    if (any(!exts %in% c("docx", "csv", "xlsx", "txt"))) {
+        warning("read.transcript only works with .docx, .csv, .xlsx or .txt")
     }
     lead <- function(string, digits) {
         sprintf(paste0("%0", digits, "d"), string)

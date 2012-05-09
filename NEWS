@@ -1,6 +1,63 @@
-qdap 0.1.0
+qdap 0.2.1
+----------------------------------------------------------------
+
+BUG FIXES
+
+* `word_associate` colors the word cloud appropriately and deals with the error 
+  caused by a grouping variable not containing any words from 1 or more of the 
+  vectors of a list supplied to match string
+
+* `trans.cloud` produced an error when expand.target was TRUE.  This error ha 
+  been eliminated.
+
+* `termco` would eliminate > 1 columns matching an identical search.term found 
+  in a second vector of match.list.  termco now counts repeated terms multiple 
+  times.
+
+* `cm_df.transcript` did not give the correct speaker labels (fixed).
+
+NEW FEATURES
+
+* `bivar_gradcloud`: Binary gradient Word Cloud - A new plotting function 
+  that plots and colors words for a binary variable based on which group of 
+  the binary variable uses the term more frequently.
+
+* `new_project`: A project template generating function designed to increase 
+  efficiency and standardize work flow.  The project comes with a .Rproj file 
+  for easy use with RStudio as well as a .Rprofile that makes loading and sourcing 
+  of packages, data and project functions.  This function uses the reprots package
+  to generate an extensive reports folder.
+
+MINOR FEATURES
+
+* `stemmer`, `stem2df` and `stem.words` now explicitally have the argument 
+  char.keep set to "~~" to enable retaining special character formerly stripped 
+  away.
+
+* `hms2sec`: A function to convert from h:m:s format to seconds.
+
+* `mcsv_w` now takes a list of data.frames.
+
+* `cm_range.temp` now takes the arguments text.var and grouping.var that will 
+  automatically output these (grouping.var) columns as range coded indices.
+
+* `wfm` gets as speed boost as the code has been re-written to be faster.
+
+* `read.transcript` now reads .txt files as well as text similar to read.table.
+
+CHANGES
+
+* `sec2hms` is the new name for `convert` 
+
+* `folder` and `delete` have been moved to the reports package which is imported 
+  by qdap.  Previously `folder` would not generate a directory with the 
+  time/date stamp if no directory name was given; this has been fixed, though 
+  the function now resides in the reprots package.
+
+qdap 0.2.0
 ----------------------------------------------------------------
 
 * The first installation of the qdap package
+
 * Package designed to bridge the gap between qualitative data and quantitative 
-analysis
+  analysis
