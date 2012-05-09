@@ -4,17 +4,17 @@
 #' 
 #' @param text.var The text variable.
 #' @param bigroup.var A binary grouping variable.
-#' @param rev.binary logical.  If TRUE the ordering of the binary levels of 
+#' @param rev.binary logical.  If \code{TRUE} the ordering of the binary levels of 
 #' bigroup.var is reversed.
 #' @param X The first gradient color for variable X.
 #' @param Y The second gradient color for variable Y.
-#' @param stem logical.  If TRUE the \code{text.var} will be stemmed.
+#' @param stem logical.  If \code{TRUE} the \code{text.var} will be stemmed.
 #' @param stopwords Words to exclude from the cloud.  Words will be removed 
-#' after determing proportional word usage.
-#' @param caps logical.  If TRUE selected words will be capitalized.
-#' @param caps.list A vector of words to capitalize (\code{caps} must be TRUE).
-#' @param I.list logical.  If TRUE capitalizes I words and contractions.
-#' @param random.order Plot words in random order. If false, they will be 
+#' after determining proportional word usage.
+#' @param caps logical.  If \code{TRUE} selected words will be capitalized.
+#' @param caps.list A vector of words to capitalize (\code{caps} must be \code{TRUE}).
+#' @param I.list logical.  If \code{TRUE} capitalizes I words and contractions.
+#' @param random.order Plot words in random order. If \code{FALSE}, they will be 
 #' plotted in decreasing frequency.
 #' @param rot.per Proportion words with 90 degree rotation.
 #' @param min.freq An integer value indicating the minimum frequency a word must 
@@ -114,8 +114,8 @@ gradient_cloud <- function(text.var, bigroup.var, rev.binary = FALSE, X = "red",
     OP <- par()[["mar"]]
     on.exit(par(mar = OP))
     par(mar=c(7,1,1,1))
-    wordcloud(WF[, 1], WF[, "total"], min.freq = 1, colors = WF[, "colors"],
-        rot.per = rot.per, random.order = random.order, 
+    wordcloud(WF[, 1], WF[, "total"], min.freq = min.freq, 
+        colors = WF[, "colors"], rot.per = rot.per, random.order = random.order, 
         ordered.colors = TRUE, vfont = cloud.font, 
         scale = c(max.word.size , min.word.size))
     if (!is.null(title)) {

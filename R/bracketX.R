@@ -10,11 +10,13 @@
 #' @param missing Value to assign to empty cells.
 #' @param names logical.  If TRUE the sentences are given as the names of the 
 #' counts.
+#' @param fix.space logical.  If TRUE extra spaces left behind from an 
+#' extraction will be eliminated.
 #' @param scrub logical.  If TRUE \code{\link[qdap]{scrubber}} will clean the 
 #' text.
 #' @return \code{bracketX} -  returns a vector of text with brackets removed.
 #' @rdname bracketX
-#' @references \url{http://stackoverflow.com/questions/8621066/remove-text-inside-brackets-parens-and-or-braces}
+#' @references \url{http://stackoverflow.com/q/8621066/1000343}
 #' @keywords bracket-remove, parenthesis, bracket, curly-braces
 #' @export
 #' @seealso 
@@ -57,23 +59,27 @@
 #' }
 bracketX <- 
 function (text.var, bracket = "all", missing = NULL, names = FALSE, 
-    scrub = TRUE) {
+    fix.space = TRUE, scrub = TRUE) {
+    lside <- rside <- ""
+    if (fix.space) {
+        lside <- rside <- "[ ]*"
+    }
     FUN <- function(bracket, text.var, missing, names) {
         X <- switch(bracket, 
-            html = sapply(text.var, function(x) gsub("<.+?>", "", x)),
-            angle = sapply(text.var, function(x) gsub("<.+?>", "", x)),
-            square = sapply(text.var, function(x) gsub("\\[.+?\\]", "", x)), 
-            round = sapply(text.var, function(x) gsub("\\(.+?\\)", "", x)), 
-            curly = sapply(text.var, function(x) gsub("\\{.+?\\}", "", x)), 
+            html = sapply(text.var, function(x) gsub(paste0(lside, "<.+?>", rside), "", x)),
+            angle = sapply(text.var, function(x) gsub(paste0(lside, "<.+?>", rside), "", x)),
+            square = sapply(text.var, function(x) gsub(paste0(lside, "\\[.+?\\]", rside), "", x)), 
+            round = sapply(text.var, function(x) gsub(paste0(lside, "\\(.+?\\)", rside), "", x)), 
+            curly = sapply(text.var, function(x) gsub(paste0(lside, "\\{.+?\\}", rside), "", x)), 
             all = {
-                P1 <- sapply(text.var, function(x) gsub("\\[.+?\\]", "", x))
-                P1 <- sapply(P1, function(x) gsub("\\(.+?\\)", "", x))
-                P1 <- sapply(P1, function(x) gsub("<.+?>", "", x))
-                sapply(P1, function(x) gsub("\\{.+?\\}", "", x))
+                P1 <- sapply(text.var, function(x) gsub(paste0(lside, "\\[.+?\\]", rside), "", x))
+                P1 <- sapply(P1, function(x) gsub(paste0(lside, "\\(.+?\\)", rside), "", x))
+                P1 <- sapply(P1, function(x) gsub(paste0(lside, "<.+?>", rside), "", x))
+                sapply(P1, function(x) gsub(paste0(lside, "\\{.+?\\}", rside), "", x))
             }
         )
         if (scrub) {
-            X <- scrubber(gsub(" +", " ", X))
+            X <- scrubber(gsub(" +", " ", X), fix.space = FALSE)
         }
         if (!is.null(missing)) {
             X[X == ""] <- missing
@@ -160,15 +166,20 @@ function(text.var, bracket = "all", with = FALSE, merge = TRUE){
 #' @return \code{genXtract} - returns a vector of text with checks removed.
 #' @export
 genX <- 
-function (text.var, left, right, missing = NULL, names = FALSE, scrub = TRUE) {
+function (text.var, left, right, missing = NULL, names = FALSE, fix.space = TRUE, 
+    scrub = TRUE) {
     if (length(left) != length(right)) {
         stop("left and right must be equal length") 
+    }
+    lside <- rside <- ""
+    if (fix.space) {
+        lside <- rside <- "[ ]*"
     }
     specchar <- c(".", "|", "(", ")", "[", "{", "^", "$", "*", "+", "?")
     left <- mgsub(specchar, paste0("\\", specchar), left, fixed = TRUE)
     right <- mgsub(specchar, paste0("\\", specchar), right, fixed = TRUE)
     FUN <- function(left, right, text.var, missing, names) {
-        X <- sapply(text.var, function(x) gsub(paste0(left, ".+?", right), "", x))
+        X <- sapply(text.var, function(x) gsub(paste0(lside, left, ".+?", right, rside), "", x))
         if (scrub) {
             X <- scrubber(gsub(" +", " ", X))
         }
@@ -198,6 +209,8 @@ function(text.var, left, right, with = FALSE, merge = TRUE){
     if (length(left) != length(right)) {
         stop("left and right must be equal length") 
     }
+    LN <- left
+    RN <- right
     specchar <- c(".", "|", "(", ")", "[", "{", "^", "$", "*", "+", "?")
     left <- mgsub(specchar, paste0("\\", specchar), left, fixed = TRUE)
     right <- mgsub(specchar, paste0("\\", specchar), right, fixed = TRUE)
@@ -217,7 +230,7 @@ function(text.var, left, right, with = FALSE, merge = TRUE){
     out <- invisible(lapply(seq_along(left), function(i) {
         FUN(left[i], right[i], text.var = text.var, with = with)
     }))
-    names(out) <- paste(left, " : ", "right")
+    names(out) <- paste(LN, " : ", RN)
     if (length(left) == 1) {
         return(unlist(out, recursive = FALSE))
     } else {

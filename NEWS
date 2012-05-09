@@ -1,3 +1,43 @@
+qdap 0.2.2
+----------------------------------------------------------------
+
+BUG FIXES
+
+* `genXtract` labels returned the word "right" rather than the right edge string.
+  See http://stackoverflow.com/a/15423439/1000343 for an example of the old 
+  behavior.  This behavior has been fixed.
+
+* `gradient_cloud`'s `min.freq ` locked at 1.  This has been fixed. (Manuel 
+  Fdez-Moya)
+
+* `termco` would produce an error if single length named vectors were passed to 
+  match.list and no multilength vectors were supplied.  Also an error was thrown 
+  if an unnamed multilength vector was passed to match.list.  This behavior has 
+  been fixed.
+
+NEW FEATURES
+
+* `tot_plot` a visualizing function that uses a bar graph to visualize patterns 
+  in sentence length and grouping variables by turn of talk.
+
+* `beg2char` and `cahr2end` functions to grab text from begining of string to a
+  character or from a character to the end of a string.
+
+* `ngrams` function to calculate ngrams by grouping variable.
+
+MINOR FEATURES
+
+* `genX` and `bracketX` gain an extra argument `space.fix` to remove extra 
+  spaces left over from bracket removal.
+
+* Updated out of date dropbox url download in `url_dl`.  `url_dl` also takes the 
+  dropbox key as well.
+
+CHANGES
+
+* qdap is now compiled for mac users (as openNLP now passes CRAN checks with no
+  Errors on Mac).
+
 qdap 0.2.1
 ----------------------------------------------------------------
 
@@ -7,7 +47,7 @@ BUG FIXES
   caused by a grouping variable not containing any words from 1 or more of the 
   vectors of a list supplied to match string
 
-* `trans.cloud` produced an error when expand.target was TRUE.  This error ha 
+* `trans.cloud` produced an error when expand.target was TRUE.  This error has 
   been eliminated.
 
 * `termco` would eliminate > 1 columns matching an identical search.term found 
@@ -18,7 +58,7 @@ BUG FIXES
 
 NEW FEATURES
 
-* `bivar_gradcloud`: Binary gradient Word Cloud - A new plotting function 
+* `gradient_cloud`: Binary gradient Word Cloud - A new plotting function 
   that plots and colors words for a binary variable based on which group of 
   the binary variable uses the term more frequently.
 

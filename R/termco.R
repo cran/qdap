@@ -134,6 +134,26 @@ function (text.var, grouping.var = NULL, match.list, short.term = TRUE,
     if (!is.list(match.list)) {
         names(match.list) <- NULL
     }  
+
+    ## Fix unnamed vectors of length > 1
+    lens <- sapply(match.list, length)
+    ncheck <- names(match.list)
+    res1 <- (is.null(ncheck) && any(lens > 1))
+    noname <- lens > 1 & ncheck == ""
+    res2 <- sum(noname) > 0
+    if(res1 | res2) {
+        if (res1) {
+            names(match.list) <- rep("", length(match.list))
+            names(match.list)[lens > 1] <- paste0("list_", seq_len(sum(lens > 1)))
+        } else {
+            if (any(names(match.list) %in% paste0("X_", seq_len(sum(noname))))) {
+                 stop("unnamed vector in match.list")        
+            } 
+            names(match.list)[noname] <- paste0("list_", seq_len(sum(noname)))
+        }
+    }
+    ## End of Fix unnamed vectors of length > 1
+
     x <- unlist(match.list)
     a <- grepl("[^a-zA-Z[:space:]]", x)
     if (any(a)) {
@@ -142,9 +162,12 @@ function (text.var, grouping.var = NULL, match.list, short.term = TRUE,
             digit.remove <- FALSE  
         }
         if (any(a + b == 1) & is.null(char.keep)) {  
-            char.keep = unlist(strsplit(paste(gsub("[a-zA-Z0-9[:space:]]", 
+            char.keep <- unlist(strsplit(paste(gsub("[a-zA-Z0-9[:space:]]", 
                 "", x), collapse=""), NULL)) 
         }
+        if (any(gsub("[0-9a-zA-Z[:space:]]", "", x) != "")) {  
+            char.keep <- unique(c(char.keep, gsub("[0-9a-zA-Z[:space:]]", "", paste(x, collapse=""))))
+        }   
     }
     if(!all(is.null(names(match.list))) && 
         any(duplicated(unblanker(names(match.list))))) {
@@ -153,6 +176,7 @@ function (text.var, grouping.var = NULL, match.list, short.term = TRUE,
     if (is.list(match.list) & length(match.list) == 1 & is.null(names(match.list))) {
         match.list <- unlist(match.list)
     }
+    named <- names(match.list) != ""
     mprot <- names(match.list) != "" & sapply(match.list, length) == 1
     if (is.null(grouping.var)) {
         NAME <- "all"
@@ -174,7 +198,7 @@ function (text.var, grouping.var = NULL, match.list, short.term = TRUE,
     ML <- unlist(match.list)
     TD <- termco.d(text.var = text.var, grouping.var = grouping.var, 
         match.string = ML, ignore.case = ignore.case, percent = percent, 
-        apostrophe.remove = apostrophe.remove, char.keep = NULL, 
+        apostrophe.remove = apostrophe.remove, char.keep = char.keep, 
         digit.remove = FALSE, digits = digits, zero.replace = zero.replace, ...)
     colnames(TD[[3]]) <- colnames(TD[[1]])
     if (is.list(preIND)) {
@@ -200,18 +224,53 @@ function (text.var, grouping.var = NULL, match.list, short.term = TRUE,
         }
     }
     o[1:3] <- lapply(o[1:3], function(x) {
+        ## Handling named single length vector (see reordering below)
+        if (sum(mprot) > 0 && sum(lens > 1) < 1) {
+            matches <- colnames(x) %in% paste0("term(", match.list, ")")[mprot]
+            subs <- gsub("term(", "", colnames(x)[matches], fixed=TRUE)
+            colnames(x)[matches] <- names(match.list)[match.list %in% substring(subs, 1, nchar(subs) - 1)]
+        }
+
         nms2 <- colnames(x)[!colnames(x) %in% names(match.list)]
         mat <- x[, !colnames(x) %in% names(match.list), drop=FALSE]
         colnames(mat) <- nms2
-        mat2 <- x[, names(match.list), drop=FALSE]
+        if (sum(mprot) > 0 && sum(lens > 1) < 1) {
+            mat2 <- x[, colnames(x)[colnames(x) %in% names(match.list)], drop=FALSE]
+        } else {
+            mat2 <- x[, names(match.list), drop=FALSE]
+        }
         x <- data.frame(mat, mat2, check.names = FALSE)
+
+        if (sum(mprot) > 0 && sum(lens > 1) < 1) { #reorder if named single length vector
+            reord <- x[, -c(1:2), drop = FALSE]
+            ML <- paste0("term(", match.list, ")")
+            ML[mprot] <- names(match.list)[mprot]
+            x <- data.frame(x[, 1:2], reord[, ML], check.names= FALSE)
+        }
+
         colnames(x)[1] <- NAME
         rownames(x) <- NULL
         x
     })
-    if (!short.term & is.list(match.list)) {
+    perm <- TRUE
+    if (!elim.old & !short.term) {
+        perm <- FALSE
+    }
+    if (!short.term & is.list(match.list) & perm) {#when elim.old = T & short.term = F
         o[1:3] <- lapply(o[1:3], function(x) {
-            colnames(x)[-c(1:2)] <- paste0("term(", colnames(x)[-c(1:2)], ")")
+            indices <- !grepl("term(", colnames(x), fixed=TRUE)
+            indices[-c(1:2)][named] <- FALSE
+            indices[1:2] <- c(FALSE, FALSE)
+            colnames(x)[indices] <- paste0("term(", colnames(x)[indices], ")")
+            return(x)
+        })
+    }
+    if (!perm & is.list(match.list)) {#when elim.old and short.term are both FALSE
+        o[1:3] <- lapply(o[1:3], function(x) {
+            named2 <- sapply(names(mprot)[named], function(y) which(colnames(x) %in% y)[1])
+            indices <- !grepl("term(", colnames(x), fixed=TRUE)
+            indices[c(1:2, named2)] <- FALSE
+            colnames(x)[indices] <- paste0("term(", colnames(x)[indices], ")")
             return(x)
         })
     }
