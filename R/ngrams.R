@@ -3,9 +3,9 @@
 #' Transcript apply ngrams.
 #' 
 #' @param text.var The text variable
-#' @param grouping.var The grouping variables.  Default NULL generates one
-#' output for all text.  Also takes a single grouping variable or a list of 1 or
-#' more grouping variables.
+#' @param grouping.var The grouping variables.  Default \code{NULL} generates 
+#' one word list for all text.  Also takes a single grouping variable or a list 
+#' of 1 or more grouping variables.
 #' @param n The max number of grams calculate. 
 #' @return Returns a list of:
 #' \item{raw}{A list of pasted single vectors of the ngrams per row.}
@@ -67,20 +67,20 @@ ngrams <- function(text.var, grouping.var = NULL, n = 2) {
     names(out6) <- paste0("n_", sort(unique(lens)))
     o <- list(raw = out, group = out2, unlist1 = out3, unlist2 = out4, 
         group_n = out5, all = unname(sort(unlist(out3))), all_n = out6)
-    class(o) <- "ngram"
+    class(o) <- "ngrams"
     o
 
 }
 
-#' Prints an ngram object
+#' Prints an ngrams object
 #' 
-#' Prints an ngram object
+#' Prints an ngrams object
 #' 
-#' @param x The ngram object
+#' @param x The ngrams object
 #' @param \ldots ignored
-#' @S3method print ngram
-#' @method print ngram
-print.ngram <-
+#' @S3method print ngrams
+#' @method print ngrams
+print.ngrams <-
 function(x, ...) {
     print(x$all_n)
 }

@@ -8,11 +8,12 @@
 #' except apostrophes and a double tilde \code{"~~"}.  The double tilde 
 #' \code{"~~"} is included for a convenient means of keeping word groups 
 #' together in functions that split text apart based on spaces.  To remove 
-#' double tildes \code{"~~"} set \code{char.keep} to NULL.
-#' @param digit.remove logical.  If TRUE strips digits from the text.
-#' @param apostrophe.remove logical.  If TRUE removes apostrophes from the 
-#' output.
-#' @param lower.case logical.  If TRUE forces all alpha characters to lower case.
+#' double tildes \code{"~~"} set \code{char.keep} to \code{NULL}.
+#' @param digit.remove logical.  If \code{TRUE} strips digits from the text.
+#' @param apostrophe.remove logical.  If \code{TRUE} removes apostrophes from 
+#' the output.
+#' @param lower.case logical.  If \code{TRUE} forces all alpha characters to 
+#' lower case.
 #' @return Returns a vector of text that has been stripped of unwanted characters.
 #' @seealso \code{\link[qdap]{stopwords}}
 #' @export
@@ -43,8 +44,8 @@ function (x, char.keep = "~~", digit.remove = TRUE, apostrophe.remove = TRUE,
             x2 <- gsub("'", "", x2)
         }
         ifelse(digit.remove == TRUE, gsub("[[:digit:]]", "", x2), x2)
-    }
-    x <- clean(gsub("/", " ", gsub("-", " ", x))) 
+    }  
+    x <- clean(x) 
     unlist(lapply(x, function(x) Trim(strp(x = x, digit.remove = digit.remove, 
        apostrophe.remove = apostrophe.remove, char.keep = char.keep, 
        lower.case = lower.case))))

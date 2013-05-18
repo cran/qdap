@@ -1,3 +1,41 @@
+qdap 0.2.3
+----------------------------------------------------------------
+
+BUG FIXES
+
+* `new_project` placed a report in the CORRESPONDENCE directory rather than 
+  CONTACT_INFO
+
+* `strip` would not allow the characters "/" and "-" to be passed to 
+  `char.keep`.  This has been fixed. (Jens Engelmann)
+
+* `beg2end` would only grab first character of a string after n -1 occurrences of 
+  the character.  For example: 
+  `beg2char(c("abc-edw-www", "nmn-ggg", "rer-qqq-fdf"), "-", 2)` resulted in
+  "abc-e" "nmn-g" "rer-q" rather than "abc-edw" "nmn-ggg" "rer-qqq"
+
+NEW FEATURES
+
+* `names2sex` a function for predicting gender from name.
+
+* Added `NAMES` and `NAMES_SEX` datasets, based on 1990 U.S. census data.
+
+* `tdm` added as an equivalent to TermDocumentMatrix from the tm package.  This 
+  allows for portability across text analysis packages.
+
+MINOR FEATURES
+
+* `mgsub` now gets a `trim` argument that optionally reomves trailing leading 
+  white spaces.
+
+* `lookup` now takes a list of named vectors for the key.match argument.
+
+CHANGES
+
+* `new_project` directory can now be transfered without breaking paths (i.e.,
+  `file.path(getwd(), "DIR/file.ext")` is used rather than the full file path).
+
+
 qdap 0.2.2
 ----------------------------------------------------------------
 
@@ -20,7 +58,7 @@ NEW FEATURES
 * `tot_plot` a visualizing function that uses a bar graph to visualize patterns 
   in sentence length and grouping variables by turn of talk.
 
-* `beg2char` and `cahr2end` functions to grab text from begining of string to a
+* `beg2char` and `cahr2end` functions to grab text from beginning of string to a
   character or from a character to the end of a string.
 
 * `ngrams` function to calculate ngrams by grouping variable.
