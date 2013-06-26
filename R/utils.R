@@ -207,3 +207,6 @@ list_namer <- function(x){
     }
     x
 }
+
+#' @importFrom qdapRegex rm_number
+rm_number_to_remove_warning <- rm_number

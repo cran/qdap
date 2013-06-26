@@ -1053,35 +1053,16 @@ mgsub(c("it's", "I'm", "I am"), c("it is", "I am", "ITERATIVE"), DATA$state)
 
 <h4 id="nms">Names to Gender Prediction</h4>
 
-A researcher may face a list of names and be uncertain about gender of the participants.  The `r FUN("name2sex")` function utilizes the `r FUN2("NAMES_LIST")` dictionary based on the 1990 U.S. census data.  For gender neutral names the gender with the higher assignment rate is assumed if `r CN("pred.sex")` is set to `r CN("TRUE")`, otherwise a `r FT(blue, text="B")` is assigned to indicate "both" genders.  For names not matching the `r FUN2("NAMES_LIST")` optional fuzzy matching can be utilized via the `r CN("fuzzy.match")` argument based on the use of `r HR2("http://stat.ethz.ch/R-manual/R-devel/library/base/html/agrep.html", "agrep")`.  Both of these argument increase accuracy but act at the cost of speed.  The use of `r CN("fuzzy.match = TRUE")` is particularly computationally costly.
+A researcher may face a list of names and be uncertain about gender of the participants.  The `r FUN("name2sex")` function utilizes the [**gender**](http://cran.r-project.org/web/packages/gender/) package to predict names based on Social Security Administration data, defaulting to the period from 1932-2012.
 
 `r FT(orange, 5, text="&diams;")` **Name to Gender Prediction**`r FT(orange, 5, text="&diams;")`
-```{r}
-name2sex(qcv(mary, jenn, linda, JAME, GABRIEL, OLIVA, tyler, jamie, JAMES, 
-    tyrone, cheryl, drew), pred.sex = TRUE, fuzzy.match = TRUE)
-name2sex(qcv(mary, jenn, linda, JAME, GABRIEL, OLIVA, tyler, jamie, JAMES, 
-    tyrone, cheryl, drew), pred.sex = FALSE, fuzzy.match = FALSE)
-name2sex(qcv(mary, jenn, linda, JAME, GABRIEL, OLIVA, tyler, jamie, JAMES, 
-    tyrone, cheryl, drew), pred.sex = FALSE, fuzzy.match = TRUE)
-name2sex(qcv(mary, jenn, linda, JAME, GABRIEL, OLIVA, tyler, jamie, JAMES, 
-    tyrone, cheryl, drew), pred.sex = TRUE, fuzzy.match = FALSE)
-## Get rank percent frequency ratio of being a gender
-library(qdapDictionaries)
-orig_nms <- qcv(mary, jenn, linda, JAME, GABRIEL, OLIVA,
-    tyler, jamie, JAMES, tyrone, cheryl, drew)
+<pre><code class="r">name2sex(qcv(mary, jenn, linda, JAME, GABRIEL, OLIVA, tyler, jamie, JAMES, 
+    tyrone, cheryl, drew))
+</code></pre>
 
-sex <- name2sex(orig_nms, FALSE, TRUE)
-
-names(sex) <- rep("", length(sex))
-names(sex)[sex == "B"] <- sapply(toupper(orig_nms[sex == "B"]), function(x) {
-        y <- NAMES[NAMES[, 1] %in% x, ]
-        round(log(Reduce("/", y[ order(y[, "gender"]), "per.freq"])), 2)
-    })
-
-## The log ratio of being a female name
-data.frame(name = orig_nms, sex = sex, `ratio_F:M` = names(sex),
-    check.names=FALSE)
-```
+<pre><code>[1] F F F M M F M F M M F M
+Levels: F M
+</code></pre>
 
 <h4 id="stem">Stem Text</h4>
 
@@ -3248,7 +3229,7 @@ termco(DATA$state, DATA$person, syns)
 ```
 
 ```{r echo = FALSE}
-termco(DATA$state, DATA$person, syns)$rnp[, c(1:4, 9:10)]
+termco(DATA[["state"]], DATA[["person"]], syns)$rnp[, c(1:4, 7:8)]
 ```
 
 `r FUN("termco")` also has a plot method that plots a heat map of the `r FUN("termco")` output based on the percent usage by grouping variable.  This allows for rapid visualizations of patterns and enables fast spotting of extreme values.  Here are some plots from the `r HR("#rajex", "Romeo and Juliet Act 1 Example")` above.
@@ -4214,7 +4195,7 @@ qheat(scores(poldat), high="blue", low="yellow", grid=NULL, order.b="ave.polarit
 
 <pre><code class="r">poldat4 <- with(rajSPLIT, polarity(dialogue, act, constrain = TRUE))
 
-polcount <- counts(poldat4)$polarity
+polcount <- na.omit(counts(poldat4)$polarity)
 len <- length(polcount)
 
 cummean <- function(x){cumsum(x)/seq_along(x)}
@@ -4224,22 +4205,22 @@ cumpolarity <- data.frame(cum_mean = cummean(polcount), Time=1:len)
 ## Calculate background rectangles
 ends <- cumsum(rle(counts(poldat4)$act)$lengths)
 starts <- c(1, head(ends + 1, -1))
-rects <- data.frame(xstart = starts, xend = ends + 1, 
+rects <- data.frame(xstart = starts, xend = ends + 1,
     Act = c("I", "II", "III", "IV", "V"))
 
 library(ggplot2)
 ggplot() + theme_bw() +
-    geom_rect(data = rects, aes(xmin = xstart, xmax = xend, 
-        ymin = -Inf, ymax = Inf, fill = Act), alpha = 0.2) +
+    geom_rect(data = rects, aes(xmin = xstart, xmax = xend,
+        ymin = -Inf, ymax = Inf, fill = Act), alpha = 0.17) +
     geom_smooth(data = cumpolarity, aes(y=cum_mean, x = Time)) +
-    geom_hline(y=mean(polcount), color="grey30", size=1, alpha=.3, linetype=2) + 
-    annotate("text", x = mean(ends[1:2]), y = mean(polcount), color="grey30", 
+    geom_hline(y=mean(polcount), color="grey30", size=1, alpha=.3, linetype=2) +
+    annotate("text", x = mean(ends[1:2]), y = mean(polcount), color="grey30",
         label = "Average Polarity", vjust = .3, size=3) +
     geom_line(data = cumpolarity, aes(y=cum_mean, x = Time), size=1) +
     ylab("Cumulative Average Polarity") + xlab("Duration") +
     scale_x_continuous(expand = c(0,0)) +
-    geom_text(data=rects, aes(x=(xstart + xend)/2, y=-.04, 
-        label=paste("Act", Act)), size=3) + 
+    geom_text(data=rects, aes(x=(xstart + xend)/2, y=-.04,
+        label=paste("Act", Act)), size=3) +
     guides(fill=FALSE) +
     scale_fill_brewer(palette="Set1")
 </code></pre>
@@ -4247,7 +4228,7 @@ ggplot() + theme_bw() +
 ```{r, echo = FALSE, fig.width=14.5, fig.height=6, message=FALSE, warning=FALSE}
 poldat4 <- readRDS("data/poldat4.rds")
 
-polcount <- counts(poldat4)$polarity
+polcount <- na.omit(counts(poldat4)$polarity)
 len <- length(polcount)
 
 cummean <- function(x){cumsum(x)/seq_along(x)}
@@ -4257,22 +4238,22 @@ cumpolarity <- data.frame(cum_mean = cummean(polcount), Time=1:len)
 ## Calculate background rectangles
 ends <- cumsum(rle(counts(poldat4)$act)$lengths)
 starts <- c(1, head(ends + 1, -1))
-rects <- data.frame(xstart = starts, xend = ends + 1, 
+rects <- data.frame(xstart = starts, xend = ends + 1,
     Act = c("I", "II", "III", "IV", "V"))
 
 library(ggplot2)
 ggplot() + theme_bw() +
-    geom_rect(data = rects, aes(xmin = xstart, xmax = xend, 
-        ymin = -Inf, ymax = Inf, fill = Act), alpha = 0.2) +
+    geom_rect(data = rects, aes(xmin = xstart, xmax = xend,
+        ymin = -Inf, ymax = Inf, fill = Act), alpha = 0.17) +
     geom_smooth(data = cumpolarity, aes(y=cum_mean, x = Time)) +
-    geom_hline(y=mean(polcount), color="grey30", size=1, alpha=.3, linetype=2) + 
-    annotate("text", x = mean(ends[1:2]), y = mean(polcount), color="grey30", 
+    geom_hline(y=mean(polcount), color="grey30", size=1, alpha=.3, linetype=2) +
+    ggplot2::annotate("text", x = mean(ends[1:2]), y = mean(polcount), color="grey30",
         label = "Average Polarity", vjust = .3, size=3) +
     geom_line(data = cumpolarity, aes(y=cum_mean, x = Time), size=1) +
     ylab("Cumulative Average Polarity") + xlab("Duration") +
     scale_x_continuous(expand = c(0,0)) +
-    geom_text(data=rects, aes(x=(xstart + xend)/2, y=-.04, 
-        label=paste("Act", Act)), size=3) + 
+    geom_text(data=rects, aes(x=(xstart + xend)/2, y=-.04,
+        label=paste("Act", Act)), size=3) +
     guides(fill=FALSE) +
     scale_fill_brewer(palette="Set1")
 ```

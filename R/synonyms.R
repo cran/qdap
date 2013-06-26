@@ -21,7 +21,7 @@
 #' is the unique words from the combination of \code{\link[qdapDictionaries]{DICTIONARY}} 
 #' and \code{\link[qdapDictionaries]{labMT}}.
 #' @export
-#' @importFrom qdapTools hash hash_look
+#' @importFrom qdapTools hash hash_look %hl%
 #' @examples
 #' \dontrun{
 #' synonyms(c("the", "cat", "job", "environment", "read", "teach"))
@@ -46,7 +46,9 @@ synonyms <- function(terms, return.list = TRUE,
     multiwords = TRUE, report.null = TRUE, 
     synonym.frame = qdapDictionaries::key.syn){
 
-    z <- terms %hl% synonym.frame
+    `%hlqdap%` <- qdapTools::`%hl%`        
+    
+    z <- terms %hlqdap% synonym.frame
     out <- lapply(z, rcst)
 
     if (!multiwords){

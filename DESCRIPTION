@@ -1,22 +1,24 @@
 Package: qdap
 Type: Package
-Title: Bridging the gap between qualitative data and quantitative
-        analysis
-Version: 2.1.1
+Title: Bridging the Gap Between Qualitative Data and Quantitative
+        Analysis
+Version: 2.2.0
 Date: 2013-06-26
 Authors@R: c(person("Bryan", "Goodrich", role = "ctb"), person("Dason",
     "Kurkiewicz", role = "ctb"), person("Tyler", "Rinker", email =
     "tyler.rinker@gmail.com", role = c("aut", "cre")))
 Maintainer: Tyler Rinker <tyler.rinker@gmail.com>
-Depends: R (>= 3.0.0), ggplot2 (>= 0.9.3.1), qdapDictionaries (>=
-        1.0.2), qdapTools (>= 1.0.1), RColorBrewer
-Imports: chron, dplyr, gdata, grid, gridExtra, igraph, NLP, openNLP (>=
-        0.2-1), parallel, plotrix, RCurl, reports, reshape2, scales,
-        stringdist, tm (>= 0.6), tools, venneuler, wordcloud, xlsx, XML
+Depends: R (>= 3.1.0), ggplot2 (>= 0.9.3.1), qdapDictionaries (>=
+        1.0.2), qdapRegex (>= 0.1.2), qdapTools (>= 1.0.3),
+        RColorBrewer
+Imports: chron, dplyr (>= 0.3), gdata, gender (>= 0.4.1), grid,
+        gridExtra, igraph, NLP, openNLP (>= 0.2-1), parallel, plotrix,
+        RCurl, reports, reshape2, scales, stringdist, tm (>= 0.6),
+        tools, venneuler, wordcloud, xlsx, XML
 Suggests: koRpus, knitr, lda, proxy, stringi, SnowballC, testthat
 LazyData: TRUE
 VignetteBuilder: knitr
-Description: This package automates many of the tasks associated with
+Description: qdap automates many of the tasks associated with
     quantitative discourse analysis of transcripts containing discourse
     including frequency counts of sentence types, words, sentences, turns of
     talk, syllables and other assorted analysis tasks.  The package
@@ -30,10 +32,10 @@ Description: This package automates many of the tasks associated with
 License: GPL-2
 URL: http://trinker.github.com/qdap/
 BugReports: http://github.com/trinker/qdap/issues
-Packaged: 2014-08-02 02:35:17 UTC; trinker
+Packaged: 2014-10-04 05:22:42 UTC; trinker
 Author: Bryan Goodrich [ctb],
   Dason Kurkiewicz [ctb],
   Tyler Rinker [aut, cre]
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2014-08-02 16:06:56
+Date/Publication: 2014-10-04 07:55:06

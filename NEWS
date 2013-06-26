@@ -17,6 +17,48 @@ And constructed with the following guidelines:
 * Bug fixes and misc. changes bumps the patch
 
 
+CHANGES IN qdap VERSION 2.2.0
+----------------------------------------------------------------
+
+BUG FIXES
+
+* `bag_o_words` did not make use of the `bag_o_words2` helper function that has 
+  finer grained control of the output.  `...` were ignored but now are respected.
+
+* `fry` threw an error if a group contained < 300 words but had enough text to
+  generate 2 texts chunks of 100 words each, caught by S. Enrico P. Indiogine.
+  The bug has been fixed as these groups are dropped and a warning given.
+
+* `phrase_net` threw an error caused by **dplyr**'s (0.3) approach to subsetting 
+  columns.  Proviously a vector was returned, now a `tbl_df` object is returned: 
+  https://github.com/hadley/dplyr/issues/587. This was adtreeded by using 
+  explicit `df[[index]]` rather than `df[, index]`.
+
+NEW FEATURES
+
+* `chunker` added to break text, optionally by grouping variables, into equal 
+  chunks.  The chunk size can be specified by giving number of words to be in 
+  each chunk or the number of chunks.
+
+IMPROVEMENTS
+
+  `all_words` gains `char.keep` and `char2space` arguments to enable retention 
+  of characters and multi word phrases.  These features are passed to 
+  `freq_terms` as well.  Suggestd by stackoverflow's lawyeR 
+  (http://stackoverflow.com/a/26162401/1000343).
+
+CHANGES
+
+* `rm_url` has been moved into its own canned regex pattern extraction/replacer
+  package named `qdapRegex`.
+
+* `name2sex` now uses the **gender** package to predict sex.  This makes the 
+  function slightly slower but much more accurate than previous versions.  
+  Because of this increased accuracy and dependence on `gender`, the arguments 
+  `pred.sex`, `fuzzy.match`, and `database` are no longer necessary and have 
+  been removed.
+
+
 CHANGES IN qdap VERSION 2.1.1
 ----------------------------------------------------------------
 

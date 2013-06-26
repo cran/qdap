@@ -1,6 +1,7 @@
 qdap
 ====
-[![Build Status](https://travis-ci.org/trinker/qdap.png?branch=master)](https://travis-ci.org/trinker/qdap)
+
+[![Build Status](https://travis-ci.org/trinker/qdap.png?branch=master)](https://travis-ci.org/trinker/qdap) [![DOI](https://zenodo.org/badge/5398/trinker/qdap.png)](http://dx.doi.org/10.5281/zenodo.11124)
 
 
 ![qdapicon](https://dl.dropbox.com/u/61803503/qdapicon.png)   
@@ -18,6 +19,7 @@ Download the [zip ball](https://github.com/trinker/qdap/zipball/master) or [tar 
 
 library(devtools)
 install_github("qdapDictionaries", "trinker")
+install_github("qdapRegex", "trinker")
 install_github("qdapTools", "trinker")
 install_github("qdap", "trinker")
 ```
