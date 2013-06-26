@@ -59,47 +59,53 @@
 #' dictionary (see the \code{polarity_frame} function).  For instance the word 
 #' "sick" in a high school setting may mean that something is good, whereas 
 #' "sick" used by a typical adult indicates something is not right or negative 
-#' connotation.
+#' connotation (\strong{deixis}).
 #' 
 #' Also note that \code{\link[qdap]{polarity}} assumes you've run 
 #' \code{\link[qdap]{sentSplit}}.
 #' @details The equation used by the algorithm to assign value to polarity of 
 #' each sentence fist utilizes the sentiment dictionary (Hu and Liu, 2004) to 
-#' tag polarized words.  A context cluster (\eqn{x_i^{T}}) of words is pulled 
-#' from around this polarized word (default 4 words before and two words after) 
-#' to be considered as valence shifters.  The words in this context cluster are 
-#' tagged as neutral (\eqn{x_i^{0}}), negator (\eqn{x_i^{N}}), amplifier 
-#' (\eqn{x_i^{a}}), or de-amplifier (\eqn{x_i^{d}}). Neutral words hold no value 
+#' tag polarized words.  A context cluster (\eqn{x_i^{T}}{x_i^T}) of words is 
+#' pulled from around this polarized word (default 4 words before and two words 
+#' after) to be considered as valence shifters.  The words in this context 
+#' cluster are tagged as neutral (\eqn{x_i^{0}}{x_i^0}), negator 
+#' (\eqn{x_i^{N}}{x_i^N}), amplifier (\eqn{x_i^{a}}{x_i^a}), or de-amplifier 
+#' (\eqn{x_i^{d}}{x_i^d}). Neutral words hold no value 
 #' in the equation but do affect word count (\eqn{n}).  Each polarized word is 
 #' then weighted \eqn{w} based on the weights from the \code{polarity.frame} 
 #' argument and then further weighted by the number and position of the valence 
 #' shifters directly surrounding the positive or negative word.  The researcher 
 #' may provide a weight \eqn{c} to be utilized with amplifiers/de-amplifiers 
 #' (default is .8; deamplifier weight is constrained to -1 lower bound).  Last, 
-#' these context cluster (\eqn{x_i^{T}}) are summed and divided by the square 
-#' root of the word count (\eqn{\sqrt{n}}) yielding an unbounded polarity score 
-#' (\eqn{\delta}).  Note that context clusters containing a comma before the 
-#' polarized word will only consider words found after the comma.
+#' these context cluster (\eqn{x_i^{T}}{x_i^T}) are summed and divided by the 
+#' square root of the word count (\eqn{\sqrt{n}}{\sqrtn}) yielding an unbounded 
+#' polarity score (\eqn{\delta}{C}).  Note that context clusters containing a 
+#' comma before the polarized word will only consider words found after the 
+#' comma.
 #' 
-#' \deqn{\delta=\frac{x_i^T}{\sqrt{n}}}
+#' \deqn{\delta=\frac{x_i^T}{\sqrt{n}}}{C=x_i^2/\sqrt(n)}
 #'   
 #' Where:
 #' 
-#' \deqn{x_i^T=\sum{((1 + c(x_i^{A} - x_i^{D}))\cdot w(-1)^{\sum{x_i^{N}}})}}
+#' \deqn{x_i^T=\sum{((1 + c(x_i^{A} - x_i^{D}))\cdot w(-1)^{\sum{x_i^{N}}})}}{x_i^T=\sum((1 + c * (x_i^A - x_i^D)) * w(-1)^(\sumx_i^N))}
 #' 
-#' \deqn{x_i^{A}=\sum{(w_{neg}\cdot x_i^{a})}}
+#' \deqn{x_i^{A}=\sum{(w_{neg}\cdot x_i^{a})}}{x_i^A=\sum(w_neg * x_i^a)}
 #' 
 #' \deqn{x_{i}^D=\left\{\begin{array}{cc}
 #' x_{i}^D & x_{i}^D \geq  -1         \\ 
 #' -1 & x_{i}^D < -1
-#' \end{array}\right.}
+#' \end{array}\right.}{        (x_i^D  x_i^D >=  -1   
+#' x_i^D= ( 
+#'         (-1  x_i^D < -1}
 #' 
-#' \deqn{x_i^{D}=\sum{(- w_{neg}\cdot x_i^{a} + x_i^{d})}}
+#' \deqn{x_i^{D}=\sum{(- w_{neg}\cdot x_i^{a} + x_i^{d})}}{x_i^D=\sum(- w_neg * x_i^a + x_i^d)}
 #' 
 #' \deqn{w_{neg}=\left\{\begin{array}{cc}
 #' 1 & \sum{x_i^{N}} \bmod {2} >0         \\ 
 #' 0 & \sum{x_i^{N}} \bmod {2} =0
-#' \end{array}\right.}
+#' \end{array}\right.}{        (1  \sumx_i^N mod 2 > 0      
+#' w_neg= (      
+#'         (0  \sumx_i^N mod 2 = 0      } 
 #'     
 #' @references Hu, M., & Liu, B. (2004). Mining opinion features in customer 
 #' reviews. National Conference on Artificial Intelligence. 
@@ -394,6 +400,7 @@ polarity <- function (text.var, grouping.var = NULL,
     }
 
     ## Construct sentence data.frame
+    counts <- unlist(lapply(DF[, "text.var2"], function(x) length(bag_o_words(x))))
     scores <- sapply(output, sum)/sqrt(counts)
     all <- data.frame(group.var =  DF[, "grouping"], wc = counts, 
         polarity = scores)
@@ -1192,6 +1199,7 @@ Animate_polarity_net <- function(x, negative = "blue", positive = "red",
     attributes(igraph_objs)[["timings"]] <- timings
     attributes(igraph_objs)[["network"]] <- TRUE
     attributes(igraph_objs)[["legend"]] <- cols
+    attributes(igraph_objs)[["data"]] <- list_polarity
     igraph_objs
 }
 
@@ -1246,6 +1254,7 @@ Animate_polarity_bar <- function(x, wc.time = TRUE, time.constant = 1,
     attributes(ggplots)[["timings"]] <- timings
     attributes(ggplots)[["network"]] <- FALSE
     attributes(ggplots)[["legend"]] <- NULL
+    attributes(ggplots)[["data"]] <- listdat
     ggplots
 }
 
@@ -1353,6 +1362,7 @@ Animate.polarity <- function(x, negative = "blue", positive = "red",
 #' equivalent to 1.0. See \code{\link[graphics]{mtext}} for more information.
 #' @param bg The color to be used for the background of the device region. See
 #' \code{\link[graphics]{par}} for more information. 
+#' @param net.legend.color The text legend color for the network plot.
 #' @param \ldots Other Arguments passed to \code{\link[igraph]{plot.igraph}}.
 #' @import igraph
 #' @importFrom plotrix color.legend
@@ -1360,7 +1370,8 @@ Animate.polarity <- function(x, negative = "blue", positive = "red",
 #' @S3method print animated_polarity 
 print.animated_polarity <- function(x, title = NULL, 
     seed = sample(1:10000, 1), layout=layout.auto, pause = 0, 
-    legend = c(-.5, -1.5, .5, -1.45), legend.cex=1, bg=NULL, ...){
+    legend = c(-.5, -1.5, .5, -1.45), legend.cex=1, bg=NULL, 
+    net.legend.color = "black", ...){
     
     if (is.null(title)) {
         title <- attributes(x)[["title"]]
@@ -1370,7 +1381,7 @@ print.animated_polarity <- function(x, title = NULL,
         invisible(lapply(x, function(y) {
             set.seed(seed)
             par(bg = bg)
-            plot.igraph(y, edge.curved=TRUE, layout=layout)
+            plot.igraph(y, edge.curved=TRUE, layout=layout, ...)
             if (!is.null(title)) {
                 mtext(title, side=3)
             }

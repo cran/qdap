@@ -17,6 +17,38 @@ And constructed with the following guidelines:
 * Bug fixes and misc. changes bumps the patch
 
 
+CHANGES IN qdap VERSION 1.3.5
+----------------------------------------------------------------
+
+BUG FIXES
+
+* The An Introduction to qdap vignette contained a broken link in the tm 
+  Package Compatibility section.  This has been fixed.  Also the reliance on 
+  `Rgraphviz` from the vignette has been removed.  This will eliminate CRAN
+  WARN in CRAN checks (for some OS) but not the note for `tm`'s reliance on 
+  `Rgraphviz`.
+
+* `polarity` reported the incorrect number of words for sentences containing 
+  commas.  This has been fixed (Max Ghenis).
+
+NEW FEATURES
+
+* `formality` picks up an `Animate` method.
+
+* `end_mark_by` function added as a aggregated grouping version of `end_mark`.
+
+MINOR FEATURES
+
+* `raj.act.1POS` added.  `raj.act.1POS` is a data set for Romeo and Juliet: Act 1
+  broken into parts of speech.
+
+IMPROVEMENTS
+
+* `discourse_map` picks up a `pause` argument that enables the user to pasue 
+  between plots in itneractive mode.
+
+CHANGES
+
 CHANGES IN qdap VERSION 1.3.4
 ----------------------------------------------------------------
 
@@ -26,7 +58,7 @@ NEW FEATURES
 
 * `gantt` and `gantt_wrap` (single facet) pick up and `Animate` mathod.
 
-* `polarity` pics up an `Animate` method.
+* `polarity` picks up an `Animate` method.
 
 * `vertex_apply` and `edge` apply added to make uniform changes to lists of 
   `igraph` objects.

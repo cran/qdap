@@ -1,7 +1,7 @@
 
 ## ----setup, include=FALSE------------------------------------------------
 # set global chunk options
-library(knitr); library(qdap)
+library(knitr); library(qdap); library(tm)
 opts_chunk$set(cache=FALSE, tidy=FALSE, warning=FALSE)
 library(knitcitations)#; library(reports)
 bib <- read.bibtex(dir()[tools::file_ext(dir()) == "bib"][1])
@@ -2082,17 +2082,16 @@ dtm(DATA$state, DATA$person)
 
 ## ----message = FALSE, fig.width = 9, fig.height = 9----------------------
 (pres <- tdm(pres_debates2012$dialogue, pres_debates2012$person))
-library(tm)
-plot(pres, corThreshold = 0.8)
+
+
+## ----message = FALSE, fig.width = 9, fig.height = 9----------------------
 (pres2 <- removeSparseTerms(pres, .3))
-plot(pres2, corThreshold = 0.95)
 
 
 ## ----, fig.width = 9, fig.height = 9-------------------------------------
 x <- wfm(DATA$state, DATA$person)
 tdm(x)
 dtm(x)
-plot(tdm(x))
 
 
 ## ----message = FALSE-----------------------------------------------------
@@ -2115,7 +2114,9 @@ apply_as_tm(a, tm:::findAssocs, "computer", .8)
 apply_as_tm(a, tm:::findFreqTerms, 2, 3)
 apply_as_tm(a, tm:::Zipf_plot)
 apply_as_tm(a, tm:::Heaps_plot)
-apply_as_tm(a, tm:::plot.TermDocumentMatrix, corThreshold = 0.4)
+
+
+## ----message = FALSE-----------------------------------------------------
 apply_as_tm(a, tm:::weightBin)
 apply_as_tm(a, tm:::weightBin, to.qdap = FALSE)
 apply_as_tm(a, tm:::weightSMART)
