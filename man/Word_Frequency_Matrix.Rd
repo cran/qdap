@@ -1,5 +1,4 @@
 \name{wfm}
-\alias{Filter}
 \alias{Filter.wfm}
 \alias{as.wfm}
 \alias{weight.wfdf}
@@ -23,9 +22,6 @@ wfm_combine(wf.obj, word.lists, matrix = TRUE)
 \method{weight}{wfm}(x, type = "prop", ...)
 
 \method{weight}{wfm}(x, type = "prop", ...)
-
-Filter(x, min = 1, max = Inf, count.apostrophe = TRUE, stopwords = NULL,
-  ...)
 
 \method{Filter}{wfm}(x, min = 1, max = Inf, count.apostrophe = TRUE,
   stopwords = NULL, ...)
@@ -78,7 +74,8 @@ as.wfm(matrix.object)
   FALSE}; output is not integer and column sums may not be
   equal.}
 
-  \item{x}{A \code{\link[qdap]{wfm}} object.}
+  \item{x}{A filterable object (e.g.,
+  \code{\link[qdap]{wfm}}, \code{\link[base]{character}}).}
 
   \item{min}{Minimum word length.}
 
@@ -135,14 +132,8 @@ analysis where such weighting is sensible.
 \code{Filter} - Filter words from a wfm that meet max/min
 word length criteria.
 
-\code{Filter.wfm} - Filter words from a wfm that meet
-max/min word length criteria.
-
 \code{as.wfm} - Attempts to coerce a matrix to a
 \code{\link[qdap]{wfm}}.
-}
-\details{
-wfm Method for Filter
 }
 \note{
 Words can be kept as one by inserting a double tilde
@@ -158,7 +149,7 @@ with(DATA, wfm(state, person))[1:15, ]
 Filter(with(DATA, wfm(state, list(sex, adult))), 5)
 with(DATA, wfm(state, list(sex, adult)))
 
-## Filter particular words based on max/min values
+## Filter particular words based on max/min values in wfm
 v <- with(DATA, wfm(state, list(sex, adult)))
 Filter(v, 5)
 Filter(v, 5, count.apostrophe = FALSE)
@@ -175,11 +166,6 @@ with(DATA, wfm(state2, list(sex, adult)))[1:18, ]
 ## word frequency dataframe (wfdf) example:
 with(DATA, wfdf(state, list(sex, adult)))[1:15, ]
 with(DATA, wfdf(state, person))[1:15, ]
-
-## insert double tilde ("~~") to keep phrases (e.g., first last name)
-alts <- c(" fun", "I ")
-state2 <- mgsub(alts, gsub("\\\\s", "~~", alts), DATA$state)
-with(DATA, wfdf(state2, list(sex, adult)))[1:18, ]
 
 ## wfm_expanded example:
 z <- wfm(DATA$state, DATA$person)
@@ -239,7 +225,7 @@ cor(t(dat)[, c("romeo", "juliet", "hate", "love")])
 qheat(cor(t(dat)[, c("romeo", "juliet", "hate", "love")]),
     diag.na = TRUE, values = TRUE, digits = 3, by.column = NULL)
 
-dat2 <- wfm(DATA$state, seq_len(nrow(DATA)))
+dat2 <- wfm(DATA$state, id(DATA))
 qheat(cor(t(dat2)), low = "yellow", high = "red",
     grid = "grey90", diag.na = TRUE, by.column = NULL)
 

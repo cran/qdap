@@ -16,15 +16,17 @@ dtm(text.var, grouping.var = NULL, vowel.check = TRUE, ...)
 
 tm2qdap(x)
 
-apply_as_tm(wfm.obj, tmfun, ..., to.qdap = TRUE)
-
-tm_corpus2df(tm.corpus, col1 = "docs", col2 = "text")
+tm_corpus2df(tm.corpus, col1 = "docs", col2 = "text", sent.split = TRUE,
+  ...)
 
 tm_corpus2wfm(tm.corpus, col1 = "docs", col2 = "text", ...)
 
-df2tm_corpus(text.var, grouping.var = NULL, ...)
+df2tm_corpus(text.var, grouping.var = NULL, demographic.vars, ...)
 
-apply_as_df(tm.corpus, qdapfun, ...)
+apply_as_tm(wfm.obj, tmfun, ..., to.qdap = TRUE)
+
+apply_as_df(tm.corpus, qdapfun, ..., stopwords = NULL, min = 1, max = Inf,
+  count.apostrophe = TRUE, ignore.case = TRUE)
 }
 \arguments{
   \item{text.var}{The text variable or a
@@ -39,16 +41,34 @@ apply_as_df(tm.corpus, qdapfun, ...)
   arguments passed to \code{wfm}.  If \code{apply_as_tm} -
   Other arguments passed to functions used on the tm
   package's \code{"TermDocumentMatrix"}.  If
-  \code{df2tm_corpus} - Other arguments passed to the tm
-  package's \code{\link[tm]{Corpus}}.  If
-  \code{tm_corpus2wfm} - Other arguments passed to
-  \code{\link[qdap]{wfm}}.}
+  \code{tm_corpus2df} - Other arguments passed to
+  \code{\link[qdap]{sentSplit}}.  If \code{df2tm_corpus} -
+  Other arguments passed to the tm package's
+  \code{\link[tm]{Corpus}}.  If \code{tm_corpus2wfm} -
+  Other arguments passed to \code{\link[qdap]{wfm}}.}
 
   \item{vowel.check}{logical.  Should terms without vowels
   be remove?}
 
   \item{x}{A
   \code{\link[tm]{TermDocumentMatrix}}/\code{\link[tm]{DocumentTermMatrix}}.}
+
+  \item{tm.corpus}{A \code{\link[tm]{Corpus}} object.}
+
+  \item{col1}{Name for column 1 (the vector elements).}
+
+  \item{col2}{Name for column 2 (the names of the
+  vectors).}
+
+  \item{sent.split}{logical.  If \code{TRUE} the text
+  variable sentences will be split into individual rows.}
+
+  \item{demographic.vars}{Additional demographic
+  information about the grouping variables.  This is a
+  data.frame, list of equal length vectors, or a single
+  vector corresponding to the grouping variable/text
+  variable.  This information will be mapped to the
+  DMetaData in the \code{\link[tm]{Corpus}}.}
 
   \item{wfm.obj}{A \code{\link[qdap]{wfm}} object.}
 
@@ -59,15 +79,25 @@ apply_as_df(tm.corpus, qdapfun, ...)
   \code{\link[qdap]{wfm}} try to coerce the output back to
   a qdap object.}
 
-  \item{tm.corpus}{A \code{\link[tm]{Corpus}} object.}
-
-  \item{col1}{Name for column 1 (the vector elements).}
-
-  \item{col2}{Name for column 2 (the names of the
-  vectors).}
-
   \item{qdapfun}{A qdap function that is usually used on
   text.variable ~ grouping variable.}
+
+  \item{stopwords}{A character vector of words to remove
+  from the text.  qdap has a number of data sets that can
+  be used as stop words including: \code{Top200Words},
+  \code{Top100Words}, \code{Top25Words}.  For the tm
+  package's traditional English stop words use
+  \code{tm::stopwords("english")}.}
+
+  \item{min}{Minimum word length.}
+
+  \item{max}{Maximum word length.}
+
+  \item{count.apostrophe}{logical.  If \code{TRUE}
+  apostrophes are counted as characters.}
+
+  \item{ignore.case}{logical.  If \code{TRUE} stop words
+  will be removed regardless of case.}
 }
 \value{
 \code{tdm} - Returns a
@@ -79,10 +109,6 @@ apply_as_df(tm.corpus, qdapfun, ...)
 \code{tm2qdap} - Returns a \code{\link[qdap]{wfm}} object
 or \code{weight} object.
 
-\code{apply_as_tm} - Applies a tm oriented function to a
-\code{\link[qdap]{wfm}} and attempts to simplify back to a
-\code{\link[qdap]{wfm}} or \code{weight} format.
-
 \code{tm_corpus2df} - Converts a \code{\link[tm]{Corpus}}
 and returns a qdap oriented dataframe.
 
@@ -91,6 +117,10 @@ returns a \code{\link[qdap]{wfm}}.
 
 \code{df2tm_corpus} - Converts a qdap oriented dataframe
 and returns a \code{\link[tm]{Corpus}}.
+
+\code{apply_as_tm} - Applies a tm oriented function to a
+\code{\link[qdap]{wfm}} and attempts to simplify back to a
+\code{\link[qdap]{wfm}} or \code{weight} format.
 }
 \description{
 \code{tdm} - Create term document matrices from raw text or
@@ -101,14 +131,9 @@ packages.
 \code{\link[qdap]{wfm}} for use with other text analysis
 packages.
 
-\code{tm2qdap} - Convert the \code{tm} package's
+\code{tm2qdap} - Convert the \pkg{tm} package's
 \code{\link[tm]{TermDocumentMatrix}}/\code{\link[tm]{DocumentTermMatrix}}
 to \code{\link[qdap]{wfm}}.
-
-\code{apply_as_tm} - Apply functions intended to be used on
-the \code{tm} package's
-\code{\link[tm]{TermDocumentMatrix}} to a
-\code{\link[qdap]{wfm}} object.
 
 \code{tm_corpus2df} - Convert a tm package corpus to a
 dataframe.
@@ -119,8 +144,16 @@ package corpus to a \code{\link[qdap]{wfm}}.
 \code{df2tm_corpus} - Convert a qdap dataframe to a tm
 package \code{\link[tm]{Corpus}}.
 
-Apply a \pkg{tm} \code{\link[tm]{Corpus}} as a qdap
-dataframe.
+\code{apply_as_tm} - Apply functions intended to be used on
+the \pkg{tm} package's \code{\link[tm]{TermDocumentMatrix}}
+to a \code{\link[qdap]{wfm}} object.
+
+\code{apply_as_df} - Apply a \pkg{tm}
+\code{\link[tm]{Corpus}} as a qdap dataframe.
+\code{apply_as_df} - Apply functions intended to be used on
+the \pkg{qdap} package's \code{\link[base]{data.frame}} +
+\code{\link[qdap]{sentSplit}} to a \pkg{tm}
+\code{\link[tm]{Corpus}} object.
 }
 \details{
 Produces output that is identical to the \code{tm}
@@ -131,7 +164,7 @@ between the qdap and tm packages.
 }
 \note{
 \code{aply_ad_df} coerces to a dataframe with columns named
-`docs` and the other named `docs`.
+`docs` and the other named `text`.
 }
 \examples{
 \dontrun{
@@ -335,6 +368,10 @@ reuters <- Corpus(DirSource(reut21578),
 corp_df <- tm_corpus2df(reuters)
 htruncdf(corp_df)
 
+z <- df2tm_corpus(DATA$state, DATA$person,
+       demographic=DATA[, qcv(sex, adult, code)])
+tm_corpus2df(z)
+
 ## Apply a qdap function
 out <- formality(corp_df$text, corp_df$docs)
 plot(out)
@@ -347,11 +384,27 @@ class(x)
 
 (y <- with(pres_debates2012, df2tm_corpus(dialogue, list(person, time))))
 
+## Add demographic info to DMetaData of Corpus
+z <- df2tm_corpus(DATA$state, DATA$person,
+    demographic=DATA[, qcv(sex, adult, code)])
+lview(z)
+
+lview(df2tm_corpus(DATA$state, DATA$person,
+    demographic=DATA$sex))
+
+lview(df2tm_corpus(DATA$state, DATA$person,
+    demographic=list(DATA$sex, DATA$adult)))
+
 ## Apply qdap functions meant for dataframes from sentSplit to tm Corpus
 library(tm)
 reut21578 <- system.file("texts", "crude", package = "tm")
 reuters <- Corpus(DirSource(reut21578),
     readerControl = list(reader = readReut21578XML))
+
+matches <- list(
+    oil = qcv(oil, crude),
+    money = c("economic", "money")
+)
 
 apply_as_df(reuters, word_stats)
 apply_as_df(reuters, formality)
@@ -364,27 +417,33 @@ apply_as_df(reuters, flesch_kincaid)
 apply_as_df(reuters, trans_venn)
 apply_as_df(reuters, gantt_plot)
 apply_as_df(reuters, rank_freq_mplot)
-apply_as_df(reuters, termco,
-    match.list = list(
-        oil = qcv(oil, Texas, crude),
-        money = c("economic", "money")
-    ))
-plot(apply_as_df(reuters, termco,
-    match.list = list(
-        oil = qcv(oil, Texas, crude),
-        money = c("economic", "money")
-    ), elim.old = FALSE), values = TRUE, high="red")
-apply_as_df(reuters, word_cor,
-    word = qcv(oil, Texas, crude, economic, money)
-)
-plot(apply_as_df(reuters, word_cor,
-    word = qcv(oil, Texas, crude, economic, money)
-))
+apply_as_df(reuters, character_table)
+
+(termco_out <- apply_as_df(reuters, termco, match.list = matches))
+plot(termco_out, values = TRUE, high="red")
+
+(wordcor_out <- apply_as_df(reuters, word_cor, word = unlist(matches)))
+plot(wordcor_out)
+
+(f_terms <- apply_as_df(reuters, freq_terms, at.least = 3))
+plot(f_terms)
+
+apply_as_df(reuters, trans_cloud)
+## To use "all" rather than "docs" as "grouping.var"...
+apply_as_df(reuters, trans_cloud, grouping.var=NULL,
+    target.words=matches, cloud.colors = c("red", "blue", "grey75"))
+
+finds <- apply_as_df(reuters, freq_terms, at.least = 5,
+    top = 5, stopwords = Top100Words)
+apply_as_df(reuters, dispersion_plot, match.terms = finds[, 1],
+    total.color = NULL)
 }
 }
 \seealso{
 \code{\link[tm]{DocumentTermMatrix}},
 \code{\link[tm]{Corpus}},
 \code{\link[tm]{TermDocumentMatrix}}
+
+\code{\link[qdap]{Filter}}
 }
 

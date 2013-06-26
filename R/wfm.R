@@ -35,7 +35,7 @@
 #' Filter(with(DATA, wfm(state, list(sex, adult))), 5)
 #' with(DATA, wfm(state, list(sex, adult)))
 #' 
-#' ## Filter particular words based on max/min values
+#' ## Filter particular words based on max/min values in wfm
 #' v <- with(DATA, wfm(state, list(sex, adult)))
 #' Filter(v, 5)
 #' Filter(v, 5, count.apostrophe = FALSE)
@@ -52,11 +52,6 @@
 #' ## word frequency dataframe (wfdf) example:
 #' with(DATA, wfdf(state, list(sex, adult)))[1:15, ]
 #' with(DATA, wfdf(state, person))[1:15, ]
-#' 
-#' ## insert double tilde ("~~") to keep phrases (e.g., first last name)
-#' alts <- c(" fun", "I ")
-#' state2 <- mgsub(alts, gsub("\\s", "~~", alts), DATA$state)
-#' with(DATA, wfdf(state2, list(sex, adult)))[1:18, ]
 #' 
 #' ## wfm_expanded example:
 #' z <- wfm(DATA$state, DATA$person)
@@ -116,7 +111,7 @@
 #' qheat(cor(t(dat)[, c("romeo", "juliet", "hate", "love")]), 
 #'     diag.na = TRUE, values = TRUE, digits = 3, by.column = NULL)
 #'     
-#' dat2 <- wfm(DATA$state, seq_len(nrow(DATA)))
+#' dat2 <- wfm(DATA$state, id(DATA))
 #' qheat(cor(t(dat2)), low = "yellow", high = "red", 
 #'     grid = "grey90", diag.na = TRUE, by.column = NULL)
 #'     
@@ -269,14 +264,23 @@ function(text.var = NULL, grouping.var = NULL, output = "raw", stopwords = NULL,
 #' Prints a wfm object.
 #' 
 #' @param x The wfm object.
+#' @param width  The width to temporarily set for printing (default = 10000).  
+#' See \code{\link[base]{options}} for more.
 #' @param digits The number of digits displayed if \code{values} is \code{TRUE}.
 #' @param \ldots ignored
 #' @method print wfm
 #' @S3method print wfm
 print.wfm <-
-  function(x, digits = 3, ...) {
+  function(x, digits = 3, width = 10000, ...) {
     class(x) <- "matrix"
+      
+    WD <- options()[["width"]]
+    if (!is.null(width)) {
+        options(width=width)
+    }
     print(round(x, digits = digits))
+    options(width=WD)
+      
 }
 
 
@@ -563,18 +567,68 @@ summary.wfm <- function(object, ...) {
     RS <- rowSums(x)
     HL <- sum(RS == 1)
     DL <- sum(RS == 2)
-    shan <- shannon(RS)
-    out <- paste(
-        sprintf("A word-frequency matrix (%s terms, %s groups)", nrow(x), ncol(x)),
-        "\n", sprintf("Non-/sparse entries       : %s/%s", Y, N),
-        sprintf("Sparsity                  : %s%%", sparsity),
-        sprintf("Maximal term length       : %s", max(NCHAR)) ,
-        sprintf("Less than four characters : %s%%", 100*round(sum(NCHAR < 4)/nrow(x), 2)) ,
-        sprintf("Hapax legomenon           : %s(%s%%)", HL, 100*round(HL/nrow(x), 2)),
-        sprintf("Dis legomenon             : %s(%s%%)", DL, 100*round(DL/nrow(x), 2)),
-        sprintf("Shannon's diversity index : %s", round(shan, 2)),
-    sep="\n")
-    message(out)
+    shan <- shannon(RS)             
+    output <- list(
+        c(Y, N),
+        c(sparsity),
+        c(max(NCHAR)),
+        c(sum(NCHAR < 4)/nrow(x)),
+        c(HL, HL/nrow(x)),
+        c(DL, DL/nrow(x)),
+        c(shan)
+    )
+    names(output) <- c("Non-/sparse entries", "Sparsity", 
+        "Maximal term length", "Less than four characters", 
+        "Hapax legomenon", "Dis legomenon", "Shannon's diversity index"                                          
+    )        
+
+    attributes(output) <- list(
+            class = c("wfm_summary"),
+            names = names(output),
+            nrow = nrow(x),
+            ncol = ncol(x)
+    )       
+
+    output
+
+}
+
+
+#' Prints a wfm_summary Object
+#' 
+#' Prints a wfm_summary object.
+#' 
+#' @param x The wfm_summary object.
+#' @param \ldots ignored
+#' @method print wfm_summary
+#' @S3method print wfm_summary
+print.wfm_summary <- function(x, ...) {
+
+    nms <- c("Non-/sparse entries", "Sparsity", 
+        "Maximal term length", "Less than four characters", 
+        "Hapax legomenon", "Dis legomenon", "Shannon's diversity index"                                          
+    ) 
+
+    numrow <- attributes(x)[["nrow"]]
+    numcol <- attributes(x)[["ncol"]]
+    class(x) <- "list"
+
+    if (!all(nms %in% names(x))) {
+        print(x)
+        return(invisible(NULL))
+    }      
+
+    vals <- c(
+        sprintf("A word-frequency matrix (%s terms, %s groups)", numrow, numcol),
+        "", sprintf("Non-/sparse entries       : %s/%s", x[[nms[1]]][1], x[[nms[1]]][2]),
+        sprintf("Sparsity                  : %s%%", x[[nms[2]]]),
+        sprintf("Maximal term length       : %s", x[[nms[3]]]) ,
+        sprintf("Less than four characters : %s%%", 100*round(x[[nms[4]]], 2)) ,
+        sprintf("Hapax legomenon           : %s(%s%%)", x[[nms[5]]][1], 100*round(x[[nms[5]]][2], 2)),
+        sprintf("Dis legomenon             : %s(%s%%)", x[[nms[6]]][1], 100*round(x[[nms[6]]][2], 2)),
+        sprintf("Shannon's diversity index : %s\n", round(x[[nms[7]]], 2))
+    )
+    cat(paste(vals, collapse="\n"))
 }
 
 #' Summarize a wfdf object
@@ -739,40 +793,82 @@ plot.weighted_wfm <- function(x, non.zero = FALSE, digits = 0, by.column = NULL,
 }
 
 
+#' Filter
+#' 
+#' \code{Filter} - Filter words from various objects that meet max/min word 
+#' length criteria.
+#' 
+#' @param x A filterable object (e.g., \code{\link[qdap]{wfm}},
+#' \code{\link[base]{character}}).
+#' @param min Minimum word length.
+#' @param max Maximum word length.
+#' @param count.apostrophe logical.  If \code{TRUE} apostrophes are counted as 
+#' characters.
+#' @param stopwords A vector of stop words to remove.
+#' @param ignore.case logical.  If \code{TRUE} stopwords will be removed 
+#' regardless of case (ignored if used on a \code{\link[qdap]{wfm}}).
+#' @param \ldots Other arguments passed to specific Filter methods.
+#' @rdname Filter
+#' @note The name and idea behind this function is inspired by the \pkg{dplyr}
+#' package's \code{filter} function and has a similar meaning in that you are 
+#' grabbing rows (or elements) meeting a particular criteria.
+#' @export
+#' @examples
+#' \dontrun{
+#' Filter(with(DATA, wfm(state, list(sex, adult))), 5)
+#' with(DATA, wfm(state, list(sex, adult)))
+#' 
+#' ## Filter particular words based on max/min values in wfm
+#' v <- with(DATA, wfm(state, list(sex, adult)))
+#' Filter(v, 5)
+#' Filter(v, 5, count.apostrophe = FALSE)
+#' Filter(v, 5, 7)
+#' Filter(v, 4, 4)
+#' Filter(v, 3, 4)
+#' Filter(v, 3, 4, stopwords = Top25Words)
+#' 
+#' ## Filter works on character strings too...
+#' x <- c("Raptors don't like robots!",  "I'd pay $500.00 to rid them.")
+#' Filter(x, 3)
+#' Filter(x, 4)
+#' Filter(x, 4, count.apostrophe = FALSE)
+#' Filter(x, 4, count.apostrophe = FALSE, stopwords="raptors")
+#' Filter(x, 4, stopwords="raptors")
+#' Filter(x, 4, stopwords="raptors", ignore.case = FALSE)
+#' 
+#' DATA[, "state"] <- Filter(DATA[, "state"], 4)
+#' DATA <- qdap::DATA
+#' }
+Filter <-
+function(x, min = 1, max = Inf, count.apostrophe = TRUE, stopwords = NULL, 
+    ignore.case = TRUE, ...){
+    
+    min
+    max
+    count.apostrophe
+    stopwords
+    ignore.case
+    UseMethod("Filter")
+}
+
 #' Word Frequency Matrix
 #' 
 #' \code{Filter} - Filter words from a wfm that meet max/min word length 
 #' criteria.
 #' 
-#' @param x A \code{\link[qdap]{wfm}} object.
+#' @param x A filterable object (e.g., \code{\link[qdap]{wfm}},
+#' \code{\link[base]{character}}).
 #' @param min Minimum word length.
 #' @param max Maximum word length.
 #' @param count.apostrophe logical.  If \code{TRUE} apostrophes are counted as 
 #' characters.
 #' @rdname Word_Frequency_Matrix
 #' @export
-#' @return \code{Filter} - Returns a matrix of the class "wfm".
-Filter <-
-function(x, min = 1, max = Inf, count.apostrophe = TRUE, stopwords = NULL, ...){
-    min
-    max
-    count.apostrophe
-    stopwords
-    UseMethod("Filter")
-}
-
-#' Word Frequency Matrix
-#' 
-#' \code{Filter.wfm} - Filter words from a wfm that meet max/min word length 
-#' criteria.
-#' 
-#' wfm Method for Filter
-#' @rdname Word_Frequency_Matrix
-#' @export
 #' @method Filter wfm
+#' @return \code{Filter} - Returns a matrix of the class "wfm".
 Filter.wfm <- 
-function(x, min = 1, max = Inf, count.apostrophe = TRUE, 
-    stopwords = NULL, ...) {
+function(x, min = 1, max = Inf, count.apostrophe = TRUE, stopwords = NULL, 
+    ...) {
 
     if (!is.null(stopwords)) {
         x <- x[!rownames(x) %in% stopwords, ]
@@ -790,11 +886,46 @@ function(x, min = 1, max = Inf, count.apostrophe = TRUE,
 
 
 #' @S3method Filter default  
-Filter.default <- 
-function(..., min = 1, max = Inf, count.apostrophe, 
-    stopwords = NULL, x){
-        LIS <- list(...)
-        return(Filter.wfm(LIS, min, max, count.apostrophe))
+Filter.default <- function(x, ...) base::Filter
+#function(..., min = 1, max = Inf, count.apostrophe, stopwords = NULL, x){
+#        LIS <- list(...)
+#        return(Filter.wfm(LIS, min, max, count.apostrophe))
+#}
+
+
+is.Integer <- 
+function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
+
+#' Filter
+#' 
+#' \code{Filter.character} - Filter words from a character vector that meet 
+#' max/min word length criteria.
+#' 
+#' character Method for Filter
+#' @rdname Filter
+#' @export
+#' @method Filter character
+#' @return \code{Filter.character} - Returns a vector of the class "character".
+#' @return \code{Filter.wfm} - Returns a matrix of the class "wfm".
+Filter.character <- function(x, min = 1, max = Inf, count.apostrophe = TRUE, 
+    stopwords = NULL, ignore.case = TRUE, ...) {
+
+    splits <- "(\\s+)|%s(?=[[:punct:]])"
+    splits <- sprintf(splits, ifelse(count.apostrophe, "(?!')", ""))
+    x2 <- lapply(strsplit(x, splits, perl = TRUE), function(y) {
+        unblanker(unlist(y))
+    })
+
+    if (!is.null(stopwords)) {
+        if (ignore.case) {
+            stopwords <- c(stopwords, sapply(stopwords, Caps))
+        }
+        x2 <- lapply(x2, function(x) x[!x %in% stopwords])
+    }
+
+    mapply(function(a, b) {paste(a[b >= min & b <= max], 
+        collapse = " ")}, x2, lapply(x2, nchar))
+
 }
 
 
@@ -812,6 +943,9 @@ as.wfm <- function(matrix.object) {
     if(!all(is.Integer(matrix.object))){
         stop("matrix.object must contain only integer values")
     }
+    if (any(class(matrix.object) %in% c("TermDocumentMatrix", "DocumentTermMatrix"))) {
+        return(tm2qdap(matrix.object))
+    }
     if (!is.matrix(matrix.object)) {
         warning("Not a matrix.object; may not convert correctly",
             immediate. = TRUE)
@@ -821,5 +955,3 @@ as.wfm <- function(matrix.object) {
     matrix.object    
 }
 
-is.Integer <- 
-function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol

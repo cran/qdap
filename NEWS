@@ -16,6 +16,71 @@ And constructed with the following guidelines:
   (and resets the patch)
 * Bug fixes and misc. changes bumps the patch
 
+
+CHANGES IN qdap VERSION 1.3.1
+----------------------------------------------------------------
+
+A version bump necessary for Re-Submission to CRAN.  
+
+CHANGES
+
+* `new_project` was reconfigured with the old code that does not require the 
+  newest version of the reports package.
+
+CHANGES IN qdap VERSION 1.3.0
+----------------------------------------------------------------
+
+BUG FIXES
+
+* `read.transcript` could leave a QDAP_PLACE_HOLDER behind if a colon was found 
+  in the person column.  This behavior has been fixed.
+
+* `word_cor`'s plotting method threw an error if a word did not have any words 
+  above the r threshold.  This behavior has been corrected.
+
+* `Filter` overwrote a base R function; this has been fixed per Joshua Ulrich.
+
+* `scores.polarity`'s print method would return an error if columns were not 
+  indexed yet were rounded.  For instance, the following threw an error: 
+
+  `scores(with(sentSplit(DATA, 4), polarity(state, person)))[, 1:4]` 
+
+   This behavior has been fixed.
+
+NEW FEATURES
+
+* qdap adds an HTML vignette to better explain the intended work flow and 
+  function use for the package.   Use `browseVignettes(package = "qdap")` to
+  open.
+
+* qdap adds a PDF vignette to describe the compatibility and navigation between 
+  qdap and the `tm` packages. Use `browseVignettes(package = "qdap")` to open.
+
+MINOR FEATURES
+
+IMPROVEMENTS
+
+* `apply_as_df` picks up a `stopwords` and `filter` arguments that allows the 
+  user to remove stopwords and min/max length words.
+
+* `plot.word_cor` picks up the argument `ncol` that allows the user to specify 
+  the number of columns used.  This uses ggplot2's `facet_wrap` rather than 
+  `facet_grid` (which is the default if `ncol =NULL`).
+
+* `name2sex` relied upon having qdapDictionaries loaded.  This could be an issue 
+  if the function were used internally.  The user now supplies a dictionary of 
+  names and probabilities.
+
+* `df2tm_corpus` gains a `demographics.vars` argument that allows the user to 
+  add demographic information to the resulting corpus `DMetaDat`.
+
+* `tm_corpus2df` gains the ability to convert `DMetaDat` into demographic 
+  data.frame columns.
+
+
+CHANGES
+
+
 CHANGES IN qdap VERSION 1.2.0
 ----------------------------------------------------------------
 

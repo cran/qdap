@@ -10,9 +10,11 @@
 #' of 1 or more grouping variables.
 #' @param \ldots If \code{tdm} or \code{dtm} - Other arguments passed to 
 #' \code{wfm}.  If \code{apply_as_tm} - Other arguments passed to functions used 
-#' on the tm package's \code{"TermDocumentMatrix"}.  If \code{df2tm_corpus} - 
-#' Other arguments passed to the tm package's \code{\link[tm]{Corpus}}.  If 
-#' \code{tm_corpus2wfm} - Other arguments passed to \code{\link[qdap]{wfm}}.
+#' on the tm package's \code{"TermDocumentMatrix"}.  If \code{tm_corpus2df} - 
+#' Other arguments passed to \code{\link[qdap]{sentSplit}}.  If 
+#' \code{df2tm_corpus} - Other arguments passed to the tm package's 
+#' \code{\link[tm]{Corpus}}.  If \code{tm_corpus2wfm} - Other arguments passed 
+#' to \code{\link[qdap]{wfm}}.
 #' @param vowel.check logical.  Should terms without vowels be remove?  
 #' @details Produces output that is identical to the \code{tm} package's 
 #' \code{\link[tm]{TermDocumentMatrix}}, \code{\link[tm]{DocumentTermMatrix}},
@@ -228,6 +230,10 @@
 #' corp_df <- tm_corpus2df(reuters)
 #' htruncdf(corp_df)
 #' 
+#' z <- df2tm_corpus(DATA$state, DATA$person, 
+#'        demographic=DATA[, qcv(sex, adult, code)])
+#' tm_corpus2df(z)
+#' 
 #' ## Apply a qdap function
 #' out <- formality(corp_df$text, corp_df$docs)
 #' plot(out)
@@ -240,11 +246,27 @@
 #' 
 #' (y <- with(pres_debates2012, df2tm_corpus(dialogue, list(person, time))))
 #' 
+#' ## Add demographic info to DMetaData of Corpus
+#' z <- df2tm_corpus(DATA$state, DATA$person, 
+#'     demographic=DATA[, qcv(sex, adult, code)])
+#' lview(z)
+#' 
+#' lview(df2tm_corpus(DATA$state, DATA$person,
+#'     demographic=DATA$sex))
+#' 
+#' lview(df2tm_corpus(DATA$state, DATA$person,
+#'     demographic=list(DATA$sex, DATA$adult)))
+#'
 #' ## Apply qdap functions meant for dataframes from sentSplit to tm Corpus
 #' library(tm)
 #' reut21578 <- system.file("texts", "crude", package = "tm")
 #' reuters <- Corpus(DirSource(reut21578),
 #'     readerControl = list(reader = readReut21578XML))
+#' 
+#' matches <- list(
+#'     oil = qcv(oil, crude),
+#'     money = c("economic", "money")
+#' )
 #' 
 #' apply_as_df(reuters, word_stats)
 #' apply_as_df(reuters, formality)
@@ -257,22 +279,26 @@
 #' apply_as_df(reuters, trans_venn)
 #' apply_as_df(reuters, gantt_plot)
 #' apply_as_df(reuters, rank_freq_mplot)
-#' apply_as_df(reuters, termco, 
-#'     match.list = list(
-#'         oil = qcv(oil, Texas, crude), 
-#'         money = c("economic", "money")
-#'     ))
-#' plot(apply_as_df(reuters, termco, 
-#'     match.list = list(
-#'         oil = qcv(oil, Texas, crude), 
-#'         money = c("economic", "money")
-#'     ), elim.old = FALSE), values = TRUE, high="red")
-#' apply_as_df(reuters, word_cor, 
-#'     word = qcv(oil, Texas, crude, economic, money)
-#' )
-#' plot(apply_as_df(reuters, word_cor, 
-#'     word = qcv(oil, Texas, crude, economic, money)
-#' ))
+#' apply_as_df(reuters, character_table)
+#' 
+#' (termco_out <- apply_as_df(reuters, termco, match.list = matches))
+#' plot(termco_out, values = TRUE, high="red")
+#' 
+#' (wordcor_out <- apply_as_df(reuters, word_cor, word = unlist(matches)))
+#' plot(wordcor_out)
+#' 
+#' (f_terms <- apply_as_df(reuters, freq_terms, at.least = 3))
+#' plot(f_terms)
+#' 
+#' apply_as_df(reuters, trans_cloud)
+#' ## To use "all" rather than "docs" as "grouping.var"...
+#' apply_as_df(reuters, trans_cloud, grouping.var=NULL, 
+#'     target.words=matches, cloud.colors = c("red", "blue", "grey75"))
+#' 
+#' finds <- apply_as_df(reuters, freq_terms, at.least = 5,
+#'     top = 5, stopwords = Top100Words)
+#' apply_as_df(reuters, dispersion_plot, match.terms = finds[, 1],
+#'     total.color = NULL)
 #' }
 tdm <- function(text.var, grouping.var = NULL, vowel.check = TRUE, ...) {
 
@@ -367,7 +393,7 @@ wfm2xtab <- function(text.var, grouping.var = NULL, ...) {
 #' tm Package Compatibility Tools: Apply to or Convert to/from Term Document 
 #' Matrix or Document Term Matrix
 #' 
-#' \code{tm2qdap} - Convert the \code{tm} package's 
+#' \code{tm2qdap} - Convert the \pkg{tm} package's 
 #' \code{\link[tm]{TermDocumentMatrix}}/\code{\link[tm]{DocumentTermMatrix}} to
 #' \code{\link[qdap]{wfm}}.
 #' 
@@ -398,39 +424,6 @@ tm2qdap <- function(x) {
 }
 
 
-#' tm Package Compatibility Tools: Apply to or Convert to/from Term Document 
-#' Matrix or Document Term Matrix
-#' 
-#' \code{apply_as_tm} - Apply functions intended to be used on the \code{tm} 
-#' package's \code{\link[tm]{TermDocumentMatrix}} to a \code{\link[qdap]{wfm}} 
-#' object.
-#' 
-#' @param wfm.obj A \code{\link[qdap]{wfm}} object.
-#' @param tmfun A function applied to a \code{\link[tm]{TermDocumentMatrix}}
-#' object.
-#' @param to.qdap logical.  If \code{TRUE} should \code{\link[qdap]{wfm}} try to
-#' coerce the output back to a qdap object.
-#' @return \code{apply_as_tm} - Applies a tm oriented function to a 
-#' \code{\link[qdap]{wfm}} and attempts to simplify back to a 
-#' \code{\link[qdap]{wfm}} or \code{weight} format.
-#' @rdname tdm
-#' @export
-apply_as_tm <- function(wfm.obj, tmfun, ..., to.qdap = TRUE){
-
-    ## Convert to a tdm
-    x <- tdm(wfm.obj) 
-
-    ## Apply the tm function
-    y <- tmfun(x, ...) 
-
-    ## attempt to coerce back to qdap wfm/weighted_wfm
-    if (to.qdap && (is(y, "DocumentTermMatrix")|is(y, "TermDocumentMatrix"))) {
-        tm2qdap(y)
-    } else {
-        y
-    }
-
-}
 
 #' tm Package Compatibility Tools: Apply to or Convert to/from Term Document 
 #' Matrix or Document Term Matrix
@@ -440,17 +433,32 @@ apply_as_tm <- function(wfm.obj, tmfun, ..., to.qdap = TRUE){
 #' @param tm.corpus A \code{\link[tm]{Corpus}} object.
 #' @param col1 Name for column 1 (the vector elements).
 #' @param col2 Name for column 2 (the names of the vectors).
+#' @param sent.split logical.  If \code{TRUE} the text variable sentences will 
+#' be split into individual rows.
 #' @return \code{tm_corpus2df} - Converts a \code{\link[tm]{Corpus}} and returns 
 #' a qdap oriented dataframe.
 #' @rdname tdm
 #' @export
-tm_corpus2df <- function(tm.corpus, col1 = "docs", col2 = "text") {
+tm_corpus2df <- function(tm.corpus, col1 = "docs", col2 = "text", 
+    sent.split = TRUE, ...) {
 
     if(!is(tm.corpus[[1]], "PlainTextDocument")) {
         tm.corpus <- tm_map(tm.corpus, as.PlainTextDocument)
     }
     
-    list2df(tm.corpus, col1 = col2, col2 = col1)[, 2:1]
+    out <- list2df(tm.corpus, col1 = col2, col2 = col1)[, 2:1]
+
+    metadat <- attributes(tm.corpus)[["DMetaData"]]
+    if (ncol(metadat) > 1) {
+        colnames(metadat)[1] <- col1
+        out <- key_merge(out, metadat)
+    }
+
+    if (sent.split) {
+        out <- sentSplit(out, col2, ...)
+    }
+    out
+
 }
 
 #' tm Package Compatibility Tools: Apply to or Convert to/from Term Document 
@@ -477,11 +485,15 @@ tm_corpus2wfm <- function(tm.corpus, col1 = "docs", col2 = "text", ...) {
 #' \code{df2tm_corpus} - Convert a qdap dataframe to a tm package 
 #' \code{\link[tm]{Corpus}}.
 #' 
+#' @param demographic.vars Additional demographic information about the grouping 
+#' variables.  This is a data.frame, list of equal length vectors, or a single 
+#' vector corresponding to the grouping variable/text variable.  This 
+#' information will be mapped to the DMetaData in the \code{\link[tm]{Corpus}}.
 #' @rdname tdm
 #' @return \code{df2tm_corpus} - Converts a qdap oriented dataframe and returns 
 #' a \code{\link[tm]{Corpus}}.
 #' @export
-df2tm_corpus <- function(text.var, grouping.var = NULL, ...){
+df2tm_corpus <- function(text.var, grouping.var = NULL, demographic.vars, ...){
 
     if(is.null(grouping.var)) {
         G <- "all"
@@ -527,8 +539,50 @@ df2tm_corpus <- function(text.var, grouping.var = NULL, ...){
     if (!is.null(pers)) {
         attributes(mycorpus)[["CMetaData"]][["MetaData"]][["creator"]] <- pers
     }
+
+    ## Add other demographic variables to "DMetaData"
+    if(!missing(demographic.vars)) {
+        if (is.data.frame(demographic.vars)) {
+    
+        } else {
+            if (is.list(demographic.vars)) {
+                nms <- colnames(demographic.vars)
+                demographic.vars <- do.call(cbind.data.frame, demographic.vars)
+                if (is.null(nms)) {
+
+                    colnames(demographic.vars) <- paste0("X", 1:ncol(demographic.vars))
+                } else {
+                    colnames(demographic.vars) <- nms
+                }
+            } else {
+                if (is.vector(demographic.vars) | is.factor(demographic.vars)) {
+                    demographic.vars <- data.frame(dems=demographic.vars)
+                } else {
+                    warning("Please supply a data.frame, list of equal length vectors,\n",  
+                        "   or a single vector to `demographic.vars`")
+                }
+        
+            }
+        }
+        metadat <- split(demographic.vars, grouping)
+        checks <- colSums(do.call(rbind, lapply(metadat, function(x) {
+            unlist(lapply(x, function(y) !compare(y)))
+        }))) == 0
+        if (sum(checks) != 0){
+            metadat <- list_df2df(lapply(metadat, 
+                function(x) x[1, checks, drop = FALSE]), "MetaID")
+            attributes(mycorpus)[["DMetaData"]] <- 
+                key_merge(attributes(mycorpus)[["DMetaData"]], metadat)
+        }
+    }
+
     mycorpus
 }
+
+
+compare <- function(v) all(sapply( as.list(v[-1]), 
+    FUN=function(z) {identical(z, v[1])}))
+
 
 #' Transposes a TermDocumentMatrix object
 #' 
@@ -595,27 +649,110 @@ t.DocumentTermMatrix <- function(x, ...) {
     a
 }
 
-#' Apply a tm Corpus as a qdap Dataframe
+#' tm Package Compatibility Tools: Apply to or Convert to/from Term Document 
+#' Matrix or Document Term Matrix
 #' 
-#' Apply a \pkg{tm} \code{\link[tm]{Corpus}} as a qdap dataframe.
+#' \code{apply_as_tm} - Apply functions intended to be used on the \pkg{tm} 
+#' package's \code{\link[tm]{TermDocumentMatrix}} to a \code{\link[qdap]{wfm}} 
+#' object.
 #' 
-#' @param qdapfun A qdap function that is usually used on 
-#' text.variable ~ grouping variable.
-#' @note \code{aply_ad_df} coerces to a dataframe with columns named `docs` and 
-#' the other named `docs`.
-#' @export
+#' @param wfm.obj A \code{\link[qdap]{wfm}} object.
+#' @param tmfun A function applied to a \code{\link[tm]{TermDocumentMatrix}}
+#' object.
+#' @param to.qdap logical.  If \code{TRUE} should \code{\link[qdap]{wfm}} try to
+#' coerce the output back to a qdap object.
+#' @return \code{apply_as_tm} - Applies a tm oriented function to a 
+#' \code{\link[qdap]{wfm}} and attempts to simplify back to a 
+#' \code{\link[qdap]{wfm}} or \code{weight} format.
 #' @rdname tdm
-apply_as_df <- function(tm.corpus, qdapfun, ...) {
+#' @export
+apply_as_tm <- function(wfm.obj, tmfun, ..., to.qdap = TRUE){
 
-    text <- doc <- tot <- NULL
+    ## Convert to a tdm
+    x <- tdm(wfm.obj) 
 
-    dat <- sentSplit(tm_corpus2df(tm.corpus), "text")
-    if (any(unlist(formals(qdapfun)) %in% "tot")) {
-        with(dat, qdapfun(text.var = text, grouping.var = docs, tot = tot,  ...))
+    ## Apply the tm function
+    y <- tmfun(x, ...) 
+
+    ## attempt to coerce back to qdap wfm/weighted_wfm
+    if (to.qdap && (is(y, "DocumentTermMatrix")|is(y, "TermDocumentMatrix"))) {
+        tm2qdap(y)
     } else {
-        with(dat, qdapfun(text.var = text, grouping.var = docs, ...))
+        y
     }
 
 }
 
+#' Apply a tm Corpus as a qdap Dataframe
+#' 
+#' \code{apply_as_df} - Apply a \pkg{tm} \code{\link[tm]{Corpus}} as a qdap 
+#' dataframe.
+#' \code{apply_as_df} - Apply functions intended to be used on the \pkg{qdap} 
+#' package's \code{\link[base]{data.frame}} + \code{\link[qdap]{sentSplit}} to 
+#' a \pkg{tm} \code{\link[tm]{Corpus}} object.
+#' 
+#' @param qdapfun A qdap function that is usually used on 
+#' text.variable ~ grouping variable.
+#' @param stopwords A character vector of words to remove from the text.  qdap 
+#' has a number of data sets that can be used as stop words including: 
+#' \code{Top200Words}, \code{Top100Words}, \code{Top25Words}.  For the tm 
+#' package's traditional English stop words use \code{tm::stopwords("english")}.
+#' @param min Minimum word length.
+#' @param max Maximum word length.
+#' @param count.apostrophe logical.  If \code{TRUE} apostrophes are counted as 
+#' characters.
+#' @param ignore.case logical.  If \code{TRUE} stop words will be removed 
+#' regardless of case.  
+#' @note \code{aply_ad_df} coerces to a dataframe with columns named `docs` and 
+#' the other named `text`.
+#' @seealso \code{\link[qdap]{Filter}}
+#' @export
+#' @rdname tdm
+apply_as_df <- function(tm.corpus, qdapfun, ..., stopwords = NULL, 
+    min = 1, max = Inf, count.apostrophe = TRUE, ignore.case = TRUE) {
+
+    text <- doc <- tot <- NULL
+
+    dat <- tm_corpus2df(tm.corpus)
+
+    if (!is.null(stopwords)) {
+        dat[, "text"] <- rm_stopwords(dat[, "text"], stopwords, separate = FALSE, 
+            ignore.case = ignore.case)
+    }
+
+    if (min != 1 | max != Inf) {
+        dat[, "text"]  <- Filter(dat[, "text"], min = min, max = max, 
+            count.apostrophe = count.apostrophe) 
+    }
+  
+    theargs <- names(formals(qdapfun))
+   
+    ## See if the user has set grouping.var to NULL
+    extras <- substitute(...())
+    group.null <- FALSE
+    if("grouping.var" %in% names(extras)) {
+        if (is.null(extras[["grouping.var"]])) {
+            group.null <- TRUE
+        }
+    }
+
+    if (any(theargs %in% "tot")) {
+        if (group.null) {
+            with(dat, qdapfun(text.var = text, tot = tot, ...)) 
+        } else {
+            with(dat, qdapfun(text.var = text, grouping.var = docs, tot = tot, ...))
+        }
+    } else {
+        if (any(theargs %in% "grouping.var")) {
+            if (group.null) {
+                with(dat, qdapfun(text.var = text, ...))
+            } else {
+                with(dat, qdapfun(text.var = text, grouping.var = docs, ...))
+            }
+        } else {
+            with(dat, qdapfun(text.var = text, ...))
+        }
+    }
+
+}
 
