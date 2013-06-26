@@ -2,11 +2,12 @@
 \alias{plot.polarity}
 \title{Plots a polarity Object}
 \usage{
-  \method{plot}{polarity} (x, bar.size = 5, low = "red",
-    mid = "grey99", high = "blue",
-    ave.polarity.shape = "+", alpha = 1/4, shape = 19,
-    point.size = 2.5, jitter = 0.1, nrow = NULL,
-    na.rm = TRUE, ...)
+\method{plot}{polarity}(x, bar.size = 5, low = "red", mid = "grey99",
+  high = "blue", ave.polarity.shape = "+", alpha = 1/4, shape = 19,
+  point.size = 2.5, jitter = 0.1, nrow = NULL, na.rm = TRUE,
+  order.by.polarity = TRUE, plot = TRUE, error.bars = TRUE,
+  error.bar.height = 0.5, error.bar.size = 0.5, error.bar.color = "black",
+  ...)
 }
 \arguments{
   \item{x}{The polarity object.}
@@ -38,20 +39,43 @@
 
   \item{nrow}{The number of rows in the dotplot legend
   (used when the number of grouping variables makes the
-  legend too wide).  If NULL no legend if plotted.}
+  legend too wide).  If \code{NULL} no legend if plotted.}
 
   \item{na.rm}{logical. Should missing values be removed?}
+
+  \item{order.by.polarity}{logical.  If \code{TRUE} the
+  group polarity plot will be ordered by average polarity
+  score, otherwise alphabetical order is assumed.}
+
+  \item{plot}{logical.  If \code{TRUE} the plot will
+  automatically plot. The user may wish to set to
+  \code{FALSE} for use in knitr, sweave, etc. to add
+  additional plot layers.}
+
+  \item{error.bars}{logical.  If \code{TRUE} error bars are
+  added to the polarity dot plot using the standard error
+  of the mean polarity score.}
+
+  \item{error.bar.height}{The height of the error bar
+  ends.}
+
+  \item{error.bar.size}{The size/thickness of the error
+  bars.}
+
+  \item{error.bar.color}{The color of the error bars.  If
+  \code{NULL} each bar will be colored by grouping
+  variable.}
 
   \item{\ldots}{ignored}
 }
 \value{
-  Invisibly returns the \code{ggplot2} objects that form
-  the larger plot.
+Invisibly returns the \code{ggplot2} objects that form the
+larger plot.
 }
 \description{
-  Plots a polarity object as a heat map Gantt plot with
-  polarity over time (measured in words) and polarity
-  scores per sentence.  In the Gantt plot the black dots
-  are the average polarity per grouping variable.
+Plots a polarity object as a heat map Gantt plot with
+polarity over time (measured in words) and polarity scores
+per sentence.  In the Gantt plot the black dots are the
+average polarity per grouping variable.
 }
 

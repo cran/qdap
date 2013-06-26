@@ -2,8 +2,7 @@
 \alias{cm_code.exclude}
 \title{Exclude Codes}
 \usage{
-  cm_code.exclude(x2long.obj, exclude.code.list,
-    rm.var = NULL)
+cm_code.exclude(x2long.obj, exclude.code.list, rm.var = NULL)
 }
 \arguments{
   \item{x2long.obj}{An object from
@@ -19,19 +18,19 @@
   \item{rm.var}{Name of the repeated measures column.}
 }
 \value{
-  Returns a dataframe with n codes excluding the nth code.
+Returns a dataframe with n codes excluding the nth code.
 }
 \description{
-  Find the occurrences of n codes excluding the nth code.
-  For example you have times/words coded for a teacher and
-  you also have times/words coded for happiness.  You can
-  find all the happiness times excluding the teacher times
-  or vice versa.
+Find the occurrences of n codes excluding the nth code.
+For example you have times/words coded for a teacher and
+you also have times/words coded for happiness.  You can
+find all the happiness times excluding the teacher times or
+vice versa.
 }
 \note{
-  The code column must be named \code{"code"} and your
-  start and end columns must be named \code{"start"} and
-  \code{"end"}.
+The code column must be named \code{"code"} and your start
+and end columns must be named \code{"start"} and
+\code{"end"}.
 }
 \examples{
 \dontrun{
@@ -54,7 +53,9 @@ foo2  <- list(
 cm_code.exclude(x, list(ABnoC=qcv(AA, BB, CC)))
 cm_code.exclude(z, list(ABnoC=qcv(AA, BB, CC)), rm.var="time")
 excludes <- list(AnoB=qcv(AA, BB), ABnoC=qcv(AA, BB, CC))
-cm_code.exclude(z, excludes, rm.var="time")
+(a <- cm_code.exclude(z, excludes, rm.var="time"))
+plot(a)
+
 #WITH cm_time2long
 x <- list(
     transcript_time_span = qcv(00:00 - 1:12:00),
@@ -79,13 +80,13 @@ cm_code.exclude(dat, list(P=qcv(A, B), Q=qcv(B, C), R=qcv(A, B, C)),
 }
 }
 \seealso{
-  \code{\link[qdap]{cm_range2long}},
-  \code{\link[qdap]{cm_time2long}},
-  \code{\link[qdap]{cm_df2long}},
-  \code{\link[qdap]{cm_code.blank}},
-  \code{\link[qdap]{cm_code.combine}},
-  \code{\link[qdap]{cm_code.overlap}},
-  \code{\link[qdap]{cm_code.transform}}
+\code{\link[qdap]{cm_range2long}},
+\code{\link[qdap]{cm_time2long}},
+\code{\link[qdap]{cm_df2long}},
+\code{\link[qdap]{cm_code.blank}},
+\code{\link[qdap]{cm_code.combine}},
+\code{\link[qdap]{cm_code.overlap}},
+\code{\link[qdap]{cm_code.transform}}
 }
 \keyword{co-occurrence}
 

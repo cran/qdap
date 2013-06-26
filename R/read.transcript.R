@@ -26,18 +26,21 @@
 #' @param rm.empty.rows logical.  If \code{TRUE} 
 #' \code{\link[qdap]{read.transcript}}  attempts to remove empty rows.
 #' @param na.strings A vector of character strings which are to be interpreted 
-#' as NA values.
+#' as \code{NA} values.
 #' @param sep The field separator character. Values on each line of the file are 
-#' separated by this character.  The default of NULL instructs 
+#' separated by this character.  The default of \code{NULL} instructs 
 #' \code{\link[qdap]{read.transcript}} to use a separator suitable for the file 
 #' type being read in.
 #' @param skip Integer; the number of lines of the data file to skip before 
 #' beginning to read data.
-#' @param nontext2factor logical.  If \code{TRUE} attempts to convert any non text to a 
-#' factor.
+#' @param nontext2factor logical.  If \code{TRUE} attempts to convert any 
+#' non-text to a factor.
 #' @param text Character string: if file is not supplied and this is, then data 
 #' are read from the value of text. Notice that a literal string can be used to 
 #' include (small) data sets within R code.
+#' @param comment.char A character vector of length one containing a single 
+#' character or an empty string. Use \code{""} to turn off the interpretation of 
+#' comments altogether.
 #' @param \ldots Further arguments to be passed to \code{\link[utils]{read.table}}.
 #' @return Returns a dataframe of dialogue and people.
 #' @note If a transcript is a .docx file read transcript expects two columns 
@@ -88,7 +91,8 @@ read.transcript <-
 function(file, col.names = NULL, text.var = NULL, merge.broke.tot = TRUE, 
     header = FALSE, dash = "", ellipsis = "...", quote2bracket = FALSE, 
     rm.empty.rows = TRUE, na.strings = c("999", "NA", "", " "), 
-    sep = NULL, skip = 0, nontext2factor = TRUE, text, ...) {
+    sep = NULL, skip = 0, nontext2factor = TRUE, text, comment.char = "", 
+    ...) {
     if (missing(file) && !missing(text)) {
         file <- textConnection(text)
         on.exit(close(file))

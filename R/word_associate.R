@@ -1,4 +1,4 @@
-#' Find Associated Words.
+#' Find Associated Words
 #' 
 #' Find words associated with a given word(s) or a phrase(s).  Results can be
 #' output as a network graph and/or wordcloud.
@@ -80,8 +80,8 @@
 #' argument.  If this behavior is not desired \code{legend.override} should be 
 #' set to \code{TRUE}.
 #' @param char2space Currently a road to nowhere.  Eventually this will allow 
-#' the retention of characters as is allowed in \code{trans.cloud} already.
-#' @param \dots Other arguments supplied to \code{\link[qdap]{trans.cloud}}.
+#' the retention of characters as is allowed in \code{trans_cloud} already.
+#' @param \dots Other arguments supplied to \code{\link[qdap]{trans_cloud}}.
 #' @return Returns a list:
 #' \item{word frequency matrices}{Word frequency matrices for each grouping 
 #' variable.} 
@@ -92,8 +92,8 @@
 #' to \code{match.string}).} 
 #' Optionally, returns a word cloud and/or a network plot of the text unit 
 #' containing the \code{match.string} terms.
-#' @seealso \code{\link[qdap]{trans.cloud}},
-#' \code{\link[qdap]{word.network.plot}},
+#' @seealso \code{\link[qdap]{trans_cloud}},
+#' \code{\link[qdap]{word_network_plot}},
 #' \code{\link[wordcloud]{wordcloud}},
 #' \code{\link[igraph]{graph.adjacency}}
 #' @export
@@ -186,7 +186,7 @@ function(text.var, grouping.var = NULL, match.string, text.unit = "sentence",
     if (!is.null(extra.terms) && 
         is.list(extra.terms) & length(extra.terms) == 1) {
         extra.terms <- unlist(extra.terms)
-    }    
+    }  
     if (network.plot | wordcloud) {
         if(is.null(nw.label.colors)) {
             nw.label.colors <- cloud.colors
@@ -234,7 +234,7 @@ function(text.var, grouping.var = NULL, match.string, text.unit = "sentence",
     if (!is.list(match.string)) {
         match.string <- list(match.string)
     }
-    Terms2 <- qdap::stopwords(text.var, stopwords = NULL, unlist = TRUE, 
+    Terms2 <- rm_stopwords(text.var, stopwords = NULL, unlist = TRUE, 
         strip = TRUE, unique = TRUE, names = FALSE, char.keep = char2space)  
     if (!is.null(char2space)) {
         Terms2 <- mgsub(char2space, " ", Terms2)
@@ -325,7 +325,7 @@ function(text.var, grouping.var = NULL, match.string, text.unit = "sentence",
     }
     DFsl <- lapply(ALN, function(i) na.omit(DF3[shortDF(DF3, i), 1:4]))
     names(DFsl) <- colnames(DF3)[-c(1:4)]
-    Terms <- qdap::stopwords(text.var2, stopwords = NULL, unlist = TRUE, 
+    Terms <- rm_stopwords(text.var2, stopwords = NULL, unlist = TRUE, 
           strip = TRUE, unique = TRUE, names = FALSE, char.keep = char2space)
     if (!is.null(char2space)) {
         Terms <- mgsub(char2space, " ", Terms)
@@ -481,7 +481,7 @@ function(text.var, grouping.var = NULL, match.string, text.unit = "sentence",
             an <-  grep("adjmat", names(o))
             ads <- lapply(an, function(i) o[[i]])
             invisible(lapply(seq_along(ads), function(i) {
-                word.network.plot(ads[[i]], label.cex = nw.label.cex, 
+                word_network_plot(ads[[i]], label.cex = nw.label.cex, 
                 title.name = namesL2[[i]], layout = nw.layout, 
                 edge.color = nw.edge.color, title.color =title.color,
                 label.colors = nw.label.colors,
@@ -497,7 +497,7 @@ function(text.var, grouping.var = NULL, match.string, text.unit = "sentence",
         }
         if (wordcloud) {
             invisible(lapply(seq_along(freqlist), function(i) {
-               suppressWarnings(trans.cloud(
+               suppressWarnings(trans_cloud(
                    word.list = freqlist[[i]]$swl, 
                    target.words = WSEARCH[choosennames2][[i]], 
                    stopwords = stopwords, 
@@ -546,12 +546,12 @@ function(x, ...) {
     elem <- unlist(x, recursive=FALSE)
     wid <- options()$width
     options(width = 10000)
-    print(left.just(elem$dialogue.any, 4))
-    cat("\nMatch Terms\n===========")
+    print(left_just(elem$dialogue.any, 4))
+    message("\nMatch Terms\n===========")
     invisible(lapply(seq_along(x$match.terms), function(i) {
-      cat(paste0("\n\n", "List ", i, ":\n", paste(x$match.terms[[i]], 
+      message(paste0("\n", "List ", i, ":\n", paste(x$match.terms[[i]], 
           collapse = ", ")))
     }))
-    cat("\n\n")
+     message("\n")
     options(width = wid) 
 }

@@ -2,11 +2,12 @@
 \alias{qheat}
 \title{Quick Heatmap}
 \usage{
-  qheat(mat, low = "white", high = "darkblue",
-    values = FALSE, digits = 1, text.size = 3,
-    text.color = "grey40", xaxis.col = "black",
-    yaxis.col = "black", order.by = NULL, grid = "white",
-    by.column = TRUE, auto.size = FALSE, mat2 = NULL)
+qheat(mat, low = "white", high = "darkblue", values = FALSE, digits = 1,
+  text.size = 3, text.color = "grey40", xaxis.col = "black",
+  yaxis.col = "black", order.by = NULL, grid = "white",
+  by.column = TRUE, auto.size = FALSE, mat2 = NULL, plot = TRUE,
+  facet.vars = NULL, facet.flip = FALSE, diag.na = FALSE,
+  diag.values = "")
 }
 \arguments{
   \item{mat}{A matrix or dataframe produced by many qdap
@@ -42,38 +43,60 @@
   variable name to order the columns by.  To reverse use a
   negative (\code{-}) before the column name.}
 
-  \item{grid}{The color of the grid (Use NULL to remove the
-  grid).}
+  \item{grid}{The color of the grid (Use \code{NULL} to
+  remove the grid).}
 
   \item{by.column}{logical.  If \code{TRUE} applies scaling
-  to the column.  If FALSE applies scaling by row (use
-  \code{NULL} to turn off scaling).}
+  to the column.  If \code{FALSE} applies scaling by row
+  (use \code{NULL} to turn off scaling).}
 
-  \item{auto.size}{logical.  IF \code{TRUE} the visual will
+  \item{auto.size}{logical.  If \code{TRUE} the visual will
   be resized to create square cells.}
 
   \item{mat2}{A second matrix equal in dimensions to
   \code{mat} that will be used for cell labels if
   \code{values} is \code{TRUE}.}
+
+  \item{plot}{logical.  If \code{TRUE} the plot will
+  automatically plot. The user may wish to set to
+  \code{FALSE} for use in knitr, sweave, etc. to add
+  additional plot layers.}
+
+  \item{facet.vars}{A character vector of 1 or 2 column
+  names to facet by.}
+
+  \item{facet.flip}{logical If \code{TRUE} the direction of
+  the faceting is reversed.}
+
+  \item{diag.na}{logical.  If \code{TRUE} and \code{mat} is
+  a symmetrical matrix the diagonals are set to \code{NA}.
+  This is useful with correlation matrices because the
+  diagonal of ones do not affect the scaling of the
+  heatmap.}
+
+  \item{diag.values}{The string to be used for the diagonal
+  labels (values) if \code{diag.na} is set to \code{TRUE}.
+  Defualt is to not print a value.}
 }
 \description{
-  A quick heatmap function for visualizing typical qdap
-  dataframe/matrix outputs.
+A quick heatmap function for visualizing typical qdap
+dataframe/matrix outputs.
 }
 \details{
-  \code{qheat} is useful for finding patterns and anomalies
-  in large qdap generated dataframes and matrices.
+\code{qheat} is useful for finding patterns and anomalies
+in large qdap generated dataframes and matrices.
 }
 \note{
-  \code{\link[qdap]{qheat}} is a fast way of working with
-  data formats produced by qdap.  The function isn't
-  designed to be extended beyond exploratory qdap usage.
+\code{\link[qdap]{qheat}} is a fast way of working with
+data formats produced by qdap.  The function isn't designed
+to be extended beyond exploratory qdap usage.
 }
 \examples{
 \dontrun{
 dat <- sentSplit(DATA, "state")
 ws.ob <- with(dat, word_stats(state, list(sex, adult), tot=tot))
 qheat(ws.ob)
+qheat(ws.ob) + coord_flip()
 qheat(ws.ob, order.by = "sptot",
     xaxis.col = c("red", "black", "green", "blue"))
 qheat(ws.ob, order.by = "sptot")
@@ -81,6 +104,10 @@ qheat(ws.ob, order.by = "-sptot")
 qheat(ws.ob, values = TRUE)
 qheat(ws.ob, values = TRUE, text.color = "red")
 qheat(ws.ob, "yellow", "red", grid = FALSE)
+qheat(mtcars, facet.vars = "cyl")
+qheat(mtcars, facet.vars = c("gear", "cyl"))
+qheat(t(mtcars), by.column=FALSE)
+qheat(cor(mtcars), diag.na=TRUE, diag.value="", by.column=NULL, values = TRUE)
 
 dat1 <- data.frame(G=LETTERS[1:5], matrix(rnorm(20), ncol = 4))
 dat2 <- data.frame(matrix(LETTERS[1:25], ncol=5))

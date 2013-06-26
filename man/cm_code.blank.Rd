@@ -2,8 +2,7 @@
 \alias{cm_code.blank}
 \title{Blank Code Transformation}
 \usage{
-  cm_code.blank(x2long.obj, combine.code.list,
-    rm.var = NULL, overlap = TRUE)
+cm_code.blank(x2long.obj, combine.code.list, rm.var = NULL, overlap = TRUE)
 }
 \arguments{
   \item{x2long.obj}{An object from
@@ -25,18 +24,18 @@
   an integer and wrapped with quotes.}
 }
 \value{
-  Returns a dataframe with transformed occurrences of
-  supplied overlapping codes added.
+Returns a dataframe with transformed occurrences of
+supplied overlapping codes added.
 }
 \description{
-  Transform codes with any binary operator combination.
+Transform codes with any binary operator combination.
 }
 \note{
-  For most jobs \code{\link[qdap]{cm_code.transform}} will
-  work.  This adds a bit of flexibility in exclusion and
-  partial matching.  The code column must be named
-  \code{"code"} and your start and end columns must be
-  named \code{"start"} and \code{"end"}.
+For most jobs \code{\link[qdap]{cm_code.transform}} will
+work.  This adds a bit of flexibility in exclusion and
+partial matching.  The code column must be named
+\code{"code"} and your start and end columns must be named
+\code{"start"} and \code{"end"}.
 }
 \examples{
 \dontrun{
@@ -53,18 +52,35 @@ foo2  <- list(
     DD = qcv(terms="")
 )
 
-
+## Single occurrence version
 (x <- cm_range2long(foo))
+
+cm_code.blank(x, combine.code.list = list(ABC=qcv(AA, BB, CC)),
+    overlap = "!=1")
+
+## Repeated measures version
 (z <- cm_range2long(foo, foo2, v.name="time"))
-cm_code.transform(x, overlap.code.list=list(AB=qcv(AA, BB)))
-cm_code.transform(x, combine.code.list = list(ALL=qcv(AA, BB, CC)))
-cm_code.transform(x, overlap.code.list=list(AB=qcv(AA, BB)),
-    combine.code.list = list(ALL=qcv(AA, BB, CC)))
-overlaps <- list(AB=qcv(AA, BB), ABC=qcv(AA, BB, CC))
-cm_code.transform(z, overlaps, rm.var="time")
-out1 <- cm_code.transform(z, overlaps,
-   exclude.code.list=list(AABB_no_CC = qcv(AA, BB, CC)), rm.var="time")
-head(out1, 10)
+
+cm_code.blank(z, combine.code.list = list(ABC=qcv(AA, BB, CC)),
+    rm.var = "time", overlap = "!=1")
+
+cm_code.blank(z, combine.code.list = list(AB=qcv(AA, BB)),
+    rm.var = "time", overlap = TRUE)
+
+cm_code.blank(z, combine.code.list = list(AB=qcv(AA, BB)),
+    rm.var = "time", overlap = FALSE)
+
+cm_code.blank(z, combine.code.list = list(AB=qcv(AA, BB)),
+    rm.var = "time", overlap = ">1")
+
+cm_code.blank(z, combine.code.list = list(AB=qcv(AA, BB)),
+    rm.var = "time", overlap = "==2")
+
+## Notice `overlap = "==2"` above is identical to `cm_code.overlap`
+cm_code.overlap(z, overlap.code.list = list(AB=qcv(AA, BB)),
+    rm.var = "time")
+
+
 #WITH cm_time2long
 x <- list(
     transcript_time_span = qcv(00:00 - 1:12:00),
@@ -82,22 +98,23 @@ y <- list(
     C = qcv(terms = "2.40:3.00, 5.01, 6.02:7.00, 9.00, 17.01")
 )
 
-dat <- cm_time2long(x, y)
+dat <- cm_time2long(x, y, v.name="time")
 head(dat, 10)
-out2 <- cm_code.transform(dat, list(P=qcv(A, B), Q=qcv(B, C), R=qcv(A, B, C)),
-    list(S=qcv(A, B), T=qcv(B, C), U=qcv(A, B, C)),
-    list(ABnoC = qcv(A, B, C)), rm.var="variable")
-head(out2, 10)
+out <- cm_code.blank(dat, combine.code.list = list(ABC=qcv(A, B, C)),
+    rm.var = "time", overlap = "!=1")
+
+head(out)
+plot(out)
 }
 }
 \seealso{
-  \code{\link[qdap]{cm_range2long}},
-  \code{\link[qdap]{cm_time2long}},
-  \code{\link[qdap]{cm_df2long}},
-  \code{\link[qdap]{cm_code.overlap}},
-  \code{\link[qdap]{cm_code.combine}},
-  \code{\link[qdap]{cm_code.exclude}},
-  \code{\link[qdap]{cm_code.transform}}
+\code{\link[qdap]{cm_range2long}},
+\code{\link[qdap]{cm_time2long}},
+\code{\link[qdap]{cm_df2long}},
+\code{\link[qdap]{cm_code.overlap}},
+\code{\link[qdap]{cm_code.combine}},
+\code{\link[qdap]{cm_code.exclude}},
+\code{\link[qdap]{cm_code.transform}}
 }
 \keyword{co-occurrence}
 

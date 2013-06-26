@@ -2,8 +2,7 @@
 \alias{prop}
 \title{Convert Raw Numeric Matrix or Data Frame to Proportions}
 \usage{
-  prop(mat, digits = 2, percent = FALSE, by.column = TRUE,
-    round = FALSE)
+prop(mat, digits = 2, percent = FALSE, by.column = TRUE, round = FALSE)
 }
 \arguments{
   \item{mat}{A numeric matrix or dataframe.}
@@ -21,20 +20,19 @@
   values (controlled by digits).}
 }
 \value{
-  Returns a matrix with proportionally scaled values.
+Returns a matrix with proportionally scaled values.
 }
 \description{
-  Convert a raw matrix or dataframe to
-  proportions/percents.  Divides each element of a column
-  by the column sum.
+Convert a raw matrix or dataframe to proportions/percents.
+Divides each element of a column by the column sum.
 }
 \examples{
 \dontrun{
 y <- wfdf(DATA$state, DATA$person, stopwords = c("your", "yours"),
     margins = TRUE)
-prop(wfm(wfdf = y), 4)[1:10, ]        #as a proportion
-prop(wfm(wfdf = y), 4, TRUE)[1:10, ]  #as a percentage
-heatmap(prop(wfm(wfdf = y), 4))
+prop(wfm(y), 4)[1:10, ]        #as a proportion
+prop(wfm(y), 4, TRUE)[1:10, ]  #as a percentage
+heatmap(prop(wfm(y), 4))
 wdstraj <- word_stats(rajSPLIT$dialogue, rajSPLIT$person)
 prop(wdstraj$gts[, -1], 5)[1:15, 1:6]
 }

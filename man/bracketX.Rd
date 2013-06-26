@@ -5,17 +5,15 @@
 \alias{genXtract}
 \title{Bracket Parsing}
 \usage{
-  bracketX(text.var, bracket = "all", missing = NULL,
-    names = FALSE, fix.space = TRUE, scrub = TRUE)
+bracketX(text.var, bracket = "all", missing = NULL, names = FALSE,
+  fix.space = TRUE, scrub = fix.space)
 
-  bracketXtract(text.var, bracket = "all", with = FALSE,
-    merge = TRUE)
+bracketXtract(text.var, bracket = "all", with = FALSE, merge = TRUE)
 
-  genX(text.var, left, right, missing = NULL,
-    names = FALSE, fix.space = TRUE, scrub = TRUE)
+genX(text.var, left, right, missing = NULL, names = FALSE,
+  fix.space = TRUE, scrub = TRUE)
 
-  genXtract(text.var, left, right, with = FALSE,
-    merge = TRUE)
+genXtract(text.var, left, right, with = FALSE, merge = TRUE)
 }
 \arguments{
   \item{text.var}{The text variable}
@@ -32,18 +30,22 @@
   given as the names of the counts.}
 
   \item{fix.space}{logical.  If \code{TRUE} extra spaces
-  left behind from an extraction will be eliminated.}
+  left behind from an extraction will be eliminated.
+  Additionally, non-space (e.g., \strong{"text(nospace
+  between text and parenthesis)"}) is replaced with a
+  single space (e.g., \strong{"text (space between text and
+  parenthesis)"}).}
 
-  \item{scrub}{logical.  If TRUE
+  \item{scrub}{logical.  If \code{TRUE}
   \code{\link[qdap]{scrubber}} will clean the text.}
 
-  \item{with}{logical.  If TRUE returns the brackets and
-  the bracketed text.}
+  \item{with}{logical.  If \code{TRUE} returns the brackets
+  and the bracketed text.}
 
-  \item{merge}{logical.  If TRUE the results of each
-  bracket type will be merged by sentence.  FALSE returns a
-  named list of lists of vectors of bracketed text per
-  bracket type.}
+  \item{merge}{logical.  If \code{TRUE} the results of each
+  bracket type will be merged by sentence.  \code{FALSE}
+  returns a named list of lists of vectors of bracketed
+  text per bracket type.}
 
   \item{left}{A vector of character or numeric symbols as
   the left edge to extract.}
@@ -52,29 +54,29 @@
   the right edge to extract.}
 }
 \value{
-  \code{bracketX} - returns a vector of text with brackets
-  removed.
+\code{bracketX} - returns a vector of text with brackets
+removed.
 
-  \code{bracketXtract} - returns a list of vectors of
-  bracketed text.
+\code{bracketXtract} - returns a list of vectors of
+bracketed text.
 
-  \code{genXtract} - returns a vector of text with checks
-  removed.
+\code{genXtract} - returns a vector of text with checks
+removed.
 
-  \code{genX} - returns a list of vectors of removed text.
+\code{genX} - returns a list of vectors of removed text.
 }
 \description{
-  \code{bracketX} - Apply bracket removal to character
-  vectors.
+\code{bracketX} - Apply bracket removal to character
+vectors.
 
-  \code{bracketXtract} - Apply bracket extraction to
-  character vectors.
+\code{bracketXtract} - Apply bracket extraction to
+character vectors.
 
-  \code{genX} - Apply general chunk removal to character
-  vectors.
+\code{genX} - Apply general chunk removal to character
+vectors.
 
-  \code{genXtract} - Apply general chunk extraction to
-  character vectors.
+\code{genXtract} - Apply general chunk extraction to
+character vectors.
 }
 \examples{
 \dontrun{
@@ -114,16 +116,16 @@ genX(DATA$state, c("is", "we"), c("too", "on"))
 }
 }
 \author{
-  Martin Morgan and Tyler Rinker <tyler.rinker@gmail.com>.
+Martin Morgan and Tyler Rinker <tyler.rinker@gmail.com>.
 }
 \references{
-  \url{http://stackoverflow.com/q/8621066/1000343}
+\url{http://stackoverflow.com/q/8621066/1000343}
 }
 \seealso{
-  \code{\link[base]{regex}}
+\code{\link[base]{regex}}
 }
-\keyword{bracket-remove,}
 \keyword{bracket,}
+\keyword{bracket-remove,}
 \keyword{curly-braces}
 \keyword{parenthesis,}
 

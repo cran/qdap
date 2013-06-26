@@ -22,7 +22,7 @@
 #' problem with the garbage collection in the openNLP function that 
 #' \code{\link[qdap]{pos}} wraps.  Consider adjusting this argument upward if 
 #' the error \code{java.lang.OutOfMemoryError} occurs.
-#' @return pos returns a list of 4: 
+#' @return \code{pos} -  returns a list of 4: 
 #' \item{text}{The original text} 
 #' \item{POStagged}{The original words replaced with parts of speech in context.} 
 #' \item{POSprop}{Dataframe of the proportion of parts of speech by row.} 
@@ -32,11 +32,12 @@
 #' \item{percent}{The value of percent used for plotting purposes.}
 #' \item{zero.replace}{The value of zero.replace used for plotting purposes.}
 #' @rdname pos
-#' @seealso \code{\link[openNLP]{Maxent_POS_Tag_Annotator}}
+#' @seealso \code{\link[openNLP]{Maxent_POS_Tag_Annotator}},
+#' \code{\link[qdap]{colcomb2class}}
 #' @references \href{openNLP}{http:/opennlp.apache.org}
 #' @keywords parts-of-speech
 #' @export
-#' @importFrom parallel parApply makeCluster detectCores stopCluster clusterEvalQ
+#' @importFrom parallel parLapply makeCluster detectCores stopCluster clusterEvalQ clusterExport
 #' @importFrom openNLP Maxent_POS_Tag_Annotator Maxent_Word_Token_Annotator
 #' @importFrom NLP as.String annotate Annotation
 #' @examples 
@@ -53,22 +54,22 @@
 #' out1 <- pos(DATA$state, parallel = TRUE) # not always useful
 #' ltruncdf(out1, 7, 4)
 #' 
-#' #use pos.tags to interpret part of speech tags used by pos & pos.by
-#' pos.tags()[1:10, ]
-#' pos.tags("matrix")[1:10, ]
-#' pos.tags("dataframe")[1:10, ]
-#' pos.tags("df")[1:10, ]
-#' ltruncdf(pos.tags("all"), 3)
+#' #use pos_tags to interpret part of speech tags used by pos & pos_by
+#' pos_tags()[1:10, ]
+#' pos_tags("matrix")[1:10, ]
+#' pos_tags("dataframe")[1:10, ]
+#' pos_tags("df")[1:10, ]
+#' ltruncdf(pos_tags("all"), 3)
 #' 
-#' posbydat <- with(DATA, pos.by(state, sex))
+#' posbydat <- with(DATA, pos_by(state, sex))
 #' names(posbydat)
 #' ltruncdf(posbydat, 7, 4)
 #' truncdf(posbydat$pos.by.prop, 4)
 #' 
-#' POSby <- with(DATA, pos.by(state, list(adult, sex)))
+#' POSby <- with(DATA, pos_by(state, list(adult, sex)))
 #' plot(POSby, values = TRUE, digits = 2)
 #' #or more quickly - reuse the output from before
-#' out2 <- with(DATA, pos.by(posbydat, list(adult, sex)))
+#' out2 <- with(DATA, pos_by(posbydat, list(adult, sex)))
 #' }
 pos <-
 function(text.var, parallel = FALSE, cores = detectCores()/2, 
@@ -124,8 +125,13 @@ function(text.var, parallel = FALSE, cores = detectCores()/2,
     G4 <- mtabulate(m2$POStags)
     m2$word.count <- wc(text.var)
     cons <- ifelse(percent, 100, 1)
+
     G5 <- sapply(data.frame(G4, check.names = FALSE), 
-        function(x) cons*(x/m2$word.count)) 
+        function(x) cons*(x/m2$word.count))
+    ## Added data.frame wrap on 128-per Kurt Hornik's bug find
+    if (is.vector(G5)) {
+        G5 <- data.frame(t(G5))
+    }
     colnames(G5) <- paste0("prop", colnames(G5))
     G4 <- data.frame(wrd.cnt = m2$word.count, G4, check.names = FALSE)
     G5 <- data.frame(wrd.cnt = m2$word.count, G5, check.names = FALSE)
@@ -134,6 +140,7 @@ function(text.var, parallel = FALSE, cores = detectCores()/2,
         G4[nas, 2:ncol(G4)] <- NA
         m2[nas, 1:ncol(m2)] <- NA
     }
+
     rnp <- raw_pro_comb(G4[, -1], G5[, -1], digits = digits, 
         percent = percent, zero.replace = zero.replace, override = TRUE)  
     rnp <- data.frame(G4[, 1, drop = FALSE], rnp, check.names = FALSE)     
@@ -142,15 +149,6 @@ function(text.var, parallel = FALSE, cores = detectCores()/2,
     if(na.omit) POS <- lapply(POS, na.omit)
     class(POS) <- "pos"
     POS
-}
-
-mtabulate <- function(vects) {
-    lev <- sort(unique(unlist(vects)))
-    dat <- do.call(rbind, lapply(vects, function(x, lev){ 
-        tabulate(factor(x, levels = lev, ordered = TRUE),
-        nbins = length(lev))}, lev = lev))
-    colnames(dat) <- sort(lev) 
-    data.frame(dat, check.names = FALSE)
 }
 
 tagPOS <-  function(text.var, PTA, ...) {
@@ -178,7 +176,7 @@ tagPOS <-  function(text.var, PTA, ...) {
 
 #' Parts of Speech by Grouping Variable(s)
 #' 
-#' \code{pos.by} - Apply part of speech tagger to transcript(s) by zero or more 
+#' \code{pos_by} - Apply part of speech tagger to transcript(s) by zero or more 
 #' grouping variable(s).
 #' 
 #' @rdname pos
@@ -186,7 +184,7 @@ tagPOS <-  function(text.var, PTA, ...) {
 #' one word list for all text.  Also takes a single grouping variable or a list 
 #' of 1 or more grouping variables.
 #' @param \ldots Other argument supplied to \code{pos}.
-#' @return pos.by returns a list of 6: 
+#' @return \code{pos_by} -  returns a list of 6: 
 #' \item{text}{The original text} 
 #' \item{POStagged}{The original words replaced with parts of speech in context.} 
 #' \item{POSprop}{Dataframe of the proportion of parts of speech by row.} 
@@ -202,7 +200,7 @@ tagPOS <-  function(text.var, PTA, ...) {
 #' \item{percent}{The value of percent used for plotting purposes.}
 #' \item{zero.replace}{The value of zero.replace used for plotting purposes.}
 #' @export
-pos.by <-
+pos_by <-
 function(text.var, grouping.var = NULL, digits = 1, percent = TRUE, 
     zero.replace = 0, ...){
     if(is.null(grouping.var)) {
@@ -220,21 +218,22 @@ function(text.var, grouping.var = NULL, digits = 1, percent = TRUE,
             G <- G[length(G)]
         }
     }
-    check <- FALSE
-    if (class(text.var) %in% c("pos", "pos.by", "formality")) {
+ #   check <- FALSE
+    if (any(class(text.var) %in% c("pos", "pos_by", "formality"))) {
         pos.list <- text.var
         text.var <- text.var[["POSfreq"]]
-        check <- TRUE
+#       check <- TRUE
     } else {
         pos.list <- pos(text.var, digits = digits, percent = percent, ...)
         text.var <- pos.list[["POSfreq"]]
     }
     if(is.null(grouping.var)){
-        if (check) {
+#        if (check) {
+## commented out rows removed 1-29-14 to deal with single length vector
             grouping <- rep("all", nrow(text.var))  
-        } else {
-            grouping <- rep("all", length(text.var))
-        }
+#        } else {
+#            grouping <- rep("all", length(text.var))
+#        }
     } else {
         if (is.list(grouping.var) & length(grouping.var)>1) {
             grouping <- paste2(grouping.var)
@@ -264,14 +263,14 @@ function(text.var, grouping.var = NULL, digits = 1, percent = TRUE,
         percent = percent, zero.replace = zero.replace, override = TRUE)  
     o[["pos.by.rnp"]] <- data.frame(o[["pos.by.freq"]][, 1:2], 
         rnp2, check.names = FALSE)     
-    class(o) <- "pos.by"
+    class(o) <- "pos_by"
     return(o)
 }
 
 #' Parts of Tags
 #' 
-#' \code{pos.tags} - Useful for interpreting the parts of speech tags created by 
-#' pos and pos.by.
+#' \code{pos_tags} - Useful for interpreting the parts of speech tags created by 
+#' pos and pos_by.
 #' 
 #' @rdname pos
 #' @param type An optional character string giving the output of the pos tags.  
@@ -281,7 +280,7 @@ function(text.var, grouping.var = NULL, digits = 1, percent = TRUE,
 #' dataframe version of the output), \code{"all"} (a list of all three of the 
 #' previous output types).
 #' @export
-pos.tags <-
+pos_tags <-
 function(type = "pretty"){
         POStags.df <- structure(list(Tag = structure(c(1L, 
             2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 15L, 
@@ -317,7 +316,7 @@ function(type = "pretty"){
             class = "data.frame", comment = 
             "http://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html")
     POStags.matrix <- as.matrix(POStags.df)
-    POStags <- left.just(POStags.df, 1:2)   
+    POStags <- left_just(POStags.df, 1:2)   
     x <- switch(type,
         pretty = POStags,
         matrix = POStags.matrix,
@@ -374,11 +373,11 @@ function(x, digits = 1, percent = NULL, zero.replace = NULL, ...) {
     options(width=WD)
 }
 
-#' Prints a pos.by Object.
+#' Prints a pos_by Object.
 #' 
-#' Prints a pos.by object.
+#' Prints a pos_by object.
 #' 
-#' @param x The pos.by object
+#' @param x The pos_by object
 #' @param digits Integer values specifying the number of digits to be 
 #' printed.
 #' @param percent logical.  If TRUE output given as percent.  If FALSE the 
@@ -387,9 +386,9 @@ function(x, digits = 1, percent = NULL, zero.replace = NULL, ...) {
 #' @param zero.replace Value to replace 0 values with.  If NULL uses the value 
 #' from \code{\link[qdap]{termco}}.  Only used if \code{label} is TRUE.
 #' @param \ldots ignored
-#' @method print pos.by
-#' @S3method print pos.by
-print.pos.by <-
+#' @method print pos_by
+#' @S3method print pos_by
+print.pos_by <-
 function(x, digits = 1, percent = NULL, zero.replace = NULL, ...) {
     WD <- options()[["width"]]
     options(width=3000)
@@ -421,11 +420,11 @@ function(x, digits = 1, percent = NULL, zero.replace = NULL, ...) {
 
 
 
-#' Plots a pos.by Object
+#' Plots a pos_by Object
 #' 
-#' Plots a pos.by object.
+#' Plots a pos_by object.
 #' 
-#' @param x The pos.by object
+#' @param x The pos_by object
 #' @param label logical.  If TRUE the cells of the heat map plot will be labeled 
 #' with count and proportional values.
 #' @param lab.digits Integer values specifying the number of digits to be 
@@ -436,9 +435,9 @@ function(x, digits = 1, percent = NULL, zero.replace = NULL, ...) {
 #' @param zero.replace Value to replace 0 values with.  If NULL uses the value 
 #' from \code{\link[qdap]{question_type}}.  Only used if \code{label} is TRUE.
 #' @param \ldots Other arguments passed to qheat.
-#' @method plot pos.by
-#' @S3method plot pos.by
-plot.pos.by <- function(x, label = FALSE, lab.digits = 1, percent = NULL, 
+#' @method plot pos_by
+#' @S3method plot pos_by
+plot.pos_by <- function(x, label = FALSE, lab.digits = 1, percent = NULL, 
     zero.replace = NULL, ...) {
     if (label) {
         if (!is.null(percent)) {

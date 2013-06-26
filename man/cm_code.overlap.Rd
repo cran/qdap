@@ -2,8 +2,7 @@
 \alias{cm_code.overlap}
 \title{Find Co-occurrence Between Codes}
 \usage{
-  cm_code.overlap(x2long.obj, overlap.code.list,
-    rm.var = NULL)
+cm_code.overlap(x2long.obj, overlap.code.list, rm.var = NULL)
 }
 \arguments{
   \item{x2long.obj}{An object from
@@ -18,15 +17,15 @@
   \item{rm.var}{Name of the repeated measures column.}
 }
 \value{
-  Returns a dataframe with co-occurrences of supplied
-  overlapping codes added.
+Returns a dataframe with co-occurrences of supplied
+overlapping codes added.
 }
 \description{
-  Combine co-occurrences of codes into a new code.
+Combine co-occurrences of codes into a new code.
 }
 \note{
-  The code column must be named code and your start and end
-  columns must be named \code{"start"} and \code{"end"}.
+The code column must be named code and your start and end
+columns must be named \code{"start"} and \code{"end"}.
 }
 \examples{
 \dontrun{
@@ -49,7 +48,8 @@ foo2  <- list(
 cm_code.overlap(x, list(AB=qcv(AA, BB)))
 cm_code.overlap(x, list(ALL=qcv(AA, BB, CC)))
 combines <- list(AB=qcv(AA, BB), ABC=qcv(AA, BB, CC))
-cm_code.overlap(z, combines, "time")
+(a <- cm_code.overlap(z, combines, "time"))
+plot(a)
 
 #WITH cm_time2long
 x <- list(
@@ -76,11 +76,11 @@ head(out, 10)
 }
 }
 \seealso{
-  \code{\link[qdap]{cm_range2long}},
-  \code{\link[qdap]{cm_time2long}},
-  \code{\link[qdap]{cm_df2long}},
-  \code{\link[qdap]{cm_code.combine}},
-  \code{\link[qdap]{cm_code.transform}}
+\code{\link[qdap]{cm_range2long}},
+\code{\link[qdap]{cm_time2long}},
+\code{\link[qdap]{cm_df2long}},
+\code{\link[qdap]{cm_code.combine}},
+\code{\link[qdap]{cm_code.transform}}
 }
 \keyword{co-occurrence}
 

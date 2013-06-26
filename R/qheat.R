@@ -20,13 +20,25 @@
 #' @param yaxis.col  A single character vector color choice for the low values.
 #' @param order.by An optional character vector of a variable name to order the 
 #' columns by.  To reverse use a negative (\code{-}) before the column name.
-#' @param grid The color of the grid (Use NULL to remove the grid).  
+#' @param grid The color of the grid (Use \code{NULL} to remove the grid).  
 #' @param by.column logical.  If \code{TRUE} applies scaling to the column.  If 
-#' FALSE  applies scaling by row (use \code{NULL} to turn off scaling).
-#' @param auto.size logical.  IF \code{TRUE} the visual will be resized to 
+#' \code{FALSE}  applies scaling by row (use \code{NULL} to turn off scaling).
+#' @param auto.size logical.  If \code{TRUE} the visual will be resized to 
 #' create square cells.
 #' @param mat2 A second matrix equal in dimensions to \code{mat} that will be 
 #' used for cell labels if \code{values} is \code{TRUE}.
+#' @param plot logical.  If \code{TRUE} the plot will automatically plot.  
+#' The user may wish to set to \code{FALSE} for use in knitr, sweave, etc.
+#' to add additional plot layers.
+#' @param facet.vars A character vector of 1 or 2 column names to facet by.
+#' @param facet.flip logical If \code{TRUE} the direction of the faceting 
+#' is reversed.
+#' @param diag.na logical.  If \code{TRUE} and \code{mat} is a symmetrical 
+#' matrix the diagonals are set to \code{NA}.  This is useful with correlation 
+#' matrices because the diagonal of ones do not affect the scaling of the 
+#' heatmap.
+#' @param diag.values The string to be used for the diagonal labels (values) 
+#' if \code{diag.na} is set to \code{TRUE}.  Defualt is to not print a value.
 #' @details \code{qheat} is useful for finding patterns and anomalies in large
 #' qdap generated dataframes and matrices.
 #' @note \code{\link[qdap]{qheat}} is a fast way of working with data formats 
@@ -35,14 +47,16 @@
 #' @keywords heatmap
 #' @export
 #' @import RColorBrewer 
-#' @importFrom gridExtra grid.arrange
+#' @importFrom gridExtra grid.arrange 
 #' @importFrom reshape2 melt 
 #' @importFrom scales alpha 
+#' @importFrom ggplot2 ggplot facet_grid geom_tile geom_text aes scale_fill_gradient theme_grey scale_x_discrete scale_y_discrete theme element_text coord_equal
 #' @examples
 #' \dontrun{
 #' dat <- sentSplit(DATA, "state")
 #' ws.ob <- with(dat, word_stats(state, list(sex, adult), tot=tot))
 #' qheat(ws.ob)
+#' qheat(ws.ob) + coord_flip()
 #' qheat(ws.ob, order.by = "sptot", 
 #'     xaxis.col = c("red", "black", "green", "blue"))
 #' qheat(ws.ob, order.by = "sptot")
@@ -50,44 +64,82 @@
 #' qheat(ws.ob, values = TRUE)
 #' qheat(ws.ob, values = TRUE, text.color = "red")
 #' qheat(ws.ob, "yellow", "red", grid = FALSE)
+#' qheat(mtcars, facet.vars = "cyl")
+#' qheat(mtcars, facet.vars = c("gear", "cyl"))
+#' qheat(t(mtcars), by.column=FALSE)
+#' qheat(cor(mtcars), diag.na=TRUE, diag.value="", by.column=NULL, values = TRUE)
 #' 
 #' dat1 <- data.frame(G=LETTERS[1:5], matrix(rnorm(20), ncol = 4))
 #' dat2 <- data.frame(matrix(LETTERS[1:25], ncol=5))
 #' qheat(dat1, values=TRUE)
 #' qheat(dat1, values=TRUE, mat2=dat2)
 #' }
-qheat <- function(mat, low = "white", high ="darkblue", values = FALSE,
+qheat <-
+function(mat, low = "white", high ="darkblue", values = FALSE,
     digits = 1, text.size = 3, text.color = "grey40", xaxis.col = "black",
     yaxis.col = "black", order.by = NULL, grid = "white", by.column = TRUE, 
-    auto.size = FALSE, mat2 = NULL) {
+    auto.size = FALSE, mat2 = NULL, plot = TRUE, facet.vars = NULL, 
+    facet.flip = FALSE, diag.na = FALSE, diag.values = "") {
     group <- value <- values2 <- NULL
+
+    ## set diagonal to NA
+    if (diag.na) {
+        if (diff(dim(mat)) == 0 && is.matrix(mat)) {
+            diag(mat) <- NA
+        } else {
+            warning ("`mat` is either not a matrix or not symmetrical; `diag.na` ignore.")
+        }
+    }
+    
+    ## convert all numeric matrices
+    if (all(sapply(mat, is.numeric))) {
+        if (is.matrix(mat)) {
+            mat <- data.frame(mat, check.names = FALSE) 
+        }
+        nms <- rownames(mat)        
+        mat <- data.frame(group=factor(nms), mat, row.names = NULL, 
+            check.names = FALSE)
+        mat[, "group"] <- factor(mat[, "group"], levels = nms)
+    }
+    
     if (!is.null(mat2) & !values) {
         values <- TRUE 
+    }
+
+    if (!is.null(facet.vars)) {
+        f.vars <- data.frame(mat, check.names = FALSE)[, facet.vars, drop = FALSE]
+        keeps <- colnames(mat)[!colnames(mat) %in% colnames(f.vars)]
+        mat <- mat[, keeps]
     }
     numformat <- function(val, digits) { 
         sub("^(-?)0.", "\\1.", sprintf(paste0("%.", digits, "f"), val)) 
     }
     classRdf <- c("diversity")
-    if (class(mat) %in% classRdf) {
+    if (any(class(mat) %in% classRdf)) {
         class(mat) <- "data.frame"
     }     
-    CLS <- class(mat)
+    CLS <- class(mat)[1]
     if (CLS == "word_stats") {
         mat <- mat[["gts"]]
         class(mat) <- "data.frame"
     }
-    if (CLS %in% c("character.table", "question_type", "pos.by")) {
+    if (CLS %in% c("character_table", "question_type", "pos_by")) {
         mat <- mat[["prop"]]
     }
     if (CLS == "termco") {
         mat2 <- mat[["rnp"]]
-        mat <- data.frame(mat[["prop"]])
+        mat <- data.frame(mat[["prop"]], check.names = FALSE)
         class(mat2) <- "data.frame"
     }      
-    dat2 <- as.matrix(mat[, -1])
+    dat2 <- as.matrix(mat[, -1, drop = FALSE])
+    NMS <- colnames(dat2)
     if (!is.null(by.column)){
         by.column <- by.column + 1
         dat2 <- apply(dat2, by.column, scale)
+        if (by.column == 1) {
+            dat2 <- t(dat2)
+            colnames(dat2) <- NMS
+        }
     }
     if (!is.null(order.by)) {
         if(substring(order.by, 1, 1) != "-") {
@@ -100,19 +152,43 @@ qheat <- function(mat, low = "white", high ="darkblue", values = FALSE,
     }
     ws4 <- data.frame(group = mat[, 1], dat2, check.names = FALSE)
     colnames(ws4)[1] <- "group"
-    ws4 <- melt(ws4, id.var = "group")
-    colnames(ws4)[1:2] <- c("group", "var")
-    ws4$var <- factor(ws4$var, levels=rev(levels(ws4$var)))
+    
+    if (!is.null(facet.vars)) {
+        rmnames <- colnames(f.vars)
+        ws4 <- data.frame(f.vars, ws4, check.names = FALSE)
+        LRM <- seq_along(rmnames)
+        colnames(ws4)[LRM] <- paste0("facet_", LRM)
+        ws4 <- melt(ws4, id.var = c(colnames(ws4)[LRM], "group"))
+    } else {
+        ws4 <- melt(ws4, id.var = "group")
+        colnames(ws4)[1:2] <- c("group", "variable")
+    }
+
+    ws4[, "var"] <- factor(ws4[, "variable"], levels=rev(levels(ws4[, "variable"])))
+
+    ## row 2 column for mat2 if NULL
+    if (!is.null(mat2) && (ncol(mat2) + 1 == ncol(mat))) {
+        mat2 <- row2col(mat2) 
+    }
+    
     if (values) {
         if (is.null(mat2)) {
             mat2 <- mat
         }      
-        ws5 <- data.frame(group = mat2[, 1], mat2[, -1])
+        ws5 <- data.frame(group = mat2[, 1], mat2[, -1, drop = FALSE], 
+            check.names = FALSE)
+
         ws5 <- melt(ws5, id.var = "group")
+
         if(is.numeric(ws5$value)) {
-            ws4$values2 <- numformat(ws5$value, digits = digits)
+            ws4[, "values2"] <- numformat(ws5[, "value"], digits = digits)
         } else {
-            ws4$values2 <- ws5$value
+            ws4[, "values2"] <- ws5[, "value"]
+        }
+
+        ## what to print the na values on the diagonal as
+        if (!is.null(diag.values)) {
+            ws4[ws4[, "values2"] == "NA", "values2"] <- diag.values
         }
     }
     if (length(xaxis.col) == 1) {
@@ -165,6 +241,36 @@ qheat <- function(mat, low = "white", high ="darkblue", values = FALSE,
     if (auto.size) {
         GP <- GP + coord_equal()
     }
-    print(GP)
+    if(!is.null(facet.vars)) {
+        if(length(LRM) == 1) {
+            if (!facet.flip) {
+                GP <- GP + facet_grid(facet_1~.)
+            } else {        
+                GP <- GP + facet_grid(.~facet_1)
+            }
+        } else {
+            if (!facet.flip) {
+                GP <- GP + facet_grid(facet_1~facet_2)
+            } else {        
+                GP <- GP + facet_grid(facet_2~facet_1)
+            }
+        }
+    }
+    
+    if (plot) {
+        print(GP)
+    }
     invisible(GP)
 }
+
+## helper to turn row to column
+row2col <-
+function(dataframe, new.col.name = NULL){
+    x <- data.frame(NEW = rownames(dataframe), dataframe, 
+        check.names=FALSE)
+    if(!is.null(new.col.name)) names(x)[1] <- new.col.name
+    rownames(x) <- 1:nrow(x)
+    return(x)
+}
+
+

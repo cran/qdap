@@ -42,6 +42,7 @@
 #' x1[, 7:14] <- lapply(7:14,  function(i) sample(0:1, nrow(x1), TRUE))
 #' out2 <- cm_df2long(x1,  code.vars = codes)
 #' head(out2, 15)
+#' plot(out2)
 #' }
 cm_df2long <-
 function(df.temp.obj, v.name = "variable", list.var = TRUE, code.vars = NULL, 
@@ -78,6 +79,16 @@ function(df.temp.obj, v.name = "variable", list.var = TRUE, code.vars = NULL,
     if (list.var) {
         colnames(DF)[ncol(DF)] <- v.name
     }
-    comment(DF) <- "cmrange"
+    if (is.null(v.name)) {
+        v.name <- "*NULL*"
+    }
+    class(DF) <- c("cmspans", "cmrange", "cmdf2long", paste0("vname_", v.name), 
+        class(DF))
     DF
 }
+
+
+
+
+
+

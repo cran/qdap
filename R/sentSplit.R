@@ -6,6 +6,8 @@
 #' 
 #' @param dataframe A dataframe that contains the person and text variable.
 #' @param text.var The text variable.
+#' @param rm.var An optional character vector of 1 or 2 naming the variables 
+#' that are repeated measures (This will restart the \strong{"tot"} column).
 #' @param endmarks A character vector of endmarks to split turns of talk into 
 #' sentences.
 #' @param incomplete.sub logical.  If \code{TRUE} detects incomplete sentences 
@@ -23,66 +25,130 @@
 #' @return \code{sentSplit} - returns a dataframe with turn of talk broken apart 
 #' into sentences.  Optionally a stemmed version of the text variable may be 
 #' returned as well.
+#' @section Warning: \code{\link[qdap]{sentSplit}} requires the dialogue (text) 
+#' column to be cleaned in a particular way.  The data should contain qdap
+#' punctuation marks (\code{c("?", ".", "!", "|")}) at the end of each sentence.
+#' Additionally, extraneous punctuation such as abbreviations should be removed
+#' (see \code{\link[qdap]{replace_abbreviation}}).
+#' Trailing sentences such as \bold{I thought I...} will be treated as 
+#' incomplete and marked with \code{"|"} to denote an incomplete/trailing 
+#' sentence.
 #' @rdname sentSplit
 #' @author Dason Kurkiewicz and Tyler Rinker <tyler.rinker@@gmail.com>.
 #' @seealso 
 #' \code{\link[qdap]{bracketX}}, 
-#' \code{\link[qdap]{incomplete.replace}},
+#' \code{\link[qdap]{incomplete_replace}},
 #' \code{\link[qdap]{stem2df}} ,
 #' \code{\link[qdap]{TOT}} 
 #' @keywords sentence, split, turn-of-talk
 #' @export
 #' @examples
 #' \dontrun{
-#' #sentSplit EXAMPLE:
-#' sentSplit(DATA, "state")
+#' ## `sentSpli`t EXAMPLE:
+#' (out <- sentSplit(DATA, "state"))
 #' sentSplit(DATA, "state", stem.col = TRUE)
 #' sentSplit(DATA, "state", text.place = "left")
 #' sentSplit(DATA, "state", text.place = "original")
 #' sentSplit(raj, "dialogue")[1:20, ]
 #' 
-#' #sentCombine EXAMPLE:
+#' ## plotting
+#' plot(out)
+#' plot(out, grouping.var = "person")
+#' 
+#' out2 <- sentSplit(DATA2, "state", rm.var = c("class", "day"))
+#' plot(out2)
+#' plot(out2, grouping.var = "person")
+#' plot(out2, grouping.var = "person", rm.var = "day")
+#' plot(out2, grouping.var = "person", rm.var = c("day", "class"))
+#'
+#' ## `sentCombine` EXAMPLE:
 #' dat <- sentSplit(DATA, "state") 
 #' sentCombine(dat$state, dat$person)
 #' truncdf(sentCombine(dat$state, dat$sex), 50)
 #' 
-#' #TOT EXAMPLE:
+#' ## `TOT` EXAMPLE:
 #' dat <- sentSplit(DATA, "state") 
 #' TOT(dat$tot)
+#' 
+#' ## `sent_detect`
+#' sent_detect(DATA$state)
 #' }
 sentSplit <-
+function(dataframe, text.var, rm.var = NULL, endmarks = c("?", ".", "!", "|"), 
+    incomplete.sub = TRUE, rm.bracket = TRUE, stem.col = FALSE, 
+    text.place = "right", ...) {
+
+    if (is.null(rm.var)) {
+        output <- sentSplit_helper(dataframe = dataframe, text.var = text.var, 
+            endmarks = endmarks, incomplete.sub = incomplete.sub, 
+            rm.bracket = rm.bracket, stem.col = stem.col, text.place = text.place
+        )
+
+    } else {
+
+        if (length(rm.var) == 1) {
+            rm_var_list <- dataframe[, rm.var[1]]
+        } else {
+            rm_var_list <- lapply(rm.var, function(x) dataframe[, x])
+        }
+
+
+        spdat <- split(dataframe, rm_var_list)
+        output <- lapply(spdat, function(x){
+            sentSplit(x, text.var = text.var, endmarks = endmarks, 
+                incomplete.sub = incomplete.sub, rm.bracket = rm.bracket, 
+                stem.col = stem.col, text.place = text.place)
+        })
+
+        if (length(rm.var) > 1) {
+            rmvars <- lapply(dataframe[, rev(rm.var)], levels)
+            rmvars <- expand.grid(rmvars)
+            ord <- match(paste2(rmvars[, ncol(rmvars):1], sep = "."), names(output))
+            output <- output[ord]
+        }
+
+        output <- data.frame(do.call(rbind, output), row.names = NULL)
+    }
+ 
+    if (!is.null(rm.var)) {
+        rm.var <- paste0("rmvars_", paste(rm.var, collapse = ":"))
+    } 
+    class(output) <- c("sent_split", paste0("sent_split_text_var:", text.var), 
+        rm.var, class(output))
+    output
+}
+
+sentSplit_helper <-
 function(dataframe, text.var, endmarks = c("?", ".", "!", "|"), 
     incomplete.sub = TRUE, rm.bracket = TRUE, stem.col = FALSE, 
     text.place = "right", ...) {
     splitpoint <- paste0("[", paste("\\", endmarks, sep="", collapse=""), "]")
     if (is.numeric(text.var)) {
-      text.var <- colnames(dataframe)[text.var]
+        text.var <- colnames(dataframe)[text.var]
     }
     if (incomplete.sub) {
-      dataframe [, text.var] <- incomplete.replace(dataframe [, text.var])
+        dataframe [, text.var] <- incomplete_replace(dataframe [, text.var])
     }
     if (rm.bracket) {
-      dataframe [, text.var] <- bracketX(dataframe [, text.var])
+        dataframe [, text.var] <- bracketX(dataframe [, text.var])
     }
     if(length(dataframe) < 3) {
-      dataframe $EXTRA1x2 <-  1:nrow(dataframe)
-      dataframe $EXTRA2x2 <-  1:nrow(dataframe)
+        dataframe $EXTRA1x2 <-  1:nrow(dataframe)
+        dataframe $EXTRA2x2 <-  1:nrow(dataframe)
     } else {
-      dataframe
+        dataframe
     }
     input <- text.var
     breakinput <- function(input, splitpoint) {
-      j <- gregexpr(splitpoint, input)
-      lengths <- unlist(lapply(j, length))
-      spots <- lapply(j, as.numeric)
-      first <- unlist(lapply(spots, function(x) {
-        c(1, (x + 1)[-length(x)])
-      }
-      )
-      )
-      last <- unlist(spots)
-      ans <- substring(rep(input, lengths), first, last)
-      list(text = ans, lengths = lengths)
+        j <- gregexpr(splitpoint, input)
+        lengths <- unlist(lapply(j, length))
+        spots <- lapply(j, as.numeric)
+        first <- unlist(lapply(spots, function(x) {
+          c(1, (x + 1)[-length(x)])
+        }))
+        last <- unlist(spots)
+        ans <- substring(rep(input, lengths), first, last)
+        list(text = ans, lengths = lengths)
     }
     j <- breakinput(dataframe [, input], splitpoint)
     others <- dataframe [, -which(colnames(dataframe) %in% input), drop=FALSE]
@@ -92,42 +158,42 @@ function(dataframe, text.var, endmarks = c("?", ".", "!", "|"),
     vlen <- sapply(j$lengths, seq_len)
     ans$tot <- unlist(lapply(seq_along(vlen), function(i) paste0(i, ".", vlen[[i]])))
     if(any(na.omit(ans[, input]==""))){
-      NAdet <- ans[, input]==""
-      NAdet[is.na(NAdet)] <- FALSE
-      ans[NAdet, input] <- NA
+        NAdet <- ans[, input]==""
+        NAdet[is.na(NAdet)] <- FALSE
+        ans[NAdet, input] <- NA
     }
     if (text.place == "original") {
-      ans <- ans[, colnames(dataframe)]
-      if (stem.col) {
-        ans <- stem2df(ans, which(colnames(ans) %in% text.var), ...)
-      } 
-    } else {
-      if (text.place == "right") {
-        ans <- data.frame(ans[, -1], ans[, 1])
-        totn <- which(names(ans)=="tot")
-        ans <- data.frame(ans[, 1, drop= FALSE], ans[, totn, drop = FALSE],
-                          ans[, -c(1, totn), drop = FALSE])
-        colnames(ans) <- c(colnames(ans)[-ncol(ans)], input)
+        ans <- ans[, c(colnames(dataframe), "tot")]
         if (stem.col) {
-          ans <- stem2df(ans, ncol(ans), warn = FALSE, ...)
-        }   
-      } else {
-        if (text.place == "left") {
-          ans <- ans
-          if (stem.col) {
-            ans <- stem2df(ans, 1, ...)
-          }             
+            ans <- stem2df(ans, which(colnames(ans) %in% text.var), ...)
+        } 
+    } else {
+        if (text.place == "right") {
+            ans <- data.frame(ans[, -1], ans[, 1])
+            totn <- which(names(ans)=="tot")
+            ans <- data.frame(ans[, 1, drop= FALSE], ans[, totn, drop = FALSE],
+                ans[, -c(1, totn), drop = FALSE])
+            colnames(ans) <- c(colnames(ans)[-ncol(ans)], input)
+            if (stem.col) {
+                ans <- stem2df(ans, ncol(ans), warn = FALSE, ...)
+            }   
         } else {
-          warning("incorrect text.place argument")
+            if (text.place == "left") {
+                ans <- ans
+                if (stem.col) {
+                    ans <- stem2df(ans, 1, ...)
+                }             
+            } else {
+                warning("incorrect text.place argument")
+            }
         }
-      }
     }
     ans$EXTRA1x2 <- NULL
     ans$EXTRA2x2 <- NULL
     rownames(ans) <- NULL
     ans[, text.var] <- as.character(ans[, text.var])
     if (stem.col) {
-      ans[, "stem.text"] <- as.character(ans[, "stem.text"])
+        ans[, "stem.text"] <- as.character(ans[, "stem.text"])
     }
     ans
 }
@@ -190,8 +256,8 @@ function(text.var, grouping.var = NULL, as.list = FALSE) {
 
 #' Convert the tot Column to Turn of Talk
 #' 
-#' \code{TOT} - Convert the tot column from \code{\link[qdap]{sentSplit}} to turn of talk 
-#' index (no sub sentence).  Generally, for internal use.
+#' \code{TOT} - Convert the tot column from \code{\link[qdap]{sentSplit}} to 
+#' turn of talk index (no sub sentence).  Generally, for internal use.
 #' 
 #' @return \code{TOT} - returns a numeric vector of the turns of talk without 
 #' sentence sub indexing (e.g. 3.2 become 3).
@@ -203,4 +269,99 @@ function(tot){
         as.numeric(as.character(unlist(strsplit(as.character(x), ".", 
         fixed=TRUE))[[1]]))
     })
+}
+
+
+#' Prints a sent_split object
+#' 
+#' Prints a sent_split object
+#' 
+#' @param x The sent_split object
+#' @param \ldots ignored
+#' @S3method print sent_split
+#' @method print sent_split
+print.sent_split <-
+function(x, ...) {
+    WD <- options()[["width"]]
+    options(width=3000)
+    class(x) <- "data.frame"
+    print(x)
+    options(width=WD)
+}
+
+#' Plots a sent_split Object
+#' 
+#' Plots a sent_split object.
+#' 
+#' @param x The sent_split object.
+#' @param text.var The text variable (character string).
+#' @param rm.var An optional repeated measures character vector of 1 or 2 to 
+#' facet by.  If \code{NULL} the \code{rm.var} from \code{sentSplit} is used.  To 
+#' avoid this behavior use
+#' \code{FALSE}.
+#' @param \ldots Other arguments passed to \code{tot_plot}.
+#' @method plot sent_split
+#' @export
+plot.sent_split <- function(x, text.var = NULL, rm.var = NULL, ...) {
+
+    ## check for text var from class of x  
+    if (is.null(text.var)) {
+        dia <- "sent_split_text_var:"
+        tv <- grepl(dia, class(x))
+        text_var <- gsub(dia, "", class(x)[tv])
+        if (!text_var %in% colnames(x)) {
+            stop(paste("\nsentSplit object has been altered:",
+                "please supply `text.var`"))
+        }
+    }
+
+    ## check for repeated measure vars from class of x    
+    if (is.null(rm.var)) {
+        rmv <- "rmvars_"
+        rv <- grepl(rmv, class(x))
+        if (sum(rv) < 1){
+            rm.var <- NULL
+        } else {
+            rm.var <- unlist(strsplit(gsub(rmv, "", class(x)[rv]), ":"))
+            if (sum(rm.var %in% colnames(x)) != length(rm.var)) {
+                warning("rm.var nit matched to column names: rm.var ignored")
+                rm.var <- NULL
+            }
+        }
+    } else {
+        if (!isTRUE(rm.var) & is.logical(rm.var)) {
+            rm.var <- NULL
+        }
+    }
+    
+    tot_plot(x, text.var = text_var, facet.vars = rm.var, ...)
+    
+}
+
+#' Convert the tot Column to Turn of Talk
+#' 
+#' \code{sent_detect} - Detect and split sentences on endmark boundaries.
+#' 
+#' @return \code{sent_detect} - returns a character vector of sentences split on
+#' endmark.
+#' @rdname sentSplit
+#' @export
+sent_detect <- function(text.var, endmarks = c("?", ".", "!", "|"), 
+    incomplete.sub = TRUE, rm.bracket = TRUE, ...) {
+
+    splitpoint <- paste0("[", paste("\\", endmarks, sep="", collapse=""), "]")
+    text.var <- as.character(text.var)
+    text.var[is.na(text.var)] <- "DELETEME_QDAP_DELqdapDEL"
+    text.var <- paste(text.var, collapse = " ")
+    if (incomplete.sub) {
+        text.var <- incomplete_replace(text.var)
+    }
+    if (rm.bracket) {
+        text.var <- bracketX(text.var)
+    }
+    splits <- strsplit(text.var, sprintf("(?<=%s)|_DELqdapDEL", 
+        splitpoint), perl=TRUE)
+    out <-  Trim(unlist(splits))
+    out[out == "DELETEME_QDAP"] <- NA
+    out
 }

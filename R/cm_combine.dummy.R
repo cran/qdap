@@ -1,4 +1,4 @@
-#' Find Co-occurrence Between Codes
+#' Find Co-occurrence Between Dummy Codes
 #'
 #' Combine code columns where they co-occur.
 #'
@@ -47,21 +47,43 @@
 #' cm_combine.dummy(D1, combine.code = combines)
 #' cm_combine.dummy(D2, combine.code = combines)
 #' }
-cm_combine.dummy <- function(cm.l2d.obj, combine.code, rm.var = "time", 
+cm_combine.dummy <- 
+function(cm.l2d.obj, combine.code, rm.var = "time", 
     overlap = TRUE) {
-    if (is.data.frame(cm.l2d.obj)) {
+
+    ## Grab the cmclass from cm.l2d.obj
+    com <- which.lcm(cm.l2d.obj)
+
+    if (is.data.frame(cm.l2d.obj) | is.matrix(cm.l2d.obj)) {
         NMS <- as.character(substitute(cm.l2d.obj))
+        if(is.matrix(cm.l2d.obj)) {
+            cm.l2d.obj <- data.frame(cm.l2d.obj)
+        }
         cm.l2d.obj <- list(cm.l2d.obj)
         names(cm.l2d.obj) <- NMS
     }
-    invisible(lapply(seq_along(cm.l2d.obj), function(i) {
-        cm.l2d.obj[[i]][, rm.var] <<- names(cm.l2d.obj)[i]
-    }))
+
+    if (is.null(rm.var)) {
+        rm.var <- "time"
+    }
+    for(i in seq_along(cm.l2d.obj)) {
+        cm.l2d.obj[[i]] <- data.frame(cm.l2d.obj[[i]])
+        cm.l2d.obj[[i]][, rm.var] <- rep(names(cm.l2d.obj)[i], nrow(cm.l2d.obj[[i]]))
+    }
+
     DF <- data.frame(do.call(rbind, cm.l2d.obj), row.names=NULL)
     if (!is.list(combine.code)) {
         combine.code <- list(combine.code)
     }
+    
     NEW <- lapply(seq_along(combine.code), function(i) {
+   
+    	## Added 11-7-13 to deal with single length column combine (a rename)
+        if (length(combine.code[[i]]) == 1) {
+        	return(DF[, c(combine.code[[i]])])
+        }
+    	## Added 11-7-13    	
+    	
         if (is.logical(overlap)) {
             if (overlap) {
                 as.numeric(rowSums(DF[, 
@@ -89,5 +111,12 @@ cm_combine.dummy <- function(cm.l2d.obj, combine.code, rm.var = "time",
     })
     names(NEW) <- names(combine.code)
     tv <- ncol(DF)
-    data.frame(DF[, -tv, drop=FALSE], do.call(cbind, NEW), DF[, tv, drop=FALSE])
+    DF <- data.frame(DF[, -tv, drop=FALSE], do.call(cbind, NEW), 
+        DF[, tv, drop=FALSE])
+
+    if (length(unique(DF[, rm.var])) > 1) {
+        DF <- split(DF, DF[, rm.var])
+    }
+    class(DF) <- c(com, class(DF))
+    DF
 }

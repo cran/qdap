@@ -3,22 +3,29 @@
 #' Environment based hash table useful for large vector lookups.
 #' 
 #' @param terms A vector of terms to undergo a lookup.
-#' @param key.match Takes (1) a two column data.frame of a match key and 
-#' reassignment column, (2) a named list of vectors(if data.frame/named list 
-#' supplied no key reassign needed) or (3) a single vector match key.
+#' @param key.match Takes one of the following: (1) a two column data.frame of a 
+#' match key and reassignment column, (2) a named list of vectors (Note: if 
+#' data.frame or named list supplied no key reassign needed) or (3) a single 
+#' vector match key.
 #' @param key.reassign A single reassignment vector supplied if key.match is 
 #' not a two column data.frame/named list.
-#' @param missing Value to assign to terms not matching the key.match.
+#' @param missing Value to assign to terms not matching the key.match.  If set 
+#' to \code{NULL} the original values in \code{terms} corresponding to the 
+#' missing elements are retained.
 #' @return Outputs A new vector with reassigned values.
 #' @seealso 
 #' \code{\link[base]{new.env}}
 #' @keywords dictionary, hash, lookup
 #' @export
+#' @rdname lookup
 #' @examples
 #' \dontrun{
 #' ## Supply a dataframe to key.match
 #' 
 #' lookup(1:5, data.frame(1:4, 11:14))
+#' 
+#' ## Retain original values for missing 
+#' lookup(1:5, data.frame(1:4, 11:14), missing=NULL) 
 #' 
 #' lookup(LETTERS[1:5], data.frame(LETTERS[1:5], 100:104))
 #' 
@@ -43,6 +50,10 @@
 #'     
 #' lookup(mtcars$carb, sort(unique(mtcars$carb)),        
 #'     seq(10, 60, by=10))
+#'     
+#' ## %l%, a binary operator version of lookup
+#' 1:5 %l% data.frame(1:4, 11:14)
+#' 1:10 %l% codes
 #' }
 lookup <-
 function(terms, key.match, key.reassign=NULL, missing = NA) {
@@ -56,6 +67,9 @@ function(terms, key.match, key.reassign=NULL, missing = NA) {
         })
         return(e)
     }  
+    if (is.matrix(key.match)) {
+        key.match <- data.frame(key.match)
+    }
     if (is.list(key.match)) {
         if (!is.data.frame(key.match)) {
             key.match <- list2df(key.match) 
@@ -85,6 +99,22 @@ function(terms, key.match, key.reassign=NULL, missing = NA) {
             }
         }                                                      
         sapply(x, rc, USE.NAMES = FALSE, envr = envr)                       
-    }                                                              
-    recoder(terms, envr = KEY, missing = missing)     
+    }    
+    if (is.null(missing)) {
+        x <- recoder(terms, envr = KEY, missing = NA) 
+        x[is.na(x)] <- terms[is.na(x)]
+        x
+    } else {                                                         
+        recoder(terms, envr = KEY, missing = missing)     
+    }
 }
+
+
+#' Hash/Dictionary Lookup
+#' 
+#' \code{terms \%l\% key.match} - A binary operator version of \code{lookup} 
+#' for when \code{key.match} is a data.frame or named list.
+#'
+#' @export
+#' @rdname lookup
+`%l%` <- function(terms, key.match) lookup(terms = terms, key.match = key.match)

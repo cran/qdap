@@ -4,19 +4,19 @@
 #' the breakdown of the model.
 #' 
 #' @param text.var The text variable (or an object from \code{\link[qdap]{pos}},
-#' \code{\link[qdap]{pos.by}} or \code{\link[qdap]{formality}}.  Passing the 
+#' \code{\link[qdap]{pos_by}} or \code{\link[qdap]{formality}}.  Passing the 
 #' later three object will greatly reduce run time.
 #' @param grouping.var The grouping variables.  Default \code{NULL} generates 
 #' one word list for all text.  Also takes a single grouping variable or a list 
 #' of 1 or more grouping variables.
-#' @param sort.by.formality logical.  If \code{TRUE} orders the results by 
+#' @param order.by.formality logical.  If \code{TRUE} orders the results by 
 #' formality score.
 #' @param digits The number of digits displayed.
-#' @param \ldots Other arguments passed to \code{\link[qdap]{pos.by}}.
-#' @section Warning: Heylighen & Dewaele(2002) state, "At present, a sample would 
+#' @param \ldots Other arguments passed to \code{\link[qdap]{pos_by}}.
+#' @section Warning: Heylighen & Dewaele (2002) state, "At present, a sample would 
 #' probably need to contain a few hundred words for the measure to be minimally 
 #' reliable. For single sentences, the F-value should only be computed for 
-#' purposes of illustration".
+#' purposes of illustration" (p. 24).
 #' @details Heylighen & Dewaele(2002)'s formality score is calculated as:
 #' \deqn{F = 50(\frac{n_{f}-n_{c}}{N} + 1)}
 #'
@@ -50,7 +50,7 @@
 #' with(DATA, formality(state, person))
 #' (x1 <- with(DATA, formality(state, list(sex, adult))))
 #' plot(x1)
-#' plot(x1, short.names = TRUE)
+#' plot(x1, short.names = FALSE)
 #' data(rajPOS) #A data set consisting of a pos list object
 #' x2 <- with(raj, formality(rajPOS, act))
 #' plot(x2)
@@ -73,25 +73,29 @@
 #' names(x8)
 #' colsplit2df(x8$formality)
 #' 
-#' #pass an object from pos or pos.by
+#' #pass an object from pos or pos_by
 #' ltruncdf(with(raj, formality(x8 , list(act, person))), 6, 4)
 #' }
 formality <- function(text.var, grouping.var = NULL,                    
-    sort.by.formality = TRUE, digits = 2, ...){        
-    G <- if(is.null(grouping.var)) {                                                 
-             gv <- TRUE                                                              
-             "all"                                                                   
-         } else {                                                                    
-             gv <- FALSE                                                             
-             if (is.list(grouping.var)) {                                            
-                 m <- unlist(as.character(substitute(grouping.var))[-1])             
-                 m <- sapply(strsplit(m, "$", fixed=TRUE), function(x) x[length(x)]) 
-                     paste(m, collapse="&")                                          
-             } else {                                                                
-                  G <- as.character(substitute(grouping.var))                        
-                  G[length(G)]                                                       
-             }                                                                       
-         }                                                                           
+    order.by.formality = TRUE, digits = 2, ...){  
+  
+    if(is.null(grouping.var)) {
+        gv <- TRUE 
+        G <- "all"
+    } else {
+        gv <- FALSE
+        if (is.list(grouping.var)) {
+            m <- unlist(as.character(substitute(grouping.var))[-1])
+            m <- sapply(strsplit(m, "$", fixed=TRUE), function(x) {
+                    x[length(x)]
+                }
+            )
+            G <- paste(m, collapse="&")
+        } else {
+            G <- as.character(substitute(grouping.var))
+            G <- G[length(G)]
+        }
+    }                                                                          
     if(is.null(grouping.var)){                                       
         grouping.var <- rep("all", length(text.var))                                                 
     } else {                                                                         
@@ -109,30 +113,21 @@ formality <- function(text.var, grouping.var = NULL,
         }                                                                            
     }                                                                          
     if (!gv) {                                                                       
-        pos.list <- pos.by(text.var = text.var,                                      
+        pos.list <- pos_by(text.var = text.var,                                      
             grouping.var = grouping.var, digits = digits, ...)                            
     } else {                                                                         
-        pos.list <- suppressWarnings(pos.by(text.var = text.var,                     
+        pos.list <- suppressWarnings(pos_by(text.var = text.var,                     
             grouping.var = NULL, digits = digits, ...))                                   
-    }                                                                                
+    }                                                                              
     text.var <- pos.list$text                                                        
-    WOR <- word.count(text.var)                                                      
+    WOR <- word_count(text.var)                                                      
     X <- pos.list[["pos.by.freq"]]                                                   
     nameX <- rownames(X)                                                             
     X <- data.frame(X)                                                               
     xn <- nrow(X)                                                                    
     X$JI <- rep(0, xn)                                                               
     X$JK <- rep(0, xn)                                                               
-    article <- function(x) {                                                         
-        if (identical(x, character(0))) {                                            
-            return(0)                                                                
-        } else {                                                                     
-            WORDS <- stopwords(x, stopwords = NULL,                                  
-                unlist = FALSE, strip = TRUE)                                        
-            sapply(WORDS, function(x) sum(x %in% c("the", "an", "a"),                
-                na.rm = TRUE ))                                                      
-        }                                                                            
-    }                                                                                
+                                                                             
     if (!gv){                                                                        
         stv <- split(text.var, grouping.var)                                         
         stv <- stv[sapply(stv, function(x) !identical(x, character(0)))]             
@@ -166,10 +161,11 @@ formality <- function(text.var, grouping.var = NULL,
     } else {                                                                         
         WOR <- sum(WOR, na.rm=TRUE)                                                  
     } 
-    DF2$other <- DF1$other <- WOR - DF1RS                                                  
+    DF2$other <- DF1$other <- WOR - DF1RS    
+                                             
     DF1 <- do.call(rbind, lapply(1:nrow(DF1), function(i) 100*(DF1[i, ]/WOR[i])))  
-    FOR <- (rowSums(cbind(DF1$noun, DF1$article, DF1$adj, DF1$prep)) -               
-        rowSums(cbind(DF1$pronoun, DF1$verb, DF1$adverb, DF1$interj)) + 100)/2                                                                                      
+    FOR <- (rowSums(cbind(DF1[, "noun"], DF1[, "articles"], DF1[, "adj"], DF1[, "prep"])) -               
+        rowSums(cbind(DF1[, "pronoun"], DF1[, "verb"], DF1[, "adverb"], DF1[, "interj"])) + 100)/2                                                                                     
     if(!gv) {                                                                        
         FOR <- data.frame(replace = X[, 1], word.count = WOR, formality = FOR)       
         colnames(FOR)[1] <- G                                                        
@@ -179,7 +175,7 @@ formality <- function(text.var, grouping.var = NULL,
         colnames(FOR)[1] <- G                                                        
     }                                                                                
     FOR[, "formality"] <- round(FOR[, "formality"], digits = digits)                 
-    if (!gv & sort.by.formality) {                                                   
+    if (!gv & order.by.formality) {                                                   
         FOR <- FOR[order(-FOR$formality), ]                                          
         rownames(FOR) <- NULL                                                        
     }                                                                                
@@ -223,6 +219,18 @@ formality <- function(text.var, grouping.var = NULL,
     return(o)                                                                        
 }
 
+## Helper function to find articles
+article <- function(x) {                                                         
+    if (identical(x, character(0))) {                                            
+        return(0)                                                                
+    } else {                                                                     
+        WORDS <- rm_stopwords(x, stopwords = NULL,                                  
+            unlist = FALSE, strip = TRUE)                                        
+        sapply(WORDS, function(x) sum(x %in% c("the", "an", "a"),                
+            na.rm = TRUE ))                                                      
+    }                                                                            
+}  
+
 
 #' Plots a formality Object
 #' 
@@ -241,16 +249,25 @@ formality <- function(text.var, grouping.var = NULL,
 #' names for more compact plot width.
 #' @param min.wrdcnt A minimum word count threshold that must be achieved to be 
 #' considered in the results.  Default includes all subgroups.
+#' @param order.by.formality logical.  If \code{TRUE} the group polarity plot 
+#' will be ordered by average polarity score, otherwise alphabetical order is 
+#' assumed.
+#' @param plot logical.  If \code{TRUE} the plot will automatically plot.  
+#' The user may wish to set to \code{FALSE} for use in knitr, sweave, etc.
+#' to add additional plot layers.
 #' @param \ldots ignored
 #' @return Invisibly returns the \code{ggplot2} objects that form the larger 
 #' plot.
 #' @method plot formality
 #' @import RColorBrewer
 #' @importFrom gridExtra grid.arrange
+#' @importFrom ggplot2 ggplot geom_bar coord_flip aes ylab xlab theme ggtitle scale_y_continuous scale_fill_brewer facet_grid scale_x_discrete scale_fill_discrete geom_point geom_text labs scale_size_continuous 
 #' @S3method plot formality
 plot.formality <- function(x, point.pch = 20, point.cex = .5,            
     point.colors = c("gray65", "red"), bar.colors = NULL, 
-    short.names = FALSE, min.wrdcnt = NULL, ...) {
+    short.names = TRUE, min.wrdcnt = NULL, order.by.formality = TRUE, 
+    plot = TRUE, ...) {
+    word.count <- NULL
     grouping <- form.class <- NULL
     dat <- x$pos.reshaped   
     FOR <- x$formality
@@ -264,7 +281,13 @@ plot.formality <- function(x, point.pch = 20, point.cex = .5,
         dat[, "form.class"] <- lookup(dat[, "form.class"], 
             c("formal", "contectual", "other"),
             c("form", "cont", "other"))
-    }                                                                                                                
+    }       
+
+    if (order.by.formality) {
+        dat[, "grouping"] <- factor(dat[, "grouping"], levels=rev(FOR[, 1]))
+        FOR[, 1] <- factor(FOR[, 1], levels=rev(FOR[, 1]))
+    }
+                                                                                                         
     YY <- ggplot(dat, aes(grouping,  fill=form.class)) +                         
         geom_bar(position='fill') +                                              
         coord_flip() +  labs(fill=NULL) +                                        
@@ -273,14 +296,11 @@ plot.formality <- function(x, point.pch = 20, point.cex = .5,
         ggtitle("Percent Contextual-Formal") +
         scale_y_continuous(breaks = c(0, .25, .5, .75, 1),
             labels=c("0", ".25", ".5", ".75", "1"))  
-        if (!is.null(bar.colors)) {  
-            if (length(bar.colors) == 1) {
-                YY <- YY + suppressWarnings(scale_fill_brewer(palette = 
-                    bar.colors))
-            } else {
-                YY <- YY + suppressWarnings(scale_fill_brewer(palette = 
-                    bar.colors[2]))
-        }
+        if (!is.null(bar.colors)) { 
+ 
+            YY <- YY + suppressWarnings(scale_fill_brewer(palette = 
+                head(bar.colors, 1)))
+
     }        
     dat2 <- dat[dat[, "pos"] != "other", ] 
     dat2[, "pos"] <- factor(dat2[, "pos"])
@@ -292,6 +312,7 @@ plot.formality <- function(x, point.pch = 20, point.cex = .5,
         LAB <- c("noun", "adjective", "preposition",                         
             "articles", "pronoun", "verb", "adverb", "interjection")  
     }
+
     LAB2 <- LAB[substring(LAB, 1, 3) %in% substring(levels(dat2$pos), 1, 3)]
     XX <- ggplot(data=dat2, aes(grouping,  fill=pos)) +                           
         geom_bar(position='fill') + coord_flip() +                               
@@ -303,15 +324,10 @@ plot.formality <- function(x, point.pch = 20, point.cex = .5,
         theme(legend.position = 'bottom') +
         ggtitle("Percent Parts of Speech By Contextual-Formal")                                         
     if (!is.null(bar.colors)) {  
-        if (length(bar.colors) == 1) {
-            XX <- XX + scale_fill_brewer(palette=bar.colors,                     
-                name = "", breaks=levels(dat2$pos),                               
-                labels = LAB2) 
-        } else {
-            XX <- XX + scale_fill_brewer(palette=bar.colors [2],                     
-                name = "", breaks=levels(dat2$pos),                               
-                labels = LAB2)  
-        }
+
+        XX <- XX + scale_fill_brewer(palette=tail(bar.colors, 1),                     
+            name = "", breaks=levels(dat2$pos), labels = LAB2)  
+
     } else {
              XX <- XX + scale_fill_discrete(name = "", 
                  breaks=levels(dat2$pos), labels = LAB2)
@@ -335,11 +351,14 @@ plot.formality <- function(x, point.pch = 20, point.cex = .5,
     } else {                                                                 
         geom_point(colour=point.colors[2], shape=point.pch, 
             size=point.cex)  
-    }                                                                     
-    suppressWarnings(grid.arrange(YY, XX,                         
-        ZZ, widths=c(.24, .47, .29), ncol=3))     
+    }   
+    if (plot) {
+        suppressWarnings(grid.arrange(YY, XX,                         
+            ZZ, widths=c(.24, .47, .29), ncol=3))   
+    }
     invisible(list(f1 = XX, f2 = YY, f3 = ZZ))
 }
+
 
 #' Prints a formality Object
 #' 

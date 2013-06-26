@@ -2,10 +2,10 @@
 \alias{plot.formality}
 \title{Plots a formality Object}
 \usage{
-  \method{plot}{formality} (x, point.pch = 20,
-    point.cex = 0.5, point.colors = c("gray65", "red"),
-    bar.colors = NULL, short.names = FALSE,
-    min.wrdcnt = NULL, ...)
+\method{plot}{formality}(x, point.pch = 20, point.cex = 0.5,
+  point.colors = c("gray65", "red"), bar.colors = NULL,
+  short.names = TRUE, min.wrdcnt = NULL, order.by.formality = TRUE,
+  plot = TRUE, ...)
 }
 \arguments{
   \item{x}{The formality object.}
@@ -28,14 +28,23 @@
   must be achieved to be considered in the results.
   Default includes all subgroups.}
 
+  \item{order.by.formality}{logical.  If \code{TRUE} the
+  group polarity plot will be ordered by average polarity
+  score, otherwise alphabetical order is assumed.}
+
+  \item{plot}{logical.  If \code{TRUE} the plot will
+  automatically plot. The user may wish to set to
+  \code{FALSE} for use in knitr, sweave, etc. to add
+  additional plot layers.}
+
   \item{\ldots}{ignored}
 }
 \value{
-  Invisibly returns the \code{ggplot2} objects that form
-  the larger plot.
+Invisibly returns the \code{ggplot2} objects that form the
+larger plot.
 }
 \description{
-  Plots a formality object including the parts of speech
-  used to calculate contextual/formal speech.
+Plots a formality object including the parts of speech used
+to calculate contextual/formal speech.
 }
 

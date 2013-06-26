@@ -2,12 +2,12 @@
 \alias{formality}
 \title{Formality Score}
 \usage{
-  formality(text.var, grouping.var = NULL,
-    sort.by.formality = TRUE, digits = 2, ...)
+formality(text.var, grouping.var = NULL, order.by.formality = TRUE,
+  digits = 2, ...)
 }
 \arguments{
   \item{text.var}{The text variable (or an object from
-  \code{\link[qdap]{pos}}, \code{\link[qdap]{pos.by}} or
+  \code{\link[qdap]{pos}}, \code{\link[qdap]{pos_by}} or
   \code{\link[qdap]{formality}}.  Passing the later three
   object will greatly reduce run time.}
 
@@ -16,61 +16,59 @@
   takes a single grouping variable or a list of 1 or more
   grouping variables.}
 
-  \item{sort.by.formality}{logical.  If \code{TRUE} orders
+  \item{order.by.formality}{logical.  If \code{TRUE} orders
   the results by formality score.}
 
   \item{digits}{The number of digits displayed.}
 
   \item{\ldots}{Other arguments passed to
-  \code{\link[qdap]{pos.by}}.}
+  \code{\link[qdap]{pos_by}}.}
 }
 \value{
-  A list containing at the following components:
-  \item{text}{The text variable} \item{POStagged}{Raw part
-  of speech for every word of the text variable}
-  \item{POSprop}{Part of speech proportion for every word
-  of the text variable} \item{POSfreq}{Part of speech count
-  for every word of the text variable}
-  \item{pos.by.freq}{The part of speech count for every
-  word of the text variable by grouping variable(s)}
-  \item{pos.by.prop}{The part of speech proportion for
-  every word of the text variable by grouping variable(s)}
-  \item{form.freq.by}{The nine broad part of speech
-  categories count for every word of the text variable by
-  grouping variable(s)} \item{form.prop.by}{The nine broad
-  part of speech categories proportion for every word of
-  the text variable by grouping variable(s)}
-  \item{formality}{Formality scores by grouping
-  variable(s)} \item{pos.reshaped}{An expanded formality
-  scores output (grouping, word.count, pos & form.class) by
-  word}
+A list containing at the following components:
+\item{text}{The text variable} \item{POStagged}{Raw part of
+speech for every word of the text variable}
+\item{POSprop}{Part of speech proportion for every word of
+the text variable} \item{POSfreq}{Part of speech count for
+every word of the text variable} \item{pos.by.freq}{The
+part of speech count for every word of the text variable by
+grouping variable(s)} \item{pos.by.prop}{The part of speech
+proportion for every word of the text variable by grouping
+variable(s)} \item{form.freq.by}{The nine broad part of
+speech categories count for every word of the text variable
+by grouping variable(s)} \item{form.prop.by}{The nine broad
+part of speech categories proportion for every word of the
+text variable by grouping variable(s)}
+\item{formality}{Formality scores by grouping variable(s)}
+\item{pos.reshaped}{An expanded formality scores output
+(grouping, word.count, pos & form.class) by word}
 }
 \description{
-  Transcript apply formality score by grouping variable(s)
-  and optionally plot the breakdown of the model.
+Transcript apply formality score by grouping variable(s)
+and optionally plot the breakdown of the model.
 }
 \details{
-  Heylighen & Dewaele(2002)'s formality score is calculated
-  as: \deqn{F = 50(\frac{n_{f}-n_{c}}{N} + 1)}
+Heylighen & Dewaele(2002)'s formality score is calculated
+as: \deqn{F = 50(\frac{n_{f}-n_{c}}{N} + 1)}
 
-  Where: \deqn{f = \left \{noun, \;adjective,
-  \;preposition, \;article\right \}} \deqn{c = \left
-  \{pronoun, \;verb, \;adverb, \;interjection\right \}}
-  \deqn{N = \sum{(f \;+ \;c \;+ \;conjunctions)}}
+Where: \deqn{f = \left \{noun, \;adjective, \;preposition,
+\;article\right \}} \deqn{c = \left \{pronoun, \;verb,
+\;adverb, \;interjection\right \}} \deqn{N = \sum{(f \;+
+\;c \;+ \;conjunctions)}}
 }
 \section{Warning}{
-  Heylighen & Dewaele(2002) state, "At present, a sample
+  Heylighen & Dewaele (2002) state, "At present, a sample
   would probably need to contain a few hundred words for
   the measure to be minimally reliable. For single
   sentences, the F-value should only be computed for
-  purposes of illustration".
+  purposes of illustration" (p. 24).
 }
 \examples{
 \dontrun{
 with(DATA, formality(state, person))
 (x1 <- with(DATA, formality(state, list(sex, adult))))
 plot(x1)
-plot(x1, short.names = TRUE)
+plot(x1, short.names = FALSE)
 data(rajPOS) #A data set consisting of a pos list object
 x2 <- with(raj, formality(rajPOS, act))
 plot(x2)
@@ -93,15 +91,15 @@ plot(x8, bar.colors="RdBu",  point.cex=2, point.pch = "|")
 names(x8)
 colsplit2df(x8$formality)
 
-#pass an object from pos or pos.by
+#pass an object from pos or pos_by
 ltruncdf(with(raj, formality(x8 , list(act, person))), 6, 4)
 }
 }
 \references{
-  Heylighen, F., & Dewaele, J.M. (2002). Variation in the
-  contextuality of language: An empirical measure. Context
-  in Context, Special issue of Foundations of Science, 7
-  (3), 293-340.
+Heylighen, F., & Dewaele, J.M. (2002). Variation in the
+contextuality of language: An empirical measure. Context in
+Context, Special issue of Foundations of Science, 7 (3),
+293-340.
 }
 \keyword{explicit,}
 \keyword{formality,}

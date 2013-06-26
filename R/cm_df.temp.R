@@ -7,9 +7,8 @@
 #' @param dataframe A dataframe containing a text variable.
 #' @param text.var The name of the text variable.
 #' @param codes Optional list of codes.
-#' @param csv logical.  If \code{TRUE} creates a csv in the working directory.
-#' @param file.name The name of the csv file.  If \code{NULL} defaults to the 
-#' dataframe name.
+#' @param file The name of the file (csv is recommended file type).  If 
+#' \code{NULL} no file is written.
 #' @param transpose logical.  If \code{TRUE} transposes the dataframe so that 
 #' the text is across the top. 
 #' @param strip logical.  If \code{TRUE} all punctuation is removed.
@@ -17,7 +16,7 @@
 #' @return Generates a dataframe, and optional csv file, of individual words 
 #' while maintaining demographic information.  If a vector of codes is provided 
 #' the outcome is a matrix of words used by codes filled with zeros.  This 
-#' dataframe is useful for dummy coded (1-yes code exists; 2-no it does not) 
+#' dataframe is useful for dummy coded (1-yes code exists; 0-no it does not) 
 #' representation of data and can be used for visualizations and statistical 
 #' analysis.
 #' @seealso 
@@ -40,8 +39,8 @@
 #' out4 <- cm_df.temp(raj.act.1, "dialogue", codes, transpose = TRUE)
 #' out4 [, 1:8]
 #' }
-cm_df.temp <- function(dataframe, text.var, codes = NULL, csv = TRUE, 
-    file.name = NULL, transpose = FALSE, strip =FALSE, ...){
+cm_df.temp <- function(dataframe, text.var, codes = NULL,  
+    file = NULL, transpose = FALSE, strip =FALSE, ...){
     tv <- as.character(dataframe[, text.var])
     if (strip) {
         tv <- strip(tv, ...)
@@ -55,23 +54,22 @@ cm_df.temp <- function(dataframe, text.var, codes = NULL, csv = TRUE,
         MAT <- matrix(rep(0, lcodes*lwrds), lwrds, lcodes)
         colnames(MAT) <- codes      
         DF <- data.frame(leftover[rep(1:nrow(leftover), lens), , 
-            drop = FALSE], text=unlist(wrds), word.num = 1:lwrds, MAT)  
+            drop = FALSE], text=unlist(wrds), word.num = 1:lwrds, MAT, 
+            check.names = FALSE, row.names = NULL)  
     } else {
         DF <- data.frame(leftover[rep(1:nrow(leftover), lens), , 
-            drop = FALSE], text=unlist(wrds)) 
+            drop = FALSE], text=unlist(wrds), check.names = FALSE, 
+            row.names = NULL) 
     }
     DF[, "word.num"] <- 1:nrow(DF)
     if (transpose) {
         DF <- t(DF)
-        DF <- data.frame(vars = rownames(DF), DF, check.names = FALSE)
+        DF <- data.frame(vars = rownames(DF), DF, check.names = FALSE, row.names=NULL)
     }
-    rownames(DF) <- NULL
-    if(csv) {
-        if (is.null(file.name)) {
-            file.name <- as.character(substitute(dataframe))
-        } 
-        write.table(DF, file = paste0(file.name, ".csv"),  sep = ",", 
+    if(!is.null(file)) {
+        write.table(DF, file = file,  sep = ",", 
             col.names = T, row.names=F, qmethod = "double") 
+        message(sprintf("%s written!", file))
     }
     return(DF)
 } 

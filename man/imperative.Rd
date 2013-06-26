@@ -2,9 +2,8 @@
 \alias{imperative}
 \title{Intuitively Remark Sentences as Imperative}
 \usage{
-  imperative(dataframe, person.var, text.var,
-    lock.incomplete = FALSE, additional.names = NULL,
-    parallel = FALSE, warning = FALSE)
+imperative(dataframe, person.var, text.var, lock.incomplete = FALSE,
+  additional.names = NULL, parallel = FALSE, warning = FALSE)
 }
 \arguments{
   \item{dataframe}{A data.frame object.}
@@ -32,18 +31,20 @@
   be handled incorrectly by the algorithm).}
 }
 \value{
-  Returns a dataframe with a text variable indicating
-  imperative sentences.  Imperative sentences are marked
-  with * followed by the original end mark.
+Returns a dataframe with a text variable indicating
+imperative sentences.  Imperative sentences are marked with
+* followed by the original end mark.
 }
 \description{
-  Automatic imperative remarking.
+Automatic imperative remarking.
 }
 \section{Warning}{
   The algorithm used by \code{\link[qdap]{imperative}} is
   sensitive to English language dialects and types.  Commas
   can indicate a choppy sentence and may indicate a false
-  positive.
+  positive.  Sentences marked with `AAVE` may be the use of
+  African American Vernacular English and not an imperative
+  sentence.
 }
 \examples{
 \dontrun{

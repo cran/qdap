@@ -1,37 +1,51 @@
-# qdap
+qdap
 ====
+[![Build Status](https://travis-ci.org/trinker/qdap.png?branch=master)](https://travis-ci.org/trinker/qdap)
+
+
 ![qdapicon](https://dl.dropbox.com/u/61803503/qdapicon.png)   
-[qdap](http://trinker.github.com/qdap_dev/) (Quantitative Discourse Analysis Package) is an R package designed to assist in quantitative discourse analysis.  The package stands as a bridge between qualitative transcripts of dialogue and statistical analysis and visualization.
+[qdap](http://trinker.github.com/qdap_dev/) (Quantitative Discourse Analysis Package) is an R package designed to assist in quantitative discourse analysis.  The package stands as a bridge between qualitative transcripts of dialogue and statistical analysis & visualization.
 
 ## Installation
 
 To download the development version of qdap:
 
-Download the [zip ball](https://github.com/trinker/qdap/zipball/master) or [tar ball](https://github.com/trinker/qdap/tarball/master), decompress and run `R CMD INSTALL` on it, or use the **devtools** package to install the development version:
+Download the [zip ball](https://github.com/trinker/qdap/zipball/master) or [tar ball](https://github.com/trinker/qdap/tarball/master), decompress and run `R CMD INSTALL` on it, or use the **devtools** package to install the development version (The user may need to install the [dev version of reports](https://github.com/trinker/reports) first):
+
+Until `slidify` is pushed to CRAN the following installs are necessary first:
 
 ```r
 # install.packages("devtools")
 
 library(devtools)
+install_github('slidify', 'ramnathv', ref = 'dev')
+install_github('slidifyLibraries', 'ramnathv', ref = 'dev')
+install_github("knitcitations", "cboettig")
+install_github("reports", "trinker")
+```
+
+
+```r
+# install.packages("devtools")
+
+library(devtools)
+install_github("qdapDictionaries", "trinker")
 install_github("qdap", "trinker")
 ```
 
 **Note**: Windows users need [Rtools](http://www.murdoch-sutherland.com/Rtools/) and [devtools](http://CRAN.R-project.org/package=devtools) to install this way.
 
-Additionally, Windows users currently must install `RCurl` before installing qdap.  Use the following short script:
-
-```r
-URL <- "http://www.stats.ox.ac.uk/pub/RWin/bin/windows/contrib/3.0/"
-install.packages("RCurl", contriburl = URL)
-```
-
 **Note**: Mac users might be required to install the appropriate version [XTools](https://developer.apple.com/xcode/) from the [Apple Developer site](https://developer.apple.com/) in order to install the development version.  You may need to [register as an Apple developer](https://developer.apple.com/programs/register/).  An older version of XTools may also be required.
 
-```r
-install.packages("openNLP", type = "source")
-```
-
 ## Help
-The qdap web page: [trinker.github.com/qdap](http://trinker.github.com/qdap/)  [improvements to come]   
-For a variety of qdap help files and videos [click here](https://github.com/trinker/qdap/wiki).   
-For the package pdf help manual [click here](https://dl.dropbox.com/u/61803503/qdap.pdf).
+
+[Web Page](http://trinker.github.com/qdap/)    
+[Package Vignette](http://htmlpreview.github.io/?https://github.com/trinker/qdap/blob/master/vignettes/qdap_vignette.html)   
+[Package PDF Help Manual](https://dl.dropbox.com/u/61803503/qdap.pdf)
+
+## Contact
+
+You are welcome to:
+* submit suggestions and bug-reports at: <https://github.com/trinker/qdap/issues>
+* send a pull request on: <https://github.com/trinker/qdap/>
+* compose a friendly e-mail to: <tyler.rinker@gmail.com>

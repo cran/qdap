@@ -35,11 +35,16 @@ function (text.var, match.string, grouping.var = NULL, ignore.case = FALSE,
     return(y)
   } else {
     y <- data.frame(group.var, y[, -1])
-    X <- data.frame(Y = word.count(text.var), G = group.var)
+    X <- data.frame(Y = word_count(text.var), G = group.var)
+
+    ## Added on 1-21-14 to deal with NA in data
+    X[is.na(X[, "Y"]), "Y"] <- 0
+
     Z <- aggregate(Y ~ G, X, sum)
     z <- lapply(2:length(y), function(x) {
       aggregate(y[, x] ~ group.var, y, sum)
     })
+
     w <- data.frame(z[[1]][1], Z[, 2], lapply(seq_along(z), 
       function(x) z[[x]][, 2]))
     NAME <- if (is.null(grouping.var)) {

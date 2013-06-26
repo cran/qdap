@@ -2,17 +2,17 @@
 \alias{replace_abbreviation}
 \title{Replace Abbreviations}
 \usage{
-  replace_abbreviation(text.var,
-    abbreviation = qdap::abbreviations, replace = NULL,
-    ignore.case = TRUE)
+replace_abbreviation(text.var, abbreviation = qdapDictionaries::abbreviations,
+  replace = NULL, ignore.case = TRUE)
 }
 \arguments{
   \item{text.var}{The text variable.}
 
   \item{abbreviation}{A two column key of abbreviations
   (column 1) and long form replacements (column 2) or a
-  vector of abbreviations.  Default is to use qdap's
-  abbreviations data set.}
+  vector of abbreviations.  Default is to use
+  qdapDictionaries's
+  \code{\link[qdapDictionaries]{abbreviations}} data set.}
 
   \item{replace}{A vector of long form replacements if a
   data frame is not supplied to the abbreviation argument.}
@@ -21,10 +21,10 @@
   without regard to capitalization.}
 }
 \value{
-  Returns a vector with abbreviations replaced.
+Returns a vector with abbreviations replaced.
 }
 \description{
-  This function replaces abbreviations with long form.
+This function replaces abbreviations with long form.
 }
 \examples{
 \dontrun{
@@ -46,10 +46,10 @@ replace_abbreviation(x, KEY)
 }
 }
 \seealso{
-  \code{\link[qdap]{bracketX}}, \code{\link[qdap]{qprep}},
-  \code{\link[qdap]{replace_contraction}},
-  \code{\link[qdap]{replace_number}},
-  \code{\link[qdap]{replace_symbol}}
+\code{\link[qdap]{bracketX}}, \code{\link[qdap]{qprep}},
+\code{\link[qdap]{replace_contraction}},
+\code{\link[qdap]{replace_number}},
+\code{\link[qdap]{replace_symbol}}
 }
 \keyword{abbreviation}
 

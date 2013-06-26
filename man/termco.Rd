@@ -1,28 +1,24 @@
 \name{termco}
-\alias{term.match}
+\alias{term_match}
 \alias{termco}
-\alias{termco.d}
 \alias{termco2mat}
+\alias{termco_d}
 \title{Search For and Count Terms}
 \usage{
-  termco(text.var, grouping.var = NULL, match.list,
-    short.term = TRUE, ignore.case = TRUE, elim.old = TRUE,
-    percent = TRUE, digits = 2, apostrophe.remove = FALSE,
-    char.keep = NULL, digit.remove = NULL,
-    zero.replace = 0, ...)
+termco(text.var, grouping.var = NULL, match.list, short.term = TRUE,
+  ignore.case = TRUE, elim.old = TRUE, percent = TRUE, digits = 2,
+  apostrophe.remove = FALSE, char.keep = NULL, digit.remove = NULL,
+  zero.replace = 0, ...)
 
-  termco.d(text.var, grouping.var = NULL, match.string,
-    short.term = FALSE, ignore.case = TRUE,
-    zero.replace = 0, percent = TRUE, digits = 2,
-    apostrophe.remove = FALSE, char.keep = NULL,
-    digit.remove = TRUE, ...)
+termco_d(text.var, grouping.var = NULL, match.string, short.term = FALSE,
+  ignore.case = TRUE, zero.replace = 0, percent = TRUE, digits = 2,
+  apostrophe.remove = FALSE, char.keep = NULL, digit.remove = TRUE, ...)
 
-  term.match(text.var, terms, return.list = TRUE,
-    apostrophe.remove = FALSE)
+term_match(text.var, terms, return.list = TRUE, apostrophe.remove = FALSE)
 
-  termco2mat(dataframe, drop.wc = TRUE, short.term = TRUE,
-    rm.zerocol = FALSE, no.quote = TRUE, transform = TRUE,
-    trim.terms = TRUE)
+termco2mat(dataframe, drop.wc = TRUE, short.term = TRUE,
+  rm.zerocol = FALSE, no.quote = TRUE, transform = TRUE,
+  trim.terms = TRUE)
 }
 \arguments{
   \item{text.var}{The text variable.}
@@ -73,9 +69,9 @@
   \code{\link[qdap]{strip}}.}
 
   \item{match.string}{A vector of terms to search for.
-  When using inside of \code{term.match} the term(s) must
+  When using inside of \code{term_match} the term(s) must
   be words or partial words but do not have to be when
-  using \code{\link[qdap]{termco.d}} (i.e., they can be
+  using \code{\link[qdap]{termco_d}} (i.e., they can be
   phrases, symbols etc.).}
 
   \item{terms}{The terms to search for in the
@@ -83,75 +79,73 @@
   terms must be words or partial words rather than multiple
   words and symbols.}
 
-  \item{return.list}{logical.  If TRUE returns the output
-  for multiple terms as a list by term rather than a
+  \item{return.list}{logical.  If \code{TRUE} returns the
+  output for multiple terms as a list by term rather than a
   vector.}
 
-  \item{dataframe}{A termco (or termco.d) dataframe or
+  \item{dataframe}{A termco (or termco_d) dataframe or
   object.}
 
-  \item{drop.wc}{logical.  If TRUE the word count column
-  will be dropped.}
+  \item{drop.wc}{logical.  If \code{TRUE} the word count
+  column will be dropped.}
 
-  \item{rm.zerocol}{logical.  If TRUE any column containing
-  all zeros will be removed from the matrix.}
+  \item{rm.zerocol}{logical.  If \code{TRUE} any column
+  containing all zeros will be removed from the matrix.}
 
-  \item{no.quote}{logical.  If TRUE the matrix will be
-  printed without quotes if it's character.}
+  \item{no.quote}{logical.  If \code{TRUE} the matrix will
+  be printed without quotes if it's character.}
 
-  \item{transform}{logical.  If TRUE the matrix will be
-  transformed.}
+  \item{transform}{logical.  If \code{TRUE} the matrix will
+  be transformed.}
 
-  \item{trim.terms}{logical.  If TRUE trims the column
-  header/names to ensure there is not a problem with
+  \item{trim.terms}{logical.  If \code{TRUE} trims the
+  column header/names to ensure there is not a problem with
   spacing when using in other R functions.}
 }
 \value{
-  \code{termco} & \code{termco.d} - both return a list, of
-  class "termco.d", of data frames and information
-  regarding word counts: \item{raw}{raw word counts by
-  grouping variable} \item{prop}{proportional word counts
-  by grouping variable; proportional to each individual's
-  word use} \item{rnp}{a character combination data frame
-  of raw and proportional} \item{zero_replace}{value to
-  replace zeros with; mostly internal use}
-  \item{percent}{The value of percent used for plotting
-  purposes.} \item{digits}{integer value of number of
-  digits to display; mostly internal use}
+\code{termco} & \code{termco_d} - both return a list, of
+class "termco", of data frames and information regarding
+word counts: \item{raw}{raw word counts by grouping
+variable} \item{prop}{proportional word counts by grouping
+variable; proportional to each individual's word use}
+\item{rnp}{a character combination data frame of raw and
+proportional} \item{zero_replace}{value to replace zeros
+with; mostly internal use} \item{percent}{The value of
+percent used for plotting purposes.} \item{digits}{integer
+value of number of digits to display; mostly internal use}
 
-  \code{term.match} - returns a list or vector of possible
-  words that match term(s).
+\code{term_match} - returns a list or vector of possible
+words that match term(s).
 
-  \code{termco2mat} - returns a matrix of term counts.
+\code{termco2mat} - returns a matrix of term counts.
 }
 \description{
-  \code{termco} - Search a transcript by any number of
-  grouping variables for categories (themes) of grouped
-  root terms.  While there are other termco functions in
-  the termco family (e.g., \code{\link[qdap]{termco.d}})
-  \code{termco} is a more powerful and flexible wrapper
-  intended for general use.
+\code{termco} - Search a transcript by any number of
+grouping variables for categories (themes) of grouped root
+terms.  While there are other termco functions in the
+termco family (e.g., \code{\link[qdap]{termco_d}})
+\code{termco} is a more powerful and flexible wrapper
+intended for general use.
 
-  \code{termco.d} - Search a transcript by any number of
-  grouping variables for root terms.
+\code{termco_d} - Search a transcript by any number of
+grouping variables for root terms.
 
-  \code{term.match} - Search a transcript for words that
-  exactly match term(s).
+\code{term_match} - Search a transcript for words that
+exactly match term(s).
 
-  \code{termco2mat} - Convert a termco dataframe to a
-  matrix for use with visualization functions (e.g.,
-  \code{\link[gplots]{heatmap.2}}).
+\code{termco2mat} - Convert a termco dataframe to a matrix
+for use with visualization functions (e.g.,
+\code{\link[gplots]{heatmap.2}}).
 }
 \note{
-  The match.list/match.string is (optionally) case and
-  character sensitive.  Spacing is an important way to grab
-  specific words and requires careful thought.  Using
-  "read" will find the words "bread", "read" "reading", and
-  "ready".  If you want to search for just the word "read"
-  you'd supply a vector of c(" read ", " reads", "
-  reading", " reader").  To search for non character
-  arguments (i.e., numbers and symbols) additional
-  arguments from strip must be passed.
+The match.list/match.string is (optionally) case and
+character sensitive.  Spacing is an important way to grab
+specific words and requires careful thought.  Using "read"
+will find the words "bread", "read" "reading", and "ready".
+If you want to search for just the word "read" you'd supply
+a vector of c(" read ", " reads", " reading", " reader").
+To search for non character arguments (i.e., numbers and
+symbols) additional arguments from strip must be passed.
 }
 \section{Warning}{
   Percentages are calculated as a ratio of counts of
@@ -203,11 +197,11 @@ DATA$state[1] <- "12 4 rgfr  r0ffrg0"
 termco(DATA$state, DATA$person, '0', digit.remove=FALSE)
 DATA <- qdap::DATA
 
-#Using with term.match and exclude
-exclude(term.match(DATA$state, qcv(th), FALSE), "truth")
-termco(DATA$state, DATA$person, exclude(term.match(DATA$state, qcv(th),
+#Using with term_match and exclude
+exclude(term_match(DATA$state, qcv(th), FALSE), "truth")
+termco(DATA$state, DATA$person, exclude(term_match(DATA$state, qcv(th),
     FALSE), "truth"))
-MTCH.LST <- exclude(term.match(DATA$state, qcv(th, i)), qcv(truth, stinks))
+MTCH.LST <- exclude(term_match(DATA$state, qcv(th, i)), qcv(truth, stinks))
 termco(DATA$state, DATA$person, MTCH.LST)
 
 syns <- synonyms("doubt")
@@ -217,13 +211,13 @@ synonyms("doubt", FALSE)
 termco(DATA$state, DATA$person, list(doubt = synonyms("doubt", FALSE)))
 termco(DATA$state, DATA$person, syns)
 
-#termco.d examples:
-termco.d(DATA$state, DATA$person, c(" the", " i'"))
-termco.d(DATA$state, DATA$person, c(" the", " i'"), ignore.case=FALSE)
-termco.d(DATA$state, DATA$person, c(" the ", " i'"))
+#termco_d examples:
+termco_d(DATA$state, DATA$person, c(" the", " i'"))
+termco_d(DATA$state, DATA$person, c(" the", " i'"), ignore.case=FALSE)
+termco_d(DATA$state, DATA$person, c(" the ", " i'"))
 
 # termco2mat example:
-MTCH.LST <- exclude(term.match(DATA$state, qcv(a, i)), qcv(is, it, am, shall))
+MTCH.LST <- exclude(term_match(DATA$state, qcv(a, i)), qcv(is, it, am, shall))
 termco_obj <- termco(DATA$state, DATA$person, MTCH.LST)
 termco2mat(termco_obj)
 plot(termco_obj)
@@ -233,7 +227,8 @@ plot(termco_obj, label = TRUE, text.color="red", lab.digits=3)
 }
 }
 \seealso{
-  \code{\link[qdap]{termco.c}}
+\code{\link[qdap]{termco_c}},
+\code{\link[qdap]{colcomb2class}}
 }
 \keyword{word-search}
 

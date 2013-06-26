@@ -35,6 +35,9 @@
 #' words used in the text.}
 #' \item{LEGOMENA_STATS}{A dataframe displaying the percent hapax legomena and 
 #' percent dis legomena of the text.}
+#' @note \code{rank_freq_mplot} utilizes the ggplot2 package, whereas, 
+#' \code{rank_freq_plot} employs base graphics.  \code{rank_freq_mplot} is more 
+#' general & flexible; in most cases \code{rank_freq_mplot} should be prefered.
 #' @rdname rank_freq_plot
 #' @references Zipf, G. K. (1949). Human behavior and the principle of least 
 #' effort. Cambridge, Massachusetts: Addison-Wesley. p. 1.
@@ -43,6 +46,7 @@
 #' @import RColorBrewer
 #' @importFrom gridExtra grid.arrange
 #' @importFrom scales alpha
+#' @importFrom ggplot2 ggplot aes geom_point facet_wrap position_jitter theme_bw scale_color_manual theme element_blank guides guide_legend xlab ylab 
 #' @examples
 #' \dontrun{
 #' #rank_freq_mplot EXAMPLES:
@@ -60,7 +64,7 @@
 #' mod <- with(mraja1spl , word_list(dialogue, person, cut.n = 10, 
 #'     cap.list=unique(mraja1spl$person)))         
 #' x3 <- rank_freq_plot(mod$fwl$Romeo$WORD, mod$fwl$Romeo$FREQ, title.ext = 'Romeo')  
-#' ltruncdf(x2, 10)
+#' ltruncdf(x3, 10)
 #' ltruncdf(rank_freq_plot(mod$fwl$Romeo$WORD, mod$fwl$Romeo$FREQ, plot = FALSE)           , 10)
 #' invisible(rank_freq_plot(mod$fwl$Romeo$WORD, mod$fwl$Romeo$FREQ, title.ext = 'Romeo',     
 #'     jitter.ammount = 0.15, hap.col = "darkgreen", dis.col = "purple"))                  
@@ -168,10 +172,11 @@ function(text.var, grouping.var = NULL, ncol =4, jitter = 0.2, log.freq = TRUE,
 #' 
 #' @rdname rank_freq_plot
 #' @export
-rank_freq_plot <-
+rank_freq_plot <- 
 function(words, frequencies, plot = TRUE, title.ext = NULL,
     jitter.ammount = 0.1, log.scale = TRUE, hap.col = "red", dis.col = "blue") {
     freq <- NULL
+    frequencies <- as.numeric(as.character(frequencies))
     original.data <- data.frame(words = words, freq = frequencies)
     X <- tapply(words, frequencies, function(x) length(x))
     ZIPF <- data.frame(n.words = as.numeric(rev(X)), 

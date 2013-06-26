@@ -3,52 +3,58 @@
 \alias{lcolsplit2df}
 \title{Wrapper for colSplit that Returns Dataframe(s)}
 \usage{
-  colsplit2df(dataframe, splitcol = 1, new.names = NULL,
-    sep = ".", keep.orig = FALSE)
+colsplit2df(dataframe, splitcols = 1, new.names = NULL, sep = ".",
+  keep.orig = FALSE, name.sep = "&", index.names = FALSE)
 
-  lcolsplit2df(qdap.list, keep.orig = FALSE)
+lcolsplit2df(qdap.list, keep.orig = FALSE)
 }
 \arguments{
   \item{dataframe}{A dataframe with a column that has been
   pasted together.}
 
-  \item{splitcol}{The name of the column that has been
-  pasted together.}
+  \item{splitcols}{The name/index of the column(s) that has
+  been pasted together.}
 
   \item{new.names}{A character vector of new names to
-  assign to the columns. Default attempts to extract the
+  assign to the columns (or list of names if multiple
+  columns are being split). Default attempts to extract the
   original names before the paste.}
 
-  \item{sep}{The character that used in \code{paste2} to
-  paste the columns.}
+  \item{sep}{The character(s) that was used in
+  \code{paste2} to paste the columns.}
 
   \item{keep.orig}{logical.  If \code{TRUE} the original
   pasted column will be retained as well.}
+
+  \item{name.sep}{The character(s) that was used to paste
+  the column names.}
+
+  \item{index.names}{logical.  If \code{TRUE} names of
+  columns that are duplicated are indexed with c("name.1",
+  "name.2", ... "name.n").}
 
   \item{qdap.list}{A qdap list object that contains
   dataframes with a leading \code{\link[qdap]{paste2}}
   column.}
 }
 \value{
-  \code{colsplit2df} - returns a dataframe with the
-  \code{paste2} column split into new columns.
+\code{colsplit2df} - returns a dataframe with the
+\code{paste2} column split into new columns.
 
-  \code{lcolsplit2df} - returns a list of dataframes with
-  the \code{\link[qdap]{paste2}} column split into new
-  columns.
+\code{lcolsplit2df} - returns a list of dataframes with the
+\code{\link[qdap]{paste2}} column split into new columns.
 }
 \description{
-  \code{colsplit2df} - Wrapper for
-  \code{\link[qdap]{colSplit}} that returns a dataframe.
+\code{colsplit2df} - Wrapper for
+\code{\link[qdap]{colSplit}} that returns a dataframe.
 
-  \code{lcolsplit2df} - Wrapper for \code{colsplit2df}
-  designed for qdap lists that returns a list dataframes.
+\code{lcolsplit2df} - Wrapper for \code{colsplit2df}
+designed for qdap lists that returns a list dataframes.
 }
 \note{
-  \code{\link[qdap]{lcolsplit2df}} is a convenience
-  function that is less flexible than
-  \code{\link[qdap]{colsplit2df}} but operates on multiple
-  dataframes at once.
+\code{\link[qdap]{lcolsplit2df}} is a convenience function
+that is less flexible than \code{\link[qdap]{colsplit2df}}
+but operates on multiple dataframes at once.
 }
 \section{Warning}{
   This will strip the class of the qdap object.
@@ -64,14 +70,30 @@ head(colsplit2df(CO2, 3, qcv(A, B, C), keep.orig=TRUE))
 head(colsplit2df(CO2, "Plant&Type&Treatment"))
 CO2 <- datasets::CO2
 
-(x <- question_type(DATA$state, list(DATA$sex, DATA$adult)))
+(dat <- colpaste2df(head(mtcars), list(1:3), sep = "|"))
+colsplit2df(dat, 12, sep = "|")
+
+## Multiple split example
+E <- list(
+    c(1, 2, 3, 4, 5),
+    qcv(mpg, hp),
+    c("disp", "am")
+)
+
+(dat2 <- colpaste2df(head(mtcars), E, sep ="|"))
+cols <- c("mpg&cyl&disp&hp&drat", "mpg&hp", "disp&am")
+colsplit2df(dat2, cols, sep = "|")
+
+## lcolsplit2df example
+(x <- with(DATA.SPLIT, question_type(state, list(sex, adult))))
 ltruncdf(x)
 z <- lcolsplit2df(x)
 ltruncdf(z)
 }
 }
 \seealso{
-  \code{\link[qdap]{colSplit}}, \code{\link{paste2}}
+\code{\link[qdap]{colSplit}}, \code{\link{colpaste2df}}
+\code{\link{paste2}}
 }
 \keyword{column-split}
 

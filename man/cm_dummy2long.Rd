@@ -2,20 +2,20 @@
 \alias{cm_dummy2long}
 \title{Convert cm_combine.dummy Back to Long}
 \usage{
-  cm_dummy2long(cm.comb.obj, rm.var = "time")
+cm_dummy2long(cm_long2dummy_obj, rm.var = "time")
 }
 \arguments{
-  \item{cm.comb.obj}{An object from cm_combine.dummy}
+  \item{cm_long2dummy_obj}{An object from cm_combine.dummy}
 
   \item{rm.var}{Name of the repeated measures column.
   Default is \code{"time"}.}
 }
 \value{
-  Returns a dataframe with co-occurrences of provided code
-  columns.
+Returns a dataframe with co-occurrences of provided code
+columns.
 }
 \description{
-  \code{cm_combine.dummy} back to long.
+\code{cm_combine.dummy} back to long.
 }
 \examples{
 \dontrun{
@@ -41,17 +41,18 @@ lapply(out2, head)
 cm_combine.dummy(out1, combine.code = list(AB=qcv(AA, BB)))
 
 combines <- list(AB=qcv(AA, BB), ABC=qcv(AA, BB, CC))
-A <- cm_combine.dummy(D2, combine.code = combines)
+A <- cm_combine.dummy(out2, combine.code = combines)
 head(A, 10)
-B <- cm_combine.dummy(D1, combine.code = combines)
+B <- cm_combine.dummy(out1, combine.code = combines)
 head(B, 10)
 
 cm_dummy2long(A)
-cm_dummy2long(B, "time")
+cm_dummy2long(B)
+plot(cm_dummy2long(A))
 }
 }
 \seealso{
-  \code{\link[qdap]{cm_long2dummy}},
-  \code{\link[qdap]{cm_combine.dummy}}
+\code{\link[qdap]{cm_long2dummy}},
+\code{\link[qdap]{cm_combine.dummy}}
 }
 

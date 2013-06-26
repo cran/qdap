@@ -21,7 +21,14 @@
 #' @param apostrophe.remove logical.  If \code{TRUE} removes apostrophes from 
 #' calculating the output.   
 #' @param digits Integer; number of decimal places to round when printing.                    
-#' @param \ldots Any other arguments passed to end_inc.     
+#' @param \ldots Any other arguments passed to \code{\link[qdap]{end_inc}}.
+#' @details Note that a sentence is classified with only one endmark.  An 
+#' imperative sentence is classified only as imperative (not as a state, quest, 
+#' or exclm as well).  If a sentence is both imperative and incomplete the 
+#' sentence will be counted as incomplete rather than imperative.
+#' labeled as both imperative 
+#' @section Warning: It is assumed the user has run \code{sentSplit} on their 
+#' data, otherwise some counts may not be accurate.     
 #' @return Returns a list of three descriptive word statistics:
 #' \item{ts}{A data frame of descriptive word statistics by row} 
 #' \item{gts}{A data frame of word/sentence statistics per grouping variable:
@@ -65,6 +72,8 @@
 #' use}  
 #' @keywords descriptive statistic
 #' @export
+#' @seealso 
+#' \code{\link[qdap]{end_inc}}
 #' @examples
 #' \dontrun{
 #' word_stats(mraja1spl$dialogue, mraja1spl$person)
@@ -78,7 +87,15 @@
 #' desc_wrds$sent.elem 
 #' plot(desc_wrds)
 #' plot(desc_wrds, label=TRUE, lab.digits = 1)
+#' ## Correlation Visualization
+#' qheat(cor(desc_wrds$gts[, -1]), diag.na = TRUE, by.column =NULL,
+#'     low = "yellow", high = "red", grid = FALSE)
 #' with(mraja1spl, word_stats(dialogue, list(sex, died, fam.aff))) 
+#' ## Parallel (possible speed boost)
+#' with(mraja1spl, word_stats(dialogue, list(sex, died, fam.aff), 
+#'     parallel = TRUE)) 
+#' ## Recycle for speed boost
+#' word_stats(desc_wrds, mraja1spl$sex)
 #' }
 word_stats <-
 function(text.var, grouping.var = NULL, tot = NULL, parallel = FALSE, 
@@ -223,16 +240,21 @@ function(text.var, grouping.var = NULL, tot = NULL, parallel = FALSE,
     DF2 <- data.frame(DF2, do.call("rbind", lapply(LIST, typer)))   
     DF2 <- DF2[order(-DF2$n.words), ]
     rownames(DF2) <- NULL
+
     qdaMOD <- suppressWarnings(lapply(LIST, function(x) {
-        A <- stopwords(x[, "text.var"], stopwords="", strip=TRUE, unlist=TRUE)
-            if (A=="") {
+        A <- rm_stopwords(x[, "text.var"], stopwords="", strip=TRUE, unlist=TRUE)
+            if (identical(A, character(0))) {
                 return (c(DIS=0, HAPAX=0, ALL=0))
             } else {
-                B <- data.frame(table(unblanker(A)))
-                HAPAX <- sum(B[,2]==1, na.rm = TRUE)
-                DIS <- sum(B[,2]==2, na.rm = TRUE)
-                ALL <- sum(B[,2], na.rm = TRUE)
-                return(c(DIS=DIS, HAPAX=HAPAX, ALL=ALL))
+                if (A=="") {
+                    return (c(DIS=0, HAPAX=0, ALL=0))
+                } else {
+                    B <- data.frame(table(unblanker(A)))
+                    HAPAX <- sum(B[,2]==1, na.rm = TRUE)
+                    DIS <- sum(B[,2]==2, na.rm = TRUE)
+                    ALL <- sum(B[,2], na.rm = TRUE)
+                    return(c(DIS=DIS, HAPAX=HAPAX, ALL=ALL))
+                }
             }
         }
     ))
@@ -317,7 +339,7 @@ function(x, digits = NULL, ...) {
     }
     WD <- options()[["width"]]
     options(width=3000)
-    print(left.just(dfnumfor(x$gts, digits = digits), 1))
+    print(left_just(dfnumfor(x$gts, digits = digits), 1))
     options(width=WD)
 }
 
@@ -327,10 +349,10 @@ function(x, digits = NULL, ...) {
 #' Plots a word_stats object.
 #' 
 #' @param x The word_stats object
-#' @param label logical.  If TRUE the cells of the heat map plot will be labeled 
-#' with count and proportional values.
+#' @param label logical.  If \code{TRUE} the cells of the heat map plot will be 
+#' labeled with count and proportional values.
 #' @param lab.digits Integer values specifying the number of digits to be 
-#' printed if \code{label} is TRUE.
+#' printed if \code{label} is \code{TRUE}.
 #' @param \ldots Other arguments passed to qheat.
 #' @method plot word_stats
 #' @S3method plot word_stats
@@ -351,15 +373,16 @@ plot.word_stats <- function(x, label = FALSE, lab.digits = NULL, ...) {
 DF_word_stats <-
 function(text.var, digit.remove = FALSE, apos_rm = FALSE, 
     digits = 3, parallel = FALSE) {
+    syllable.count <- character.count <- word.count <- NULL
     polysyllable.count <- NULL
     DF <- na.omit(data.frame(text.var = text.var, 
         stringsAsFactors = FALSE))
     DF$n.sent <- 1:nrow(DF)
-    DF$word.count <- word.count(DF$text.var, missing = 0, 
+    DF[, "word.count"] <- word_count(DF$text.var, missing = 0, 
         digit.remove = digit.remove)
-    DF$character.count <- character.count(DF$text.var, 
+    DF[, "character.count"] <- character_count(DF$text.var, 
         apostrophe.remove = apos_rm, digit.remove = digit.remove)
-    DF <- data.frame(DF, combo_syllable.sum(DF$text.var, parallel = parallel))
+    DF <- data.frame(DF, combo_syllable_sum(DF$text.var, parallel = parallel))
     DF <- DF[, c("text.var", "n.sent", "word.count", "character.count",
         "syllable.count",  "polysyllable.count") ]
     DF <- transform(DF, char2word.ratio = 
@@ -372,4 +395,3 @@ function(text.var, digit.remove = FALSE, apos_rm = FALSE,
     DF <- DF[order(DF$n.sent),]  
     return(DF)
 }
-

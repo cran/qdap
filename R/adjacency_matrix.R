@@ -5,10 +5,10 @@
 #' 
 #' @rdname adjacency_matrix
 #' @param matrix.obj A matrix object, preferably, of the class "termco"  
-#'  generated from \code{\link[qdap]{termco}}, \code{\link[qdap]{termco.d}} or 
-#'  \code{\link[qdap]{termco.c}}.
+#'  generated from \code{\link[qdap]{termco}}, \code{\link[qdap]{termco_d}} or 
+#'  \code{\link[qdap]{termco_c}}.
 #' @return Returns list:
-#' \item{Boolean}{A Boolean matrix}
+#' \item{boolean}{A Boolean matrix}
 #' \item{adjacency}{An adjacency matrix.  Diagonals are the total (sum) number of 
 #' occurrences a variable had}
 #' \item{shared}{An adjacency matrix with no diagonal and the upper triangle 
@@ -39,7 +39,8 @@
 #' }
 adjacency_matrix <-
 function(matrix.obj) {
-    if(class(matrix.obj) %in% c("termco")){
+
+    if(any(class(matrix.obj) %in% c("termco"))){
         info <- matrix.obj #for later use
         if (matrix.obj[["zero.replace"]] != 0){
             matrix.obj <- replacer(matrix.obj[["raw"]], 
@@ -49,14 +50,10 @@ function(matrix.obj) {
         }
         matrix.obj <- termco2mat(matrix.obj)
     } else {    
-        if (class(matrix.obj) =="matrix") {
-            if (is.null(comment(matrix.obj))){
-                warning("Not a termco or wfm object; results may not be correct.")
-            } else {
-                if(comment(matrix.obj)!="true.matrix"){
-                    warning(paste("Not a termco.d, termco.c or wfm object;",
-                    "results may not be correct."))
-                }
+        if (is(matrix.obj, "matrix")) {
+            if(!is(matrix.obj, "true.matrix")){
+                 warning(paste("Not a termco_d, termco_c or wfm object;",
+                     "results may not be correct."))
             }
         } else {
              warning("Not a matrix object; results may not be correct.")

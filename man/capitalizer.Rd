@@ -2,12 +2,12 @@
 \alias{capitalizer}
 \title{Capitalize Select Words}
 \usage{
-  capitalizer(text, caps.list = NULL, I.list = TRUE,
-    apostrophe.remove = FALSE)
+capitalizer(text, caps.list = NULL, I.list = TRUE,
+  apostrophe.remove = FALSE)
 }
 \arguments{
-  \item{text}{A vector of words (generally from bag.o.words
-  or breaker).}
+  \item{text}{A vector of words (generally from
+  \code{bag_o_words} or \code{breaker}).}
 
   \item{caps.list}{A list of words to capitalize.}
 
@@ -19,22 +19,22 @@
   apostrophe's back into words appropriately.}
 }
 \value{
-  Returns a vector of capitalized words based on supplied
-  capitalization arguments.
+Returns a vector of capitalized words based on supplied
+capitalization arguments.
 }
 \description{
-  A helper function for \code{\link[qdap]{word_list}} that
-  allows the user to supply vectors of words to be
-  capitalized.
+A helper function for \code{\link[qdap]{word_list}} that
+allows the user to supply vectors of words to be
+capitalized.
 }
 \note{
-  Not intended for general use.  Acts as a helper function
-  to several qdap functions.
+Not intended for general use.  Acts as a helper function to
+several qdap functions.
 }
 \examples{
 \dontrun{
-capitalizer(bag.o.words("i like it but i'm not certain"), "like")
-capitalizer(bag.o.words("i like it but i'm not certain"), "like", FALSE)
+capitalizer(bag_o_words("i like it but i'm not certain"), "like")
+capitalizer(bag_o_words("i like it but i'm not certain"), "like", FALSE)
 }
 }
 

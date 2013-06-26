@@ -12,7 +12,8 @@
 #' @param stopwords Words to exclude from the cloud.  Words will be removed 
 #' after determining proportional word usage.
 #' @param caps logical.  If \code{TRUE} selected words will be capitalized.
-#' @param caps.list A vector of words to capitalize (\code{caps} must be \code{TRUE}).
+#' @param caps.list A vector of words to capitalize (\code{caps} must be 
+#' \code{TRUE}).
 #' @param I.list logical.  If \code{TRUE} capitalizes I words and contractions.
 #' @param random.order Plot words in random order. If \code{FALSE}, they will be 
 #' plotted in decreasing frequency.
@@ -33,10 +34,10 @@
 #' alignment.
 #' @param title.location On which side of the plot (1=bottom, 2=left, 3=top, 
 #' 4=right).
-#' @param title.cex Character expansion factor for the title. NULL and NA are 
-#' equivalent to 1.0. 
-#' @param legend.cex Character expansion factor for the legend. NULL and NA are 
-#' equivalent to 1.0. 
+#' @param title.cex Character expansion factor for the title. \code{NULL} and 
+#' \code{NA} are equivalent to 1.0. 
+#' @param legend.cex Character expansion factor for the legend. \code{NULL} and 
+#' \code{NA} are equivalent to 1.0. 
 #' @param legend.location A vector of length 4 denoting the lower left (x and y 
 #' left) and upper right (x and y right) coordinates of the rectangle of colors 
 #' in user coordinates.
@@ -45,7 +46,7 @@
 #' to make the cloud.
 #' @details Breaking is done using \code{\link[stats]{quantile}}.  This will 
 #' ensure a certain percentage of words will be colored at each bin.
-#' @seealso \code{\link[qdap]{trans.cloud}},
+#' @seealso \code{\link[qdap]{trans_cloud}},
 #' \code{\link[wordcloud]{wordcloud}},
 #' \code{\link[plotrix]{color.legend}}
 #' @keywords heatcloud
@@ -66,7 +67,21 @@
 #'     rot.per = .5, title="Heatcloud", title.color="orange", title.cex=1.75))    
 #' x <- with(subset(mraja1, fam.aff %in% qcv(cap, mont)), 
 #'     gradient_cloud(dialogue, fam.aff))
-#' head(x)     
+#' head(x) 
+#' 
+#' ## 2012 U.S. Presidential Debates
+#' invisible(lapply(split(pres_debates2012, pres_debates2012$time), function(x) {
+#'     x <- x[x$person %in% qcv(ROMNEY, OBAMA), ]
+#'     dev.new()
+#'     gradient_cloud(x$dialogue, x$person, 
+#'         title = paste("Debate", char2end(x$time[1])),
+#'         stopwords = BuckleySaltonSWL,
+#'         X = "blue", Y = "red", 
+#'         max.word.size = 2.2, 
+#'         min.word.size = 0.55
+#'     )
+#' }))
+#'         
 #' }
 gradient_cloud <- function(text.var, bigroup.var, rev.binary = FALSE, X = "red", 
     Y = "blue", stem = FALSE, stopwords = NULL, caps = TRUE, caps.list = NULL, 

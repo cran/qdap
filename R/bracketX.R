@@ -11,9 +11,11 @@
 #' @param names logical.  If \code{TRUE} the sentences are given as the names of 
 #' the counts.
 #' @param fix.space logical.  If \code{TRUE} extra spaces left behind from an 
-#' extraction will be eliminated.
-#' @param scrub logical.  If TRUE \code{\link[qdap]{scrubber}} will clean the 
-#' text.
+#' extraction will be eliminated.  Additionally, non-space (e.g., 
+#' \strong{"text(nospace between text and parenthesis)"}) is replaced with a 
+#' single space (e.g., \strong{"text (space between text and parenthesis)"}).
+#' @param scrub logical.  If \code{TRUE} \code{\link[qdap]{scrubber}} will clean 
+#' the text.
 #' @return \code{bracketX} -  returns a vector of text with brackets removed.
 #' @rdname bracketX
 #' @references \url{http://stackoverflow.com/q/8621066/1000343}
@@ -57,25 +59,27 @@
 #' DATA$state  #notice number 1 and 10
 #' genX(DATA$state, c("is", "we"), c("too", "on"))
 #' }
-bracketX <- 
+bracketX <-
 function (text.var, bracket = "all", missing = NULL, names = FALSE, 
-    fix.space = TRUE, scrub = TRUE) {
+    fix.space = TRUE, scrub = fix.space) {
     lside <- rside <- ""
     if (fix.space) {
         lside <- rside <- "[ ]*"
+        text.var <- mgsub(c("(", ")","[", "]", "{", "}", "<", ">"), 
+            c(" (", ") "," [", "] ", " {", "} ", " <", "> "), text.var)
     }
     FUN <- function(bracket, text.var, missing, names) {
         X <- switch(bracket, 
-            html = sapply(text.var, function(x) gsub(paste0(lside, "<.+?>", rside), "", x)),
-            angle = sapply(text.var, function(x) gsub(paste0(lside, "<.+?>", rside), "", x)),
-            square = sapply(text.var, function(x) gsub(paste0(lside, "\\[.+?\\]", rside), "", x)), 
-            round = sapply(text.var, function(x) gsub(paste0(lside, "\\(.+?\\)", rside), "", x)), 
-            curly = sapply(text.var, function(x) gsub(paste0(lside, "\\{.+?\\}", rside), "", x)), 
+            html = sapply(text.var, function(x) gsub(paste0(lside, "<.*?>", rside), "", x)),
+            angle = sapply(text.var, function(x) gsub(paste0(lside, "<.*?>", rside), "", x)),
+            square = sapply(text.var, function(x) gsub(paste0(lside, "\\[.*?\\]", rside), "", x)), 
+            round = sapply(text.var, function(x) gsub(paste0(lside, "\\(.*?\\)", rside), "", x)), 
+            curly = sapply(text.var, function(x) gsub(paste0(lside, "\\{.*?\\}", rside), "", x)), 
             all = {
-                P1 <- sapply(text.var, function(x) gsub(paste0(lside, "\\[.+?\\]", rside), "", x))
-                P1 <- sapply(P1, function(x) gsub(paste0(lside, "\\(.+?\\)", rside), "", x))
-                P1 <- sapply(P1, function(x) gsub(paste0(lside, "<.+?>", rside), "", x))
-                sapply(P1, function(x) gsub(paste0(lside, "\\{.+?\\}", rside), "", x))
+                P1 <- sapply(text.var, function(x) gsub(paste0(lside, "\\[.*?\\]", rside), "", x))
+                P1 <- sapply(P1, function(x) gsub(paste0(lside, "\\(.*?\\)", rside), "", x))
+                P1 <- sapply(P1, function(x) gsub(paste0(lside, "<.*?>", rside), "", x))
+                sapply(P1, function(x) gsub(paste0(lside, "\\{.*?\\}", rside), "", x))
             }
         )
         if (scrub) {
@@ -87,6 +91,7 @@ function (text.var, bracket = "all", missing = NULL, names = FALSE,
         if (!names) names(X) <- NULL
         X
     }
+
     invisible(lapply(bracket, function(x) {
         text.var <<- FUN(x, text.var = text.var, 
             missing = missing, names = names)
@@ -94,16 +99,16 @@ function (text.var, bracket = "all", missing = NULL, names = FALSE,
     text.var
 }
 
-
 #' bracketXtract
 #' 
 #' \code{bracketXtract} - Apply bracket extraction to character vectors.
 #' 
 #' @rdname bracketX
-#' @param with logical.  If TRUE returns the brackets and the bracketed text.
-#' @param merge logical.  If TRUE the results of each bracket type will be 
-#' merged by sentence.  FALSE returns a named list of lists of vectors of 
-#' bracketed text per bracket type.  
+#' @param with logical.  If \code{TRUE} returns the brackets and the bracketed 
+#' text.
+#' @param merge logical.  If \code{TRUE} the results of each bracket type will 
+#' be merged by sentence.  \code{FALSE} returns a named list of lists of vectors 
+#' of bracketed text per bracket type.  
 #' @return \code{bracketXtract} -  returns a list of vectors of bracketed text.
 #' @author  Martin Morgan and Tyler Rinker <tyler.rinker@@gmail.com>.
 #' @export
@@ -123,7 +128,7 @@ function(text.var, bracket = "all", with = FALSE, merge = TRUE){
         }
         map <- c(`\\(`="\\)", `\\[`="\\]", `\\{`="\\}",
                  `\\<`="\\>", `\\(|\\{|<|\\[`="\\)|\\}|\\>|\\]")
-        fmt <- if (with==TRUE) {
+        fmt <- if (with) {
             "(%s).*?(%s)"
         } else {
             "(?<=%s).*?(?=%s)"
@@ -215,7 +220,7 @@ function(text.var, left, right, with = FALSE, merge = TRUE){
     left <- mgsub(specchar, paste0("\\", specchar), left, fixed = TRUE)
     right <- mgsub(specchar, paste0("\\", specchar), right, fixed = TRUE)
     FUN <- function(left, right, text.var, with){   
-        fmt <- if (with==TRUE) {
+        fmt <- if (with) {
             "(%s).*?(%s)"
         } else {
             "(?<=%s).*?(?=%s)"

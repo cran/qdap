@@ -2,37 +2,44 @@
 \alias{all_words}
 \title{Searches Text Column for Words}
 \usage{
-  all_words(text.var, begins.with = NULL, contains = NULL,
-    alphabetical = TRUE)
+all_words(text.var, begins.with = NULL, contains = NULL,
+  alphabetical = TRUE, apostrophe.remove = FALSE, ...)
 }
 \arguments{
   \item{text.var}{The text variable.}
 
   \item{begins.with}{This argument takes a word chunk.
-  Default is NULL. Use this if searching for a word
+  Default is \code{NULL}. Use this if searching for a word
   beginning with the word chunk.}
 
   \item{contains}{This argument takes a word chunk.
-  Default is NULL. Use this if searching for a word
+  Default is \code{NULL}. Use this if searching for a word
   containing the word chunk.}
 
-  \item{alphabetical}{logical.  If TRUE orders rows
-  alphabetically, if FALSE orders the rows by frequency.}
+  \item{alphabetical}{logical.  If \code{TRUE} orders rows
+  alphabetically, if \code{FALSE} orders the rows by
+  descending frequency.}
+
+  \item{apostrophe.remove}{logical.  If \code{TRUE} removes
+  apostrophes from the text before examining.}
+
+  \item{\ldots}{Other argument supplied to
+  \code{\link[qdap]{strip}}.}
 }
 \value{
-  Returns a dataframe with frequency counts of words that
-  begin with or contain the provided word chunk.
+Returns a dataframe with frequency counts of words that
+begin with or contain the provided word chunk.
 }
 \description{
-  A convenience function to find words that begin with or
-  contain a letter chunk and returns the frequency counts
-  of the number of occurrences of each word.
+A convenience function to find words that begin with or
+contain a letter chunk and returns the frequency counts of
+the number of occurrences of each word.
 }
 \note{
-  Cannot provide both \code{begins.with} and
-  \code{contains} arguments at once.  If both begins.with
-  and contains are NULL \code{\link[qdap]{all_words}}
-  returns a frequency count for all words.
+Cannot provide both \code{begins.with} and \code{contains}
+arguments at once.  If both begins.with and contains are
+\code{NULL}. \code{\link[qdap]{all_words}} returns a
+frequency count for all words.
 }
 \examples{
 \dontrun{
@@ -46,6 +53,6 @@ head(x3, 10)
 }
 }
 \seealso{
-  \code{\link[qdap]{term.match}}
+\code{\link[qdap]{term_match}}
 }
 

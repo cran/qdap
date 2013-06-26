@@ -2,9 +2,9 @@
 \alias{dir_map}
 \title{Map Transcript Files from a Directory to a Script}
 \usage{
-  dir_map(loc, obj.prefix = "dat",
-    col.names = c("person", "dialogue"), file = NULL,
-    copy2clip = TRUE)
+dir_map(loc = "CLEANED_TRANSCRIPTS", obj.prefix = "dat", use.path = TRUE,
+  col.names = c("person", "dialogue"), file = NULL,
+  copy2clip = interactive())
 }
 \arguments{
   \item{loc}{The path/location of the transcript data
@@ -13,6 +13,12 @@
   \item{obj.prefix}{A character string that will be used as
   the prefix (followed by a unique digit) as the assignment
   object.}
+
+  \item{use.path}{logical.  If \code{TRUE} use the actual
+  path to the \code{loc} argument.  If \code{FALSE}, the
+  code may be more portable in that the actual input to
+  \code{loc} is supplied to the
+  \code{\link[qdap]{read.transcript}}.}
 
   \item{col.names}{Supplies a vector of column names to the
   transcript columns.}
@@ -24,26 +30,26 @@
   copy the output to the clipboard.}
 }
 \value{
-  Prints a read in script text to the console, optionally
-  copies the wrapped text to the clipboard on a Mac or
-  Windows machine and optionally prints to an outside file.
+Prints a read in script text to the console, optionally
+copies the wrapped text to the clipboard on a Mac or
+Windows machine and optionally prints to an outside file.
 }
 \description{
-  Generate script text (and optionally output it to the
-  clipboard and/or an external file) that can be used to
-  individually read in every file in a directory and assign
-  it to an object.
+Generate script text (and optionally output it to the
+clipboard and/or an external file) that can be used to
+individually read in every file in a directory and assign
+it to an object.
 }
 \details{
-  Generally, the researcher will want to read in and parse
-  every transcript document separately.  The task of
-  writing the script for multiple transcript documents can
-  be tedious.  This function is designed to make the
-  process more efficient and less prone to errors.
+Generally, the researcher will want to read in and parse
+every transcript document separately.  The task of writing
+the script for multiple transcript documents can be
+tedious.  This function is designed to make the process
+more efficient and less prone to errors.
 }
 \note{
-  \code{skip} is set to 0, however, it is likely that this
-  value will need to be changed for each transcript.
+\code{skip} is set to 0, however, it is likely that this
+value will need to be changed for each transcript.
 }
 \examples{
 \dontrun{
@@ -52,6 +58,6 @@ dir_map(DIR)
 }
 }
 \seealso{
-  \code{\link[qdap]{read.transcript}}
+\code{\link[qdap]{read.transcript}}
 }
 

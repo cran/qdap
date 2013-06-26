@@ -2,12 +2,11 @@
 \alias{read.transcript}
 \title{Read Transcripts Into R}
 \usage{
-  read.transcript(file, col.names = NULL, text.var = NULL,
-    merge.broke.tot = TRUE, header = FALSE, dash = "",
-    ellipsis = "...", quote2bracket = FALSE,
-    rm.empty.rows = TRUE,
-    na.strings = c("999", "NA", "", " "), sep = NULL,
-    skip = 0, nontext2factor = TRUE, text, ...)
+read.transcript(file, col.names = NULL, text.var = NULL,
+  merge.broke.tot = TRUE, header = FALSE, dash = "", ellipsis = "...",
+  quote2bracket = FALSE, rm.empty.rows = TRUE, na.strings = c("999", "NA",
+  "", " "), sep = NULL, skip = 0, nontext2factor = TRUE, text,
+  comment.char = "", ...)
 }
 \arguments{
   \item{file}{The name of the file which the data are to be
@@ -48,11 +47,11 @@
   empty rows.}
 
   \item{na.strings}{A vector of character strings which are
-  to be interpreted as NA values.}
+  to be interpreted as \code{NA} values.}
 
   \item{sep}{The field separator character. Values on each
   line of the file are separated by this character.  The
-  default of NULL instructs
+  default of \code{NULL} instructs
   \code{\link[qdap]{read.transcript}} to use a separator
   suitable for the file type being read in.}
 
@@ -60,27 +59,32 @@
   to skip before beginning to read data.}
 
   \item{nontext2factor}{logical.  If \code{TRUE} attempts
-  to convert any non text to a factor.}
+  to convert any non-text to a factor.}
 
   \item{text}{Character string: if file is not supplied and
   this is, then data are read from the value of text.
   Notice that a literal string can be used to include
   (small) data sets within R code.}
 
+  \item{comment.char}{A character vector of length one
+  containing a single character or an empty string. Use
+  \code{""} to turn off the interpretation of comments
+  altogether.}
+
   \item{\ldots}{Further arguments to be passed to
   \code{\link[utils]{read.table}}.}
 }
 \value{
-  Returns a dataframe of dialogue and people.
+Returns a dataframe of dialogue and people.
 }
 \description{
-  Read .docx, .csv or .xlsx files into R.
+Read .docx, .csv or .xlsx files into R.
 }
 \note{
-  If a transcript is a .docx file read transcript expects
-  two columns (generally person and dialogue) with some
-  sort of separator (default is colon separator).  .doc
-  files must be converted to .docx before reading in.
+If a transcript is a .docx file read transcript expects two
+columns (generally person and dialogue) with some sort of
+separator (default is colon separator).  .doc files must be
+converted to .docx before reading in.
 }
 \section{Warning}{
   \code{\link[qdap]{read.transcript}} may contain errors if
@@ -120,13 +124,13 @@ read.transcript(text=trans)
 }
 }
 \author{
-  Bryan Goodrich and Tyler Rinker <tyler.rinker@gmail.com>.
+Bryan Goodrich and Tyler Rinker <tyler.rinker@gmail.com>.
 }
 \references{
-  \url{https://github.com/trinker/qdap/wiki/Reading-.docx-\%5BMS-Word\%5D-Transcripts-into-R}
+\url{https://github.com/trinker/qdap/wiki/Reading-.docx-\%5BMS-Word\%5D-Transcripts-into-R}
 }
 \seealso{
-  \code{\link[qdap]{dir_map}}
+\code{\link[qdap]{dir_map}}
 }
 \keyword{transcript}
 

@@ -63,37 +63,58 @@
 #' head(dat, 12)
 #' cm_code.combine(dat, list(P=qcv(A, B), Q=qcv(B, C), R=qcv(A, B, C)), "variable")
 #' }
-cm_code.combine <- function(x2long.obj, combine.code.list, rm.var = NULL) {
+cm_code.combine <-
+function(x2long.obj, combine.code.list, rm.var = NULL) {
     NMS <- as.character(substitute(x2long.obj))
     if (!is.null(rm.var)) {
         if(!rm.var %in% colnames(x2long.obj)) {
             stop("rm.var does not match a column")
         }
     }
+
     x1 <- cm_long2dummy(x2long.obj, rm.var = rm.var)
-    if (is.null(rm.var)) {
+    if (is.null(rm.var)) {  ## I don't think this is needed anymore
         colnames(x1) <- gsub("long.obj.", "", colnames(x1))
     }
+
+    ## added 11-6-13 to deal with codes in rep mes. not found in both
+    cols <- unique(unlist(lapply(x1, colnames)))
+    if (!is.matrix(x1)) {
+        x1 <- lapply(x1, function(x, y =cols) {
+            addon <- y[!y %in% colnames(x)]
+            if (is.null(addon) | identical(addon, character(0))) return(x)
+            mat <- matrix(rep(0, nrow(x)*length(addon)), ncol = length(addon))
+            colnames(mat) <- addon
+            dat <- data.frame(x, mat)
+            dat[, sort(colnames(dat))]
+        })
+    }
+
+
     x2 <- cm_combine.dummy(x1, combine.code = combine.code.list, 
         rm.var = rm.var, overlap = FALSE)
     if (is.null(rm.var)) {
         x2$time <- NMS
     }
+
     rmv <- FALSE
     if (is.null(rm.var)) {
         rmv <- TRUE
         rm.var <- "time"
-    }
+    }  
+
     DF <- cm_dummy2long(x2, rm.var = rm.var)
-    if (comment(x2long.obj) == "cmtime") {
-        DF$start <- DF$start + 1
+    if (which.cm(x2long.obj) == "cmtime") {
+        ## DF$start <- DF$start + 1  ## removed 9-22-2013
         DF$Start <- sec2hms(DF$start)
         DF$End <- sec2hms(DF$end) 
         DF <- data.frame(DF[, -4, drop=FALSE], DF[, 4, drop=FALSE])
+        class(DF) <- c("cmspans", which.cm(x2long.obj), 
+            paste0("vname_", rm.var), class(DF))
     }
-    comment(DF) <- comment(x2long.obj)
     if (rmv) {
         DF$time <- NULL
-    }
+        class(DF) <- class(DF)[!grepl("vname_", class(DF))]
+    }    
     DF
 }

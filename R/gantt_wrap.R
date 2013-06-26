@@ -49,15 +49,19 @@
 #' value in addition to border size if plot borders appear disproportional.
 #' @param constrain logical.  If \code{TRUE} the Gantt bars touch the edge of 
 #' the graph. 
+#' @param plot logical.  If \code{TRUE} the plot will automatically plot.  
+#' The user may wish to set to \code{FALSE} for use in knitr, sweave, etc.
+#' to add additional plot layers.
 #' @return Returns a Gantt style visualization. Invisibly returns the ggplot2 
 #' list object.
-#' @note For non repeated measures data/plotting use \code{\link[qdap]{gantt}}; 
+#' @note For non-repeated measures data/plotting use \code{\link[qdap]{gantt}}; 
 #' for repeated measures data output use \code{\link[qdap]{gantt_rep}}; and for 
 #' a convenient wrapper that takes text and generates plots use 
 #' \code{\link[qdap]{gantt_plot}}.
 #' @import RColorBrewer 
 #' @importFrom gridExtra grid.arrange
 #' @importFrom scales alpha trans_new pretty_breaks
+#' @importFrom ggplot2 ggplot aes geom_segment geom_vline scale_x_continuous element_rect ggtitle theme element_blank facet_wrap facet_grid guides guide_legend ylab xlab
 #' @author Andrie de Vries and Tyler Rinker <tyler.rinker@@gmail.com>.
 #' @seealso 
 #' \code{\link[qdap]{gantt}},
@@ -71,50 +75,45 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' dat <- gantt(mraja1$dialogue, list(mraja1$fam.aff, mraja1$sex), 
-#'     units = "sentences", plot.colors = 'black', sums = TRUE, 
-#'     col.sep = "_")$gantt.df
-#' htruncdf(dat)     
-#' gantt_wrap(dat, fam.aff_sex, title = "Gantt Plot")  
+#' dat <- gantt(mraja1$dialogue, list(mraja1$fam.aff, mraja1$sex),
+#'     units = "sentences", col.sep = "_")
+#' htruncdf(dat)
+#' gantt_wrap(dat, "fam.aff_sex", title = "Gantt Plot")
 #' dat$codes <- sample(LETTERS[1:3], nrow(dat), TRUE)
-#' gantt_wrap(dat, fam.aff_sex, fill.var = "codes", 
+#' gantt_wrap(dat, "fam.aff_sex", fill.var = "codes",
 #'     legend.position = "bottom")
 #' 
-#' dat2 <- with(rajSPLIT, gantt_rep(act, dialogue, 
+#' dat2 <- with(rajSPLIT, gantt_rep(act, dialogue,
 #'     list(fam.aff, sex), units = "words", col.sep = "_"))
-#' htruncdf(dat2)  
-#' x <- gantt_wrap(dat2, fam.aff_sex, facet.vars = "act", 
+#' htruncdf(dat2)
+#' x <- gantt_wrap(dat2, "fam.aff_sex", facet.vars = "act",
 #'     title = "Repeated Measures Gantt Plot")
-#'     
+#' 
 #' library(ggplot2); library(scales); library(RColorBrewer)
-#' x + scale_color_manual(values=rep("black", 
-#'     length(levels(dat2$fam.aff_sex)))) 
+#' x + scale_color_manual(values=rep("black",
+#'     length(levels(dat2$fam.aff_sex))))
 #' }
 gantt_wrap <-
 function(dataframe, plot.var, facet.vars = NULL, fill.var = NULL, title = NULL, 
-    ylab = as.character(plot.var), xlab = "duration.default", rev.factor = TRUE,
+    ylab = plot.var, xlab = "duration.default", rev.factor = TRUE,
     transform = FALSE, ncol = NULL, minor.line.freq = NULL, 
     major.line.freq = NULL, sig.dig.line.freq = 1, hms.scale = NULL, 
     scale = NULL, space = NULL, size = 3, rm.horiz.lines = FALSE, x.ticks = TRUE, 
-    y.ticks = TRUE, legend.position = NULL, bar.color = NULL,
-    border.color = NULL, border.size = 2, border.width = .1, constrain = TRUE) { 
+    y.ticks = TRUE, legend.position = NULL, bar.color = NULL, 
+    border.color = NULL, border.size = 2, border.width = .1, constrain = TRUE, 
+    plot = TRUE) { 
     new4 <- startp <- endp <- NULL
     if (is.null(hms.scale)) {
-        if (!is.null(comment(dataframe)) && comment(dataframe) == "cmtime") {
+        if (is(dataframe, "cmtime")) {
             hms.scale <- TRUE
         } else {
             hms.scale <- FALSE
-            if(!is.null(comment(dataframe))) {
-                if (comment(dataframe) == "cmrange" & xlab == "duration.default"){
-                    xlab <- "Duration (words)"
-                }
+            if (is(dataframe, "cmrange") & xlab == "duration.default"){
+                xlab <- "Duration (words)"
             }
         }
     }
-    plot.var2 <- as.character(substitute(plot.var))
-    if(plot.var2 != "NAME") {
-        plot.var <- as.character(substitute(plot.var))
-    }
+    dataframe[, plot.var] <- as.factor(dataframe[, plot.var])
     if (rev.factor) {
         dataframe[, "new"] <- factor(dataframe[, plot.var], 
             levels=rev(levels(dataframe[, plot.var])))
@@ -124,18 +123,20 @@ function(dataframe, plot.var, facet.vars = NULL, fill.var = NULL, title = NULL,
     }
     if(xlab == "duration.default") {
         if (hms.scale) {
-                xlab <- "Duration (hours:minutes)"
+                xlab <- "Duration (hours:minutes:seconds)"
         } else {
-            if (!is.null(comment(dataframe))) {
-                xlab <- paste0("Duration (", comment(dataframe), ")")
+            if (!is.null(which.unit(dataframe))) {
+                xlab <- paste0("Duration (", which.unit(dataframe), ")")
             } else {
                 xlab <- "Duration"
             }
         }
     }
-    if (!is.null(facet.vars)) { 
+    if (!is.null(facet.vars)) {
+        dataframe[, facet.vars[1]] <- factor(dataframe[, facet.vars[1]])
         dataframe[, "new2"] <- dataframe[, facet.vars[1]]
         if (length(facet.vars) == 2) {
+            dataframe[, facet.vars[2]] <- factor(dataframe[, facet.vars[2]])
             dataframe[, "new3"] <- dataframe[, facet.vars[2]]
         }
     } 
@@ -259,6 +260,8 @@ function(dataframe, plot.var, facet.vars = NULL, fill.var = NULL, title = NULL,
     if (!is.null(fill.var)){
         theplot <- theplot + guides(colour = guide_legend(fill.var))
     }
-    print(theplot)
+    if (plot) {
+        print(theplot)
+    }
     invisible(theplot)
 }

@@ -1,36 +1,48 @@
 \name{lookup}
+\alias{\%l\%}
 \alias{lookup}
 \title{Hash Table/Dictionary Lookup}
 \usage{
-  lookup(terms, key.match, key.reassign = NULL,
-    missing = NA)
+lookup(terms, key.match, key.reassign = NULL, missing = NA)
+
+terms \%l\% key.match
 }
 \arguments{
   \item{terms}{A vector of terms to undergo a lookup.}
 
-  \item{key.match}{Takes (1) a two column data.frame of a
-  match key and reassignment column, (2) a named list of
-  vectors(if data.frame/named list supplied no key reassign
-  needed) or (3) a single vector match key.}
+  \item{key.match}{Takes one of the following: (1) a two
+  column data.frame of a match key and reassignment column,
+  (2) a named list of vectors (Note: if data.frame or named
+  list supplied no key reassign needed) or (3) a single
+  vector match key.}
 
   \item{key.reassign}{A single reassignment vector supplied
   if key.match is not a two column data.frame/named list.}
 
   \item{missing}{Value to assign to terms not matching the
-  key.match.}
+  key.match.  If set to \code{NULL} the original values in
+  \code{terms} corresponding to the missing elements are
+  retained.}
 }
 \value{
-  Outputs A new vector with reassigned values.
+Outputs A new vector with reassigned values.
 }
 \description{
-  Environment based hash table useful for large vector
-  lookups.
+Environment based hash table useful for large vector
+lookups.
+
+\code{terms \%l\% key.match} - A binary operator version of
+\code{lookup} for when \code{key.match} is a data.frame or
+named list.
 }
 \examples{
 \dontrun{
 ## Supply a dataframe to key.match
 
 lookup(1:5, data.frame(1:4, 11:14))
+
+## Retain original values for missing
+lookup(1:5, data.frame(1:4, 11:14), missing=NULL)
 
 lookup(LETTERS[1:5], data.frame(LETTERS[1:5], 100:104))
 
@@ -55,10 +67,14 @@ lookup(mtcars$carb, sort(unique(mtcars$carb)),
 
 lookup(mtcars$carb, sort(unique(mtcars$carb)),
     seq(10, 60, by=10))
+
+## \%l\%, a binary operator version of lookup
+1:5 \%l\% data.frame(1:4, 11:14)
+1:10 \%l\% codes
 }
 }
 \seealso{
-  \code{\link[base]{new.env}}
+\code{\link[base]{new.env}}
 }
 \keyword{dictionary,}
 \keyword{hash,}

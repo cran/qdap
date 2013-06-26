@@ -2,11 +2,15 @@
 \alias{cm_time.temp}
 \title{Time Span Code Sheet}
 \usage{
-  cm_time.temp(codes, start = ":00", end = NULL,
-    file = NULL)
+cm_time.temp(codes, grouping.var = NULL, start = ":00", end = NULL,
+  file = NULL, coding = FALSE, print = TRUE)
 }
 \arguments{
   \item{codes}{List of codes.}
+
+  \item{grouping.var}{The grouping variables.  Also takes a
+  single grouping variable or a list of 1 or more grouping
+  variables.}
 
   \item{start}{A character string in the form of "00:00"
   indicating start time (default is ":00").}
@@ -16,15 +20,21 @@
 
   \item{file}{A connection, or a character string naming
   the file to print to (.txt or .doc is recommended).}
+
+  \item{coding}{logical.  If \code{TRUE} a coding list is
+  provided with the time span coding sheet.  \code{coding}
+  is ignored if \code{end = NULL}.}
+
+  \item{print}{logical.  If \code{TRUE} the time spans are
+  printed to the console.}
 }
 \description{
-  Generates a time span coding sheet and coding format
-  sheet.
+Generates a time span coding sheet and coding format sheet.
 }
 \examples{
 \dontrun{
 ## cm_time.temp(qcv(AA, BB, CC), ":30", "7:40", file = "foo.txt")
-## delete("foo.txt")
+## library(reports); delete("foo.txt")
 cm_time.temp(qcv(AA, BB, CC), ":30", "7:40")
 
 x <- list(
@@ -38,12 +48,12 @@ cm_time.temp(qcv(AA, BB, CC))
 }
 }
 \references{
-  Miles, M. B. & Huberman, A. M. (1994). An expanded
-  sourcebook: Qualitative data analysis. 2nd ed. Thousand
-  Oaks, CA: SAGE Publications.
+Miles, M. B. & Huberman, A. M. (1994). An expanded
+sourcebook: Qualitative data analysis. 2nd ed. Thousand
+Oaks, CA: SAGE Publications.
 }
 \seealso{
-  \code{\link[qdap]{cm_range.temp}},
+\code{\link[qdap]{cm_range.temp}},
 }
 \keyword{coding}
 

@@ -1,18 +1,17 @@
-\name{syllable.sum}
-\alias{combo_syllable.sum}
-\alias{polysyllable.sum}
-\alias{syllable.count}
-\alias{syllable.sum}
+\name{syllable_sum}
+\alias{combo_syllable_sum}
+\alias{polysyllable_sum}
+\alias{syllable_count}
+\alias{syllable_sum}
 \title{Syllabication}
 \usage{
-  syllable.sum(text.var, parallel = FALSE)
+syllable_sum(text.var, parallel = FALSE)
 
-  syllable.count(text, remove.bracketed = TRUE,
-    algorithm.report = FALSE)
+syllable_count(text, remove.bracketed = TRUE, algorithm.report = FALSE)
 
-  polysyllable.sum(text.var, parallel = FALSE)
+polysyllable_sum(text.var, parallel = FALSE)
 
-  combo_syllable.sum(text.var, parallel = FALSE)
+combo_syllable_sum(text.var, parallel = FALSE)
 }
 \arguments{
   \item{text.var}{The text variable}
@@ -32,53 +31,53 @@
   (i.e., syllables were calculated with an algorithm).}
 }
 \value{
-  \code{syllable.sum} - returns a vector of syllable counts
-  per row.
+\code{syllable_sum} - returns a vector of syllable counts
+per row.
 
-  \code{syllable.count} - returns a dataframe of syllable
-  counts and algorithm/dictionary uses and, optionally, a
-  report of words not found in the dictionary.
+\code{syllable_count} - returns a dataframe of syllable
+counts and algorithm/dictionary uses and, optionally, a
+report of words not found in the dictionary.
 
-  \code{polysyllable.sum} - returns a vector of
-  polysyllable counts per row.
+\code{polysyllable_sum} - returns a vector of polysyllable
+counts per row.
 
-  \code{combo_syllable.sum} - returns a dataframe of
-  syllable and polysyllable counts per row.
+\code{combo_syllable_sum} - returns a dataframe of syllable
+and polysyllable counts per row.
 }
 \description{
-  \code{syllable.sum} - Count the number of syllables per
-  row of text.
+\code{syllable_sum} - Count the number of syllables per row
+of text.
 
-  \code{syllable.count} - Count the number of syllables in
-  a single text string.
+\code{syllable_count} - Count the number of syllables in a
+single text string.
 
-  \code{polysyllable.sum} - Count the number of
-  polysyllables per row of text.
+\code{polysyllable_sum} - Count the number of polysyllables
+per row of text.
 
-  \code{combo_syllable.sum} - Count the number of both
-  syllables and polysyllables per row of text.
+\code{combo_syllable_sum} - Count the number of both
+syllables and polysyllables per row of text.
 }
 \details{
-  The worker function of all the syllable functions is
-  \code{\link[qdap]{syllable.count}}, though it is not
-  intended for direct use on a transcript.  This function
-  relies on a combined dictionary lookup (based on the
-  Nettalk Corpus (Sejnowski & Rosenberg, 1987)) and backup
-  algorithm method.
+The worker function of all the syllable functions is
+\code{\link[qdap]{syllable_count}}, though it is not
+intended for direct use on a transcript.  This function
+relies on a combined dictionary lookup (based on the
+Nettalk Corpus (Sejnowski & Rosenberg, 1987)) and backup
+algorithm method.
 }
 \examples{
 \dontrun{
-syllable.count("Robots like Dason lie.")
-syllable.count("Robots like Dason lie.", algorithm.report = TRUE)
-syllable.sum(DATA$state)
-polysyllable.sum(DATA$state)
-combo_syllable.sum(DATA$state)
+syllable_count("Robots like Dason lie.")
+syllable_count("Robots like Dason lie.", algorithm.report = TRUE)
+syllable_sum(DATA$state)
+polysyllable_sum(DATA$state)
+combo_syllable_sum(DATA$state)
 }
 }
 \references{
-  Sejnowski, T.J., and Rosenberg, C.R. (1987). "Parallel
-  networks that learn to pronounce English text" in Complex
-  Systems, 1, 145-168.
+Sejnowski, T.J., and Rosenberg, C.R. (1987). "Parallel
+networks that learn to pronounce English text" in Complex
+Systems, 1, 145-168.
 }
 \keyword{polysyllable}
 \keyword{syllabication,}

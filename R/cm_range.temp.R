@@ -3,11 +3,11 @@
 #' Generates a range coding sheet for coding words.
 #' 
 #' @param codes Character vector of codes.
-#' @param file A connection, or a character string naming the file to print to 
-#' (.txt or .doc is recommended).
 #' @param text.var The text variable.     
 #' @param grouping.var The grouping variables.  Also takes a single grouping 
-#' variable or a list of 1 or more grouping variables.  
+#' variable or a list of 1 or more grouping variables. 
+#' @param file A connection, or a character string naming the file to print to 
+#' (.txt or .doc is recommended). 
 #' @references Miles, M. B. & Huberman, A. M. (1994). An expanded sourcebook: 
 #' Qualitative   data analysis. 2nd ed. Thousand Oaks, CA: SAGE Publications.
 #' @keywords coding
@@ -17,12 +17,12 @@
 #' @examples
 #' \dontrun{
 #' cm_range.temp(qcv(AA, BB, CC))
-#' with(DATA, cm_range.temp(qcv(AA, BB, CC), , state, list(person, adult)))
+#' with(DATA, cm_range.temp(qcv(AA, BB, CC), state, list(person, adult)))
 #' ## cm_range.temp(qcv(AA, BB, CC), file = "foo.txt")
-#' ## delete("foo.txt")
+#' ## library(reports); delete("foo.txt")
 #' }
 cm_range.temp <-
-function(codes, file=NULL, text.var = NULL, grouping.var = NULL) {
+function(codes, text.var = NULL, grouping.var = NULL, file=NULL) {
     if (Sys.info()["sysname"] != "Windows") {
         writeClipboard <- NULL
     }  
@@ -79,7 +79,7 @@ function(codes, file=NULL, text.var = NULL, grouping.var = NULL) {
             paste0("    ", names(colcodes), " = qcv(terms='", colcodes, "'),"), 
             x1[-1, ]), ncol = 1)
     }
-    cat(paste(x1, collapse="\n")); cat("\n")
+    message(paste(x1, collapse="\n"))
     dimnames(x1) <- list(c(rep("", nrow(x1))), c(""))
     if (Sys.info()["sysname"] == "Windows") {
         writeClipboard(noquote(x1), format = 1)                        

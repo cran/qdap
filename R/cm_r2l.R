@@ -62,8 +62,12 @@ function(range.list, v.name = "variable", list.var = TRUE){
     Wcol <- lapply(COL, function(x) -1 + sort(x + rep(1:2, 
         each = length(x))))
     COLneg <- lapply(x, ncolon)
+    ## Added the gsub "," to deal with issue #144 on 1-2-14
+    ## x <- lapply(seq_along(x), function(i) {
+    ##     x[[i]][unlist(COLneg[i])]
+    ## }) 
     x <- lapply(seq_along(x), function(i) {
-        x[[i]][unlist(COLneg[i])]
+        gsub(",", "", x[[i]][unlist(COLneg[i])])
     })
     append2 <- function(x, y = ":", z) {
         lapply(z, function(z) {
@@ -108,6 +112,7 @@ function(range.list, v.name = "variable", list.var = TRUE){
     } else {
         DF[, ncol(DF)] <- NULL
     }
-    comment(DF) <- "cmrange"
+    class(DF) <- c("cmrange", class(DF))
     DF
 }
+

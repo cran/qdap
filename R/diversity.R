@@ -74,43 +74,8 @@ function (text.var, grouping.var=NULL){
     } 
     DF <- na.omit(data.frame(group = grouping,
         text.var = as.character(text.var), stringsAsFactors = FALSE))
-    shannon <- function(num.var, digits = 3){
-        N <- sum(num.var)
-        P <- num.var/N
-        logP <- log(P)
-        sum(-(P * logP))
-    }
-    simpson <- function(num.var, digits = 3){
-        N <- sum(num.var)
-        FUN <- function(x) x*(x-1)  
-        n.sum <- sum(FUN(num.var))
-        1 - (n.sum/(N*(N-1)))
-    }
-    collision <- function(num.var, digits=3){
-        N <- sum(num.var)
-        P <- num.var/N
-        Epi2 <- sum(P^2)
-        -log(Epi2)
-    }
-    berger_parker <- function(num.var, digits=3){
-        N <- sum(num.var)
-        Nm <- max(num.var)
-        Nm/N
-    }
-    brillouin <- function(num.var, digits=3){
-        N <- sum(num.var)
-        (lfactorial(N) - sum(lfactorial(num.var)))/N
-    }
-    RICH <- function(x){
-        c(wc=sum(x), simpson=simpson(x), 
-            shannon = shannon(x), 
-            collision = collision(x),
-            berger_parker = berger_parker(x),
-            brillouin = brillouin(x)
-        )
-    }
     z <- split(DF[, "text.var"], DF[, "group"])
-    y <- lapply(z, stopwords, stopwords=NULL, unlist=TRUE, strip = TRUE)
+    y <- lapply(z, rm_stopwords, stopwords=NULL, unlist=TRUE, strip = TRUE)
     w <- lapply(y, function(x) data.frame(table(x)))
     v <- do.call(rbind, lapply(w, function(x) RICH(x[, 2])))
     o <- data.frame(rownames(v), v)
@@ -147,10 +112,47 @@ function(x, digits = 3, ...) {
 #' Plots a diversity object.
 #' 
 #' @param x The diversity object
-#' @param \ldots Other arguments passed to qheat
+#' @param \ldots Other arguments passed to \code{qheat}
 #' @method plot diversity
 #' @S3method plot diversity
 plot.diversity <- function(x, ...) {
     class(x) <- "data.frame"
     qheat(x, ...)
+}
+
+## Helper functions for diersity:
+shannon <- function(num.var, digits = 3){
+    N <- sum(num.var)
+    P <- num.var/N
+    logP <- log(P)
+    sum(-(P * logP))
+}
+simpson <- function(num.var, digits = 3){
+    N <- sum(num.var)
+    FUN <- function(x) x*(x-1)  
+    n.sum <- sum(FUN(num.var))
+    1 - (n.sum/(N*(N-1)))
+}
+collision <- function(num.var, digits=3){
+    N <- sum(num.var)
+    P <- num.var/N
+    Epi2 <- sum(P^2)
+    -log(Epi2)
+}
+berger_parker <- function(num.var, digits=3){
+    N <- sum(num.var)
+    Nm <- max(num.var)
+    Nm/N
+}
+brillouin <- function(num.var, digits=3){
+    N <- sum(num.var)
+    (lfactorial(N) - sum(lfactorial(num.var)))/N
+}
+RICH <- function(x){
+    c(wc=sum(x), simpson=simpson(x), 
+        shannon = shannon(x), 
+        collision = collision(x),
+        berger_parker = berger_parker(x),
+        brillouin = brillouin(x)
+    )
 }

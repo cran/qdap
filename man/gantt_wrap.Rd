@@ -2,17 +2,14 @@
 \alias{gantt_wrap}
 \title{Gantt Plot}
 \usage{
-  gantt_wrap(dataframe, plot.var, facet.vars = NULL,
-    fill.var = NULL, title = NULL,
-    ylab = as.character(plot.var),
-    xlab = "duration.default", rev.factor = TRUE,
-    transform = FALSE, ncol = NULL, minor.line.freq = NULL,
-    major.line.freq = NULL, sig.dig.line.freq = 1,
-    hms.scale = NULL, scale = NULL, space = NULL, size = 3,
-    rm.horiz.lines = FALSE, x.ticks = TRUE, y.ticks = TRUE,
-    legend.position = NULL, bar.color = NULL,
-    border.color = NULL, border.size = 2,
-    border.width = 0.1, constrain = TRUE)
+gantt_wrap(dataframe, plot.var, facet.vars = NULL, fill.var = NULL,
+  title = NULL, ylab = plot.var, xlab = "duration.default",
+  rev.factor = TRUE, transform = FALSE, ncol = NULL,
+  minor.line.freq = NULL, major.line.freq = NULL, sig.dig.line.freq = 1,
+  hms.scale = NULL, scale = NULL, space = NULL, size = 3,
+  rm.horiz.lines = FALSE, x.ticks = TRUE, y.ticks = TRUE,
+  legend.position = NULL, bar.color = NULL, border.color = NULL,
+  border.size = 2, border.width = 0.1, constrain = TRUE, plot = TRUE)
 }
 \arguments{
   \item{dataframe}{A data frame with plotting variable(s)
@@ -101,37 +98,41 @@
 
   \item{constrain}{logical.  If \code{TRUE} the Gantt bars
   touch the edge of the graph.}
+
+  \item{plot}{logical.  If \code{TRUE} the plot will
+  automatically plot. The user may wish to set to
+  \code{FALSE} for use in knitr, sweave, etc. to add
+  additional plot layers.}
 }
 \value{
-  Returns a Gantt style visualization. Invisibly returns
-  the ggplot2 list object.
+Returns a Gantt style visualization. Invisibly returns the
+ggplot2 list object.
 }
 \description{
-  A \href{http://docs.ggplot2.org/current/}{ggplot2}
-  wrapper that produces a Gantt plot.
+A \href{http://docs.ggplot2.org/current/}{ggplot2} wrapper
+that produces a Gantt plot.
 }
 \note{
-  For non repeated measures data/plotting use
-  \code{\link[qdap]{gantt}}; for repeated measures data
-  output use \code{\link[qdap]{gantt_rep}}; and for a
-  convenient wrapper that takes text and generates plots
-  use \code{\link[qdap]{gantt_plot}}.
+For non-repeated measures data/plotting use
+\code{\link[qdap]{gantt}}; for repeated measures data
+output use \code{\link[qdap]{gantt_rep}}; and for a
+convenient wrapper that takes text and generates plots use
+\code{\link[qdap]{gantt_plot}}.
 }
 \examples{
 \dontrun{
 dat <- gantt(mraja1$dialogue, list(mraja1$fam.aff, mraja1$sex),
-    units = "sentences", plot.colors = 'black', sums = TRUE,
-    col.sep = "_")$gantt.df
+    units = "sentences", col.sep = "_")
 htruncdf(dat)
-gantt_wrap(dat, fam.aff_sex, title = "Gantt Plot")
+gantt_wrap(dat, "fam.aff_sex", title = "Gantt Plot")
 dat$codes <- sample(LETTERS[1:3], nrow(dat), TRUE)
-gantt_wrap(dat, fam.aff_sex, fill.var = "codes",
+gantt_wrap(dat, "fam.aff_sex", fill.var = "codes",
     legend.position = "bottom")
 
 dat2 <- with(rajSPLIT, gantt_rep(act, dialogue,
     list(fam.aff, sex), units = "words", col.sep = "_"))
 htruncdf(dat2)
-x <- gantt_wrap(dat2, fam.aff_sex, facet.vars = "act",
+x <- gantt_wrap(dat2, "fam.aff_sex", facet.vars = "act",
     title = "Repeated Measures Gantt Plot")
 
 library(ggplot2); library(scales); library(RColorBrewer)
@@ -140,19 +141,17 @@ x + scale_color_manual(values=rep("black",
 }
 }
 \author{
-  Andrie de Vries and Tyler Rinker
-  <tyler.rinker@gmail.com>.
+Andrie de Vries and Tyler Rinker <tyler.rinker@gmail.com>.
 }
 \references{
-  Clark, W. & Gantt, H. (1922) The Gantt chart, a working
-  tool of management. New York, Ronald Press.
+Clark, W. & Gantt, H. (1922) The Gantt chart, a working
+tool of management. New York, Ronald Press.
 }
 \seealso{
-  \code{\link[qdap]{gantt}},
-  \code{\link[qdap]{gantt_plot}},
-  \code{\link[qdap]{gantt_rep}},
-  \code{\link[ggplot2]{facet_grid}},
-  \code{\link[ggplot2]{facet_wrap}}
+\code{\link[qdap]{gantt}}, \code{\link[qdap]{gantt_plot}},
+\code{\link[qdap]{gantt_rep}},
+\code{\link[ggplot2]{facet_grid}},
+\code{\link[ggplot2]{facet_wrap}}
 }
 \keyword{Gantt}
 

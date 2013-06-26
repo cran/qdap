@@ -2,14 +2,14 @@
 \alias{plot.diversity}
 \title{Plots a diversity object}
 \usage{
-  \method{plot}{diversity} (x, ...)
+\method{plot}{diversity}(x, ...)
 }
 \arguments{
   \item{x}{The diversity object}
 
-  \item{\ldots}{Other arguments passed to qheat}
+  \item{\ldots}{Other arguments passed to \code{qheat}}
 }
 \description{
-  Plots a diversity object.
+Plots a diversity object.
 }
 
