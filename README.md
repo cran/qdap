@@ -28,10 +28,12 @@ install_github("qdap", "trinker")
 
 ## Help
 
-[Web Page](http://trinker.github.com/qdap/)    
-[HTML Vignette: Introduction to qdap](http://trinker.github.io/qdap/vignettes/qdap_vignette.html)   
-[PDF Vignette: qdap-tm Package Compatibility](http://trinker.github.io/qdap/vignettes/tm_package_compatibility.pdf)     
-[Package PDF Help Manual](https://dl.dropbox.com/u/61803503/qdap.pdf)
+- [Web Page](http://trinker.github.com/qdap/) 
+- Vignettes:     
+  - [HTML Vignette: Introduction to qdap](http://trinker.github.io/qdap/vignettes/qdap_vignette.html)        
+  - [PDF Vignette: qdap-tm Package Compatibility](http://trinker.github.io/qdap/vignettes/tm_package_compatibility.pdf)   
+  - [PDF Vignette: Cleaning Text & Debugging](http://trinker.github.io/qdap_dev/vignettes/cleaning_and_debugging.pdf)      
+- [Package PDF Help Manual](https://dl.dropbox.com/u/61803503/qdap.pdf)
 
 ## Contact
 
@@ -39,3 +41,5 @@ You are welcome to:
 * submit suggestions and bug-reports at: <https://github.com/trinker/qdap/issues>
 * send a pull request on: <https://github.com/trinker/qdap/>
 * compose a friendly e-mail to: <tyler.rinker@gmail.com>
+
+*<b>Note:</b> If you are reporting a bug make sure you have first read the [Cleaning Text & Debugging vignette](http://trinker.github.io/qdap_dev/vignettes/cleaning_and_debugging.pdf)*

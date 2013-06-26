@@ -17,6 +17,8 @@
 #' @param text.place A character string giving placement location of the text 
 #' column. This must be one of the strings \code{"original"}, \code{"right"} or 
 #' \code{"left"}.
+#' @param verbose logical.  If \code{TRUE} select diagnostics from 
+#' \code{\link[qdap]{check_text}} are reported. 
 #' @param \ldots Additional options passed to \code{\link[qdap]{stem2df}}.
 #' @param grouping.var The grouping variables.  Default \code{NULL} generates 
 #' one word list for all text.  Also takes a single grouping variable or a list 
@@ -33,6 +35,9 @@
 #' Trailing sentences such as \bold{I thought I...} will be treated as 
 #' incomplete and marked with \code{"|"} to denote an incomplete/trailing 
 #' sentence.
+#' 
+#' @section Suggestion: It is recommended that the user runs \code{\link[qdap]{check_text}} on the 
+#' output of \code{sentSplit}'s text column.
 #' @rdname sentSplit
 #' @author Dason Kurkiewicz and Tyler Rinker <tyler.rinker@@gmail.com>.
 #' @seealso 
@@ -47,6 +52,7 @@
 #' \dontrun{
 #' ## `sentSplit` EXAMPLE:
 #' (out <- sentSplit(DATA, "state"))
+#' out %&% check_text()  ## check output text
 #' sentSplit(DATA, "state", stem.col = TRUE)
 #' sentSplit(DATA, "state", text.place = "left")
 #' sentSplit(DATA, "state", text.place = "original")
@@ -77,7 +83,19 @@
 sentSplit <-
 function(dataframe, text.var, rm.var = NULL, endmarks = c("?", ".", "!", "|"), 
     incomplete.sub = TRUE, rm.bracket = TRUE, stem.col = FALSE, 
-    text.place = "right", ...) {
+    text.place = "right", verbose = is.global(2),  ...) {
+
+    if (verbose) {
+        checks <- check_text(dataframe[[text.var]])
+        checks <- checks[!names(checks) %in% c("double_punctuation", 
+            "missing_value", "potentially_misspelled")]
+        pot_probs <- !sapply(checks, is.null)
+        if(sum(pot_probs) > 0) {
+            probs <- gsub("_", " ", paste(names(pot_probs)[pot_probs], collapse=", "))
+            warning("The following problems were detected:\n", probs, 
+                "\n\n*Consider running `check_text`")
+        }
+    }
 
     if (is.null(rm.var)) {
         output <- sentSplit_helper(dataframe = dataframe, text.var = text.var, 
@@ -115,9 +133,11 @@ function(dataframe, text.var, rm.var = NULL, endmarks = c("?", ".", "!", "|"),
         rm.var <- paste0("rmvars_", paste(rm.var, collapse = ":"))
     } 
     output <- tbl_df(output)
-    class(output) <- c("sent_split", paste0("sent_split_text_var:", text.var), 
-        rm.var, class(output))
+    class(output) <- unique(c("sent_split", "qdap_df", 
+        paste0("sent_split_text_var:", text.var), rm.var, class(output)))
     attributes(output)[["text.var"]] <- text.var
+    attributes(output)[["qdap_df_text.var"]] <- substitute(text.var)  
+    
     output
 }
 

@@ -17,6 +17,116 @@ And constructed with the following guidelines:
 * Bug fixes and misc. changes bumps the patch
 
 
+CHANGES IN qdap VERSION 2.1.1
+----------------------------------------------------------------
+
+BUG FIXES
+
+* `syllable_count` returned the sentence (recycled) in the `words` column of the
+  output.  This behavior has been fixed.  See GitHub issue #188 for details.
+
+* `syn` returned antonyms for some words.  This was caused by the dictionary:
+  `qdapDictionaries::key.syn` contained antonyms and elemets the were error 
+  messages (character).  This has been fixed.  Reference issue #190. (Jingjing Zou)
+
+* The `pres_debates2012` data set contained three errors in speech attribution.
+  This has been corrected and the turn of talk (`tot`) as well.
+
+* `word_stats` would throw an error if no poly-syllable words existed.  This has 
+  been corrected (reported by Nicolas Turenne).
+
+NEW FEATURES
+
+* `qdap_df` and `%&%` added to mimic some of the functionality of `dplyr`'s 
+  `tbl_df` and chaining pipe in a more specific, less flexible, `qdap` oriented 
+  way.
+
+* `Text` added to view and change the `text.var` attribute of a `data.frame of 
+  the class `qdap_df`.
+
+* `cumulative` generic method added to view cumulative scores over time.
+
+* `formality` picks up a `cumulative` method.
+
+* `polarity` picks up a `cumulative` method.
+
+* `end_mark` picks up a `class` (`end_mark`), `plot` method, and a `cumulative` 
+  method.
+
+* `syllable_sum`, `polysyllable_sum`, and `combo_syllable_sum` pick up a 
+  `class`, `plot` method, and a `cumulative` method.
+
+* `wfm` becomes a generic method currently applied to a `text.var` that is:
+  `character`, `factor` (coerced to `character`), or `wfdf`.
+
+* `unbag` added as a compliment to `bag_o_words` and friends for undoing string 
+  splitting.  A convenience wrapper for `paste(collapse = " ")`.
+
+* `as.Corpus.TermDocumentMatrix`, `as.Corpus.DocumentTermMatrix`, and 
+  `as.Corpus.wfm` added to convert a matrix format to a `tm::Corpus`.
+
+* `exclude` becomes a generic method for various classes.  Functionality is the 
+  same but with improved code readability.
+
+* `check_spelling_interactive`, `check_spelling`, `which_misspelled`, and 
+  `correct` allow the user to identify potentially misspelled words and 
+  optionally suggest replacements.
+
+* `random_data` & `random_sent` added to generate random sentence data sets and 
+  vectors.
+
+* `comma_spacer` added to ensure strings with commas contain a space after them.
+
+* `check_text` added to identify potential problems in text.
+
+* `replace_ordinal` added to convert ordinal representations of 1 through 100 to
+  strictly ordinal text (e.g., "1st" becomes "first").
+
+* A vignette: `Cleaning Text & Debugging` was added to assist users with 
+  cleaning and debugging problems in `qdap`.
+
+* `pronoun_type`, and `subject_pronoun_type`, `object_pronoun_type` added to 
+  examine usage of subject/object pronouns by grouping variable.
+
+MINOR FEATURES
+
+* `dplyr`'s chaining pipe imported for convenience.  See 
+  http://www.rdocumentation.org/packages/magrittr/functions/magrittr for details.
+
+IMPROVEMENTS
+
+* `wfm` gains a speedup through generic classes and `tm` package integration 
+  (`strip` is no longer used in `wfm`).
+
+* `as.tdm.character` and `as.dtm.character` gain a speed boost with a `tm` 
+  package integration.
+
+* Added message to `as.data.frame.Corpus` for missing end-marks suggesting the 
+  use of: `sent.split = FALSE`.
+
+* `as.Corpus` familiy of functions didn't necessarily respect document names and
+  sometimes used numeric sequence instead.  The introduction of a reader via
+  `tm::readTabular` has fixed this.
+
+* `sentSplit` now gives warnings for text that may contain anomalies such as:
+  non-ASCII characters, factors, missing punctuation, empty cells, and no 
+  alphabetic characters found.
+
+* `read.transcript` now gives a warning when reading from a .docx file and the 
+  separator (`sep`) used is still found in the text as this may indicate the 
+  data did not split correctly.
+
+* `dispersion_plot` now takes a named list of vectors of terms as the argument to 
+  `match.terms`.  The vectors are combined as a unified theme named with the 
+  names of the list supplied to `match.terms`.
+
+CHANGES
+
+* `as.data.frame.Corpus`'s default value for `sent.split` is now `FALSE`.
+
+* The `state` column in the `qdap::DATA2` data-set is now character (previously 
+  factor).
+
 CHANGES IN qdap VERSION 2.1.0
 ----------------------------------------------------------------
 
@@ -26,10 +136,11 @@ BUG FIXES
   been fixed. Reference issue #184.
 
 * `sentiment_frame` coerced words to factor.  `stringsAsFactors = FALSE` has 
-  been added to prebent this.
+  been added to prevent this.
 
 * `polarity` did not work on > 1 grams due to a bug in `sentiment_frame` 
-  converting character to factor (chewth). See GitHub issue #185 for details.
+  converting character to factor (thanks for the find @chewth). See GitHub 
+  issue #185 for details.
 
 NEW FEATURES
 
@@ -88,12 +199,12 @@ CHANGES
   Use `as.dtm` or `as.DocumentTermMatrix` instead.
 
 * The *Introduction to qdap* .Rmd vignette has been moved to an internal 
-  directory.  The HTML version is not built by default.  THis saves CRAN space 
+  directory.  The HTML version is not built by default.  This saves CRAN space 
   and time checking the package source.  The file has been replaced with a
   temporary place holder that contains instructions for building the actual 
   vignette.  The user may also use the `build_qdap_vignette` directly.
 
-* `qdap` incorporates the chanegs from the `tm` package version: 0.6:
+* `qdap` incorporates the changes from the `tm` package version: 0.6:
   http://cran.r-project.org/web/packages/tm/news.html  Reference issue #187.
 
 CHANGES IN qdap VERSION 2.0.0
@@ -147,7 +258,7 @@ CHANGES
   bundle of functions to be used outside of qdap without calling the larger qdap 
   package per the request of Kirill Muller (see issue #165).
 
-* As schedulaed the `dissimialrity` function has been removed from the qdap 
+* As scheduled the `dissimilarity` function has been removed from the qdap 
   package to avoid conflict with the `tm` package.  Use `Dissimilarity` function 
   instead.
 
@@ -202,7 +313,7 @@ MINOR FEATURES
 
 IMPROVEMENTS
 
-* `discourse_map` picks up a `pause` argument that enables the user to pasue 
+* `discourse_map` picks up a `pause` argument that enables the user to pause 
   between plots in interactive mode.
 
 CHANGES
@@ -214,7 +325,7 @@ BUG FIXES
 
 NEW FEATURES
 
-* `gantt` and `gantt_wrap` (single facet) pick up and `Animate` mathod.
+* `gantt` and `gantt_wrap` (single facet) pick up and `Animate` method.
 
 * `polarity` picks up an `Animate` method.
 
@@ -228,7 +339,7 @@ IMPROVEMENTS
 * `discourse_map` picks up a `condense` argument that allows the user to 
   condense sequential rows for like grouping variable sub groups.
 
-* `list_df2df` names now use a zero padded numeric portion for defualt names.  
+* `list_df2df` names now use a zero padded numeric portion for default names.  
   For example `c("L1", "L2", "L3", ... "L10")`, becomes 
   `c("L01", "L02", "L03", ... "L10")`.
 
@@ -359,7 +470,7 @@ IMPROVEMENTS
   user to remove stopwords and min/max length words.
 
 * `plot.word_cor` picks up the argument `ncol` that allows the user to specify 
-  the number of columns used.  This uses ggplot2's `facet_wrap` rather than 
+  the number of columns used.  This uses `ggplot2`'s `facet_wrap` rather than 
   `facet_grid` (which is the default if `ncol =NULL`).
 
 * `name2sex` relied upon having qdapDictionaries loaded.  This could be an issue 
@@ -419,7 +530,7 @@ IMPROVEMENTS
 
 * `word_cor` output that was a list (not a correlation matrix) did not have a 
   plot method.  The plot method for `word_cor` now handles both matrices and the 
-  lsit of correlations.
+  list of correlations.
 
 * `rm_row` picks up the `contains` argument that allows the user to search for, 
   and remove rows of, within the string, not just the beginning.
@@ -490,7 +601,7 @@ BUG FIXES
   within the `grouping.vars`.  This behavior has been fixed with corresponding 
   examples added.
 
-* `url_dl` - Downloaded an empty file when not using a dropbox key.  This 
+* `url_dl` - Downloaded an empty file when not using a Dropbox key.  This 
   behavior has been fixed.
 
 * The `cm_code.` family of functions had a bug in the output due to 
@@ -544,7 +655,7 @@ NEW FEATURES
   and outputs a dataframe.
 
 * `colcomb2class` quickly combines columns for  number of qdap classes including 
-  output from: `termco`, `question_type`, `pos_by`, adn 1character_table`.
+  output from: `termco`, `question_type`, `pos_by`, and `character_table`.
 
 * `lview` a function to unclass a list output that has a special print method 
   that returns only a portion of the output.  `lview` re-classes to "list".
@@ -562,7 +673,7 @@ NEW FEATURES
 * `tm_corpus2df` and `df2tm_corpus` added to convert a tm package corpus to a 
   dataframe for use in qdap or vice versa.
 
-* `tdm` and `dtm` are now truly compatable with the `tm` package.  `tdm` and 
+* `tdm` and `dtm` are now truly compatible with the `tm` package.  `tdm` and 
   `dtm` produce outputs of the class `"TermDocumentMatrix"` and 
   `"DocumentTermMatrix"` respectively.  This change (coupled with the renaming 
   of `stopwords` to `rm_stopwords`) should make the two packages logical 
@@ -602,7 +713,7 @@ MINOR FEATURES
   to `strip`
 
 * `dtm` added to compliment `tdm`, allowing for easier integration with other R 
-  packages that utilize tdm/dtm.
+  packages that utilize `tdm`/`dtm`.
 
 * `dir_map` picks up a `use.path` argument that allows the user to specify a 
   more flexible path to the created pre-formed `read.transcript` scripts based 
@@ -612,7 +723,7 @@ MINOR FEATURES
 * `polarity_frame` a function to make a hash environment lookup for use with the 
   `polarity` function.
 
-* `DATA.SPLIT` a `sentSplit` version of the `DATA` dataset has been added to 
+* `DATA.SPLIT` a `sentSplit` version of the `DATA` data-set has been added to 
   qdap.
 
 * `gantt_plot` accepts NULL for `grouping.var` and figures for "all" rows as a 
@@ -625,7 +736,7 @@ MINOR FEATURES
 
 * `qheat`, `polarity.plot` and `formality.plot` pick up the argument `plot` 
   which optionally suppresses the plotting.  This is useful if the user is 
-  operating in knitr, sewave, etc. and wishes to alter/add onto the plot.
+  operating in **knitr**, **sewave**, etc. and wishes to alter/add onto the plot.
 
 * `lookup` now takes `missing = NULL`.  This results in the original values in
   `terms` corresponding to the missing elements being retained.
@@ -666,9 +777,9 @@ MINOR FEATURES
 * `exclude` now works with `wfm` and the `tm` package's `DocumentTermMatrix` and
   `TermDocumentMatrix` classes.
 
-* `rm_url` removes/repalces URLs in a string(s).
+* `rm_url` removes/replaces URLs in a string(s).
 
-* `matrix2df` added (under `list2df`) to convert rownnames of matrix to a 
+* `matrix2df` added (under `list2df`) to convert `rownames` of matrix to a 
   dataframe column.
 
 CHANGES
@@ -752,7 +863,7 @@ NEW FEATURES
 
 * `names2sex` a function for predicting gender from name.
 
-* Added `NAMES` and `NAMES_SEX` datasets, based on 1990 U.S. census data.
+* Added `NAMES` and `NAMES_SEX` data-sets, based on 1990 U.S. census data.
 
 * `tdm` added as an equivalent to TermDocumentMatrix from the tm package.  This 
   allows for portability across text analysis packages.
@@ -802,12 +913,12 @@ MINOR FEATURES
 * `genX` and `bracketX` gain an extra argument `space.fix` to remove extra 
   spaces left over from bracket removal.
 
-* Updated out of date dropbox url download in `url_dl`.  `url_dl` also takes the 
-  dropbox key as well.
+* Updated out of date Dropbox url download in `url_dl`.  `url_dl` also takes the 
+  Dropbox key as well.
 
 CHANGES
 
-* qdap is now compiled for mac users (as openNLP now passes CRAN checks with no
+* qdap is now compiled for mac users (as `openNLP` now passes CRAN checks with no
   Errors on Mac).
 
 CHANGES IN qdap VERSION 0.2.1
@@ -874,3 +985,6 @@ CHANGES IN qdap VERSION 0.2.0
 
 * Package designed to bridge the gap between qualitative data and quantitative 
   analysis
+
+
+

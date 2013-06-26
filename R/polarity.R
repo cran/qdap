@@ -123,6 +123,7 @@
 #' colsplit2df(scores(poldat2))
 #' plot(poldat2)
 #' plot(scores(poldat2))
+#' cumulative(poldat2)
 #' 
 #' poldat3 <- with(rajSPLIT, polarity(dialogue, person))
 #' poldat3[["group"]][, "OL"] <- outlier_labeler(scores(poldat3)[, 
@@ -193,7 +194,7 @@
 #' 
 #' saveHTML(FUN(), autoplay = FALSE, loop = TRUE, verbose = FALSE,
 #'     ani.height = 1000, ani.width=650,
-#'     outdir = loc2, single.opts =
+#'     outdir = loc, single.opts =
 #'     "'controls': ['first', 'play', 'loop', 'speed'], 'delayMin': 0")
 #'  
 #' #=====================#
@@ -206,6 +207,7 @@
 #' library(reports)
 #' library(igraph)
 #' library(plotrix)
+#' library(gridExtra)
 #' 
 #' deb2dat <- subset(pres_debates2012, time=="time 2")
 #' deb2dat[, "person"] <- factor(deb2dat[, "person"])
@@ -283,6 +285,188 @@
 #' 
 #' FUN2(TRUE)
 #' 
+#' #=====================#
+#' library(animation)
+#' library(grid)
+#' library(gridBase)
+#' library(qdap)
+#' library(reports)
+#' library(igraph)
+#' library(plotrix)
+#' library(gplots)
+#' 
+#' deb2dat <- subset(pres_debates2012, time=="time 2")
+#' deb2dat[, "person"] <- factor(deb2dat[, "person"])
+#' (deb2 <- with(deb2dat, polarity(dialogue, person)))
+#' 
+#' ## Set up the network version
+#' bg_black <- Animate(deb2, neutral="white", current.speaker.color="grey70")
+#' bgb <- vertex_apply(bg_black, label.color="grey80", size=30, label.size=22,
+#'     color="grey40")
+#' bgb <- edge_apply(bgb, label.color="yellow")
+#' 
+#' ## Set up the bar version
+#' deb2_bar <- Animate(deb2, as.network=FALSE)
+#' 
+#' ## Set up the line version
+#' deb2_line <- plot(cumulative(deb2_bar))
+#' 
+#' ## Generate a folder
+#' loc2b <- folder(animation_polarity2)
+#' 
+#' ## Set up the plotting function
+#' oopt <- animation::ani.options(interval = 0.1)
+#' 
+#' 
+#' FUN2 <- function(follow=FALSE, theseq = seq_along(bgb)) {
+#' 
+#'     Title <- "Animated Polarity: 2012 Presidential Debate 2"
+#'     Legend <- c(.2, -1.075, 1.5, -1.005)
+#'     Legend.cex <- 1
+#' 
+#'     lapply(theseq, function(i) {
+#'         if (follow) {
+#'             png(file=sprintf("%s/images/Rplot%s.png", loc2b, i),
+#'                 width=650, height=725)
+#'         }
+#'         ## Set up the layout
+#'         layout(matrix(c(rep(1, 9), rep(2, 4)), 13, 1, byrow = TRUE))
+#' 
+#'         ## Plot 1
+#'         par(mar=c(2, 0, 2, 0), bg="black")
+#'         #par(mar=c(2, 0, 2, 0))
+#'         set.seed(20)
+#'         plot.igraph(bgb[[i]], edge.curved=TRUE)
+#'         mtext(Title, side=3, col="white")
+#'         color.legend(Legend[1], Legend[2], Legend[3], Legend[4],
+#'               c("Negative", "Neutral", "Positive"), attributes(bgb)[["legend"]],
+#'               cex = Legend.cex, col="white")
+#' 
+#'         ## Plot2
+#'         plot.new()
+#'         vps <- baseViewports()
+#' 
+#'         uns <- unit(c(-1.3,.5,-.75,.25), "cm")
+#'         p <- deb2_bar[[i]] +
+#'             theme(plot.margin = uns,
+#'                 text=element_text(color="white"),
+#'                 plot.background = element_rect(fill = "black",
+#'                     color="black"))
+#'         print(p,vp = vpStack(vps$figure,vps$plot))
+#'         animation::ani.pause()
+#' 
+#'         if (follow) {
+#'             dev.off()
+#'         }
+#'     })
+#' 
+#' }
+#' 
+#' FUN2()
+#' 
+#' ## Detect OS
+#' type <- if(.Platform$OS.type == "windows") shell else system
+#' 
+#' saveHTML(FUN2(), autoplay = FALSE, loop = TRUE, verbose = FALSE,
+#'     ani.height = 1000, ani.width=650,
+#'     outdir = loc2b, single.opts =
+#'     "'controls': ['first', 'play', 'loop', 'speed'], 'delayMin': 0")
+#' 
+#' FUN2(TRUE)
+#' 
+#' ## Increased complexity
+#' ## --------------------
+#' 
+#' ## Helper function to cbind ggplots
+#' cbinder <- function(x, y){
+#' 
+#'     uns_x <- unit(c(-1.3,.15,-.75,.25), "cm")
+#'     uns_y <- unit(c(-1.3,.5,-.75,.15), "cm")
+#' 
+#'     x <- x + theme(plot.margin = uns_x,
+#'         text=element_text(color="white"),
+#'         plot.background = element_rect(fill = "black",
+#'         color="black")
+#'     )
+#' 
+#'     y <- y + theme(plot.margin = uns_y,
+#'         text=element_text(color="white"),
+#'         plot.background = element_rect(fill = "black", 
+#'         color="black")
+#'     )
+#' 
+#'     plots <- list(x, y)
+#'     grobs <- list()
+#'     heights <- list()
+#'     
+#'     for (i in 1:length(plots)){
+#'         grobs[[i]] <- ggplotGrob(plots[[i]])
+#'         heights[[i]] <- grobs[[i]]$heights[2:5]
+#'     }
+#'     
+#'     maxheight <- do.call(grid::unit.pmax, heights)
+#'     
+#'     for (i in 1:length(grobs)){
+#'          grobs[[i]]$heights[2:5] <- as.list(maxheight)
+#'     }
+#'     
+#'     do.call("arrangeGrob", c(grobs, ncol = 2))
+#' }
+#' 
+#' deb2_combo <- Map(cbinder, deb2_bar, deb2_line)
+#' 
+#' ## Generate a folder
+#' loc3 <- folder(animation_polarity3)
+#' 
+#' 
+#' FUN3 <- function(follow=FALSE, theseq = seq_along(bgb)) {
+#' 
+#'     Title <- "Animated Polarity: 2012 Presidential Debate 2"
+#'     Legend <- c(.2, -1.075, 1.5, -1.005)
+#'     Legend.cex <- 1
+#' 
+#'     lapply(theseq, function(i) {
+#'         if (follow) {
+#'             png(file=sprintf("%s/images/Rplot%s.png", loc3, i),
+#'                 width=650, height=725)
+#'         }
+#'         ## Set up the layout
+#'         layout(matrix(c(rep(1, 9), rep(2, 4)), 13, 1, byrow = TRUE))
+#' 
+#'         ## Plot 1
+#'         par(mar=c(2, 0, 2, 0), bg="black")
+#'         #par(mar=c(2, 0, 2, 0))
+#'         set.seed(20)
+#'         plot.igraph(bgb[[i]], edge.curved=TRUE)
+#'         mtext(Title, side=3, col="white")
+#'         color.legend(Legend[1], Legend[2], Legend[3], Legend[4],
+#'               c("Negative", "Neutral", "Positive"), attributes(bgb)[["legend"]],
+#'               cex = Legend.cex, col="white")
+#' 
+#'         ## Plot2
+#'         plot.new()
+#'         vps <- baseViewports()
+#'         p <- deb2_combo[[i]]
+#'         print(p,vp = vpStack(vps$figure,vps$plot))
+#'         animation::ani.pause()
+#' 
+#'         if (follow) {
+#'             dev.off()
+#'         }
+#'     })
+#' }
+#' 
+#' FUN3()
+#' 
+#' type <- if(.Platform$OS.type == "windows") shell else system
+#' 
+#' saveHTML(FUN3(), autoplay = FALSE, loop = TRUE, verbose = FALSE,
+#'     ani.height = 1000, ani.width=650,
+#'     outdir = loc3, single.opts =
+#'     "'controls': ['first', 'play', 'loop', 'speed'], 'delayMin': 0")
+#' 
+#' FUN3(TRUE)
+#' 
 #' ##-----------------------------##
 #' ## Constraining between -1 & 1 ##
 #' ##-----------------------------##
@@ -310,6 +494,40 @@
 #' m + theme_nightheat
 #' dev.off()
 #' m+ theme_nightheat(title="Polarity Discourse Map")
+#' 
+#' #===============================#
+#' ## CUMULATIVE POLARITY EXAMPLE ##
+#' #===============================#
+#' poldat4 <- with(rajSPLIT, polarity(dialogue, act, constrain = TRUE))
+#' 
+#' polcount <- na.omit(counts(poldat4)$polarity)
+#' len <- length(polcount)
+#' 
+#' cummean <- function(x){cumsum(x)/seq_along(x)}
+#' 
+#' cumpolarity <- data.frame(cum_mean = cummean(polcount), Time=1:len)
+#' 
+#' ## Calculate background rectangles
+#' ends <- cumsum(rle(counts(poldat4)$act)$lengths)
+#' starts <- c(1, head(ends + 1, -1))
+#' rects <- data.frame(xstart = starts, xend = ends + 1, 
+#'     Act = c("I", "II", "III", "IV", "V"))
+#' 
+#' library(ggplot2)
+#' ggplot() + theme_bw() +
+#'     geom_rect(data = rects, aes(xmin = xstart, xmax = xend, 
+#'         ymin = -Inf, ymax = Inf, fill = Act), alpha = 0.17) +
+#'     geom_smooth(data = cumpolarity, aes(y=cum_mean, x = Time)) +
+#'     geom_hline(y=mean(polcount), color="grey30", size=1, alpha=.3, linetype=2) + 
+#'     annotate("text", x = mean(ends[1:2]), y = mean(polcount), color="grey30", 
+#'         label = "Average Polarity", vjust = .3, size=3) +
+#'     geom_line(data = cumpolarity, aes(y=cum_mean, x = Time), size=1) +
+#'     ylab("Cumulative Average Polarity") + xlab("Duration") +
+#'     scale_x_continuous(expand = c(0,0)) +
+#'     geom_text(data=rects, aes(x=(xstart + xend)/2, y=-.04, 
+#'         label=paste("Act", Act)), size=3) + 
+#'     guides(fill=FALSE) +
+#'     scale_fill_brewer(palette="Set1")
 #' }
 polarity <- function (text.var, grouping.var = NULL, 
     polarity.frame = qdapDictionaries::key.pol, constrain = FALSE,
@@ -673,7 +891,7 @@ plot.polarity <- function(x, bar.size = 5, low = "blue", mid = "grey99",
     XX <- ggplot(dat2, aes(color = Polarity )) + 
         geom_segment(aes(x=start, xend=end, y=group, yend=group), 
             size=bar.size) +
-        xlab("Duration (words)") + ylab(gsub("\\&", " & ", G)) +
+        xlab("Duration (sentences)") + ylab(gsub("\\&", " & ", G)) +
         scale_colour_gradientn(colours = c(low, mid, high)) +
         theme_bw() + theme(legend.position="bottom") + 
         guides(colour = guide_colorbar(barwidth = 9, barheight = .75, nbin=1000))
@@ -1207,7 +1425,6 @@ Animate_polarity_bar <- function(x, wc.time = TRUE, time.constant = 1,
     thedat <- list_df2df(listdat, "row")
     rng <- range(thedat[, "ave.polarity"], na.rm=TRUE)
 
-
     theplot <- ggbar(listdat[[length(listdat)]], grp = colnms1, rng = rng)
 
     ggplots <- setNames(lapply(seq_along(listdat), function(i, aplot=theplot) {
@@ -1414,7 +1631,7 @@ constrain <- function(x) ((1 - (1/(1 + exp(x)))) * 2) - 1
 #' @param positive The color to use for positive polarity.
 #' @param neutral The color to use for neutral polarity.
 #' @param edge.constant A constant to multiple edge width by.
-#' @param title The title to apply to the Networkd image(s).
+#' @param title The title to apply to the Networked image(s).
 #' @param digits The number of digits to use in the current turn of talk 
 #' polarity.
 #' @param \ldots Other arguments passed to \code{\link[qdap]{discourse_map}}.
@@ -1535,6 +1752,142 @@ colorize <- function(x, y) {
 }
 
 
+#' \code{cumulative.polarity} - Generate polarity over time (duration in 
+#' sentences).
+#' @rdname cumulative
+#' @export
+#' @method cumulative polarity
+cumulative.polarity <- function(x, ...){
+    
+    keeps <- !is.na(counts(x)[["polarity"]])
+    y <- counts(x)[["polarity"]][keeps]
 
+    out <- list(cumulative_average_polarity = cummean(y))
 
+    class(out) <- "cumulative_polarity"
+    attributes(out)[["constrained"]] <- attributes(x)[["constrained"]]
+    out
 
+}
+
+cummean <- function(x){
+    cumsum(x)/seq_along(x)
+}
+
+#' Plots a cumulative_polarity Object
+#' 
+#' Plots a cumulative_polarity object.
+#' 
+#' @param x The cumulative_polarity object.
+#' @param \ldots ignored
+#' @method plot cumulative_polarity 
+#' @export
+plot.cumulative_polarity <- function(x, ...){
+
+    len <- length(x[[1]])
+    cumpolarity <- data.frame(cum_mean = x[[1]], Time = 1:len, drop=TRUE) 
+
+    ggplot2::ggplot() + ggplot2::theme_bw() +
+        ggplot2::geom_smooth(data = cumpolarity, ggplot2::aes_string(y="cum_mean", 
+            x = "Time")) +
+        ggplot2::geom_hline(y=mean(x[[1]]), color="grey30", size=1, alpha=.3, linetype=2) + 
+        ggplot2::annotate("text", x = len/2, y = mean(x[[1]]), color="grey30", 
+            label = "Average Polarity", vjust = .3, size=4) +
+        ggplot2::geom_line(data = cumpolarity, ggplot2::aes_string(y="cum_mean", 
+            x = "Time"), size=1) +
+        ggplot2::ylab("Cumulative Average Polarity") + 
+        ggplot2::xlab("Duration") +
+        ggplot2::scale_x_continuous(expand = c(0, 0), limits = c(0, len))
+
+}
+
+#' Prints a cumulative_polarity Object
+#' 
+#' Prints a cumulative_polarity  object.
+#' 
+#' @param x The cumulative_polarity object.
+#' @param \ldots ignored
+#' @method print cumulative_polarity
+#' @export
+print.cumulative_polarity <- function(x, ...) {
+    print(plot.cumulative_polarity(x, ...))
+}
+
+#' \code{cumulative.animated_polarity} - Generate animated polarity over time 
+#' (duration in sentences).
+#' @rdname cumulative
+#' @export
+#' @method cumulative animated_polarity
+cumulative.animated_polarity <- function(x, ...) {
+
+    if(attributes(x)[["network"]]) {
+        stop("Output must be from an `Animate.polarity` when `network = FALSE`")
+    }
+
+    out <- c(0, unlist(lapply(x, grab_ave_polarity), use.names = FALSE))
+    avepol <- tail(out, 1)
+    len <- length(out)
+    
+    output <- data.frame(cum_mean = out, Time = 1:len, drop=TRUE) 
+
+    class(output) <- c("cumulative_animated_polarity", class(output))
+    attributes(output)[["length"]] <- len
+    attributes(output)[["average.polarity"]] <- avepol    
+    attributes(output)[["range"]] <- x[[1]][["scales"]][["scales"]][[1]][["limits"]]  
+    output
+}
+
+#' Plots a cumulative_animated_polarity Object
+#' 
+#' Plots a cumulative_animated_polarity object.
+#' 
+#' @param x The cumulative_animated_polarity object.
+#' @param \ldots ignored
+#' @method plot cumulative_animated_polarity 
+#' @export
+plot.cumulative_animated_polarity <- function(x, ...){
+   
+    output <- lapply(1:nrow(x), function(i) {
+
+        ggplot2::ggplot() + ggplot2::theme_bw() +
+            ggplot2::geom_line(data = x[1:i, ,drop=FALSE], ggplot2::aes_string(y="cum_mean", 
+                x = "Time"), size=1) +
+            ggplot2::geom_hline(yintercept=0, size=1.5, color="grey50", linetype="dashed") + 
+            ggplot2::geom_hline(y=attributes(x)[["average.polarity"]], 
+                color="grey30", size=1, alpha=.3) + 
+            ggplot2::ylab("Cumulative Average Polarity") + 
+            ggplot2::xlab("Duration") +
+            ggplot2::scale_x_continuous(expand = c(0, 0), 
+                limits = c(0, attributes(x)[["length"]])) +
+            ggplot2::ylim(range(x[["cum_mean"]])) +
+            ggplot2::annotate("point", y = x[i, "cum_mean"], 
+                x =x[i, "Time"], colour = "red", size = 1.5) 
+    })
+
+    output[[1]][["layers"]][[4]][["geom_params"]][["colour"]] <- NA
+    output[[length(output)]] <- output[[length(output)]] + 
+        ggplot2::geom_smooth(data = x, 
+            ggplot2::aes_string(y="cum_mean", x = "Time")) 
+
+    output
+}
+
+#' Prints a cumulative_animated_polarity Object
+#' 
+#' Prints a cumulative_animated_polarity  object.
+#' 
+#' @param x The cumulative_animated_polarity object.
+#' @param \ldots ignored
+#' @method print cumulative_animated_polarity
+#' @export
+print.cumulative_animated_polarity <- function(x, ...) {
+    print(plot.cumulative_animated_polarity(x, ...))
+}
+
+grab_ave_polarity <- function(x, left="Average Discourse Polarity:", 
+    right = "Current Speaker:") {
+    
+    genXtract(x[["labels"]][["title"]], left, right) %>% 
+    Trim() %>% 
+    as.numeric() 
+}

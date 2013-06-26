@@ -276,28 +276,29 @@ inspect(TermDocumentMatrix(tm_dat,
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 ##           Docs
-## Terms      docs 1 docs 2 docs 3 docs 4
-##   computer      1      0      0      0
-##   do            0      0      1      0
-##   dumb          0      1      0      0
-##   fun           2      0      0      0
-##   is            1      0      0      0
-##   it            0      0      0      1
-##   its           0      2      0      0
-##   liar          0      0      0      1
-##   no            0      1      0      0
-##   not           1      1      0      0
-##   should        0      0      1      0
-##   stinks        0      0      0      1
-##   too           1      0      0      0
-##   we            0      0      1      0
-##   what          0      0      1      0
-##   you           0      0      0      1
+## Terms      1 2 3 4
+##   computer 1 0 0 0
+##   do       0 0 1 0
+##   dumb     0 1 0 0
+##   fun      2 0 0 0
+##   is       1 0 0 0
+##   it       0 0 0 1
+##   its      0 2 0 0
+##   liar     0 0 0 1
+##   no       0 1 0 0
+##   not      1 1 0 0
+##   should   0 0 1 0
+##   stinks   0 0 0 1
+##   too      1 0 0 0
+##   we       0 0 1 0
+##   what     0 0 1 0
+##   you      0 0 0 1
+
 \end{alltt}
 \end{kframe}
 \end{knitrout}
 
-The two matrices are essentially the same, with the exception of column order and names.  Notice that by default \textbf{tm} removes words with fewer characters (word length) and does not discard punctuation (we made the matrices equal by specifying \texttt{removePunctuation = TRUE} and \texttt{wordLengths=c(0, Inf)} for \textbf{tm}'s \texttt{control} argument).  \textbf{qdap} takes the opposite approach, removing punctuation and utilizing all words, by default.  These differences arise out of the intended uses, audiences, and philosophies of the package authors.  Each has strengths in particular situations.  The \textbf{qdap} output is an ordinary \texttt{matrix} whereas the \textbf{tm} output is a more compact \texttt{simple triplet matrix}.  While the storage is different, both packages can be made to mimic the default of the other.  
+The two matrices are essentially the same, with the exception of column order and names.  Notice that by default \textbf{tm} removes words with fewer characters (word length) and does not discard punctuation (we made the matrices equal by specifying \texttt{removePunctuation = TRUE} and \texttt{wordLengths=c(0, Inf)} for \textbf{tm}'s \texttt{control} argument).  \textbf{qdap} takes the opposite approach, removing punctuation and utilizing all words, by default.  Likewise, the \textbf{tm} package stores demographic information as meta data within the \texttt{Corpus}, whereas, \textbf{qdap} incorporates the demographics with the text into a single \texttt{data.frame} structure.  These differences arise out of the intended uses, audiences, and philosophies of the package authors.  Each has strengths in particular situations.  The \textbf{qdap} output is an ordinary \texttt{matrix} whereas the \textbf{tm} output is a more compact \texttt{simple\_triplet\_matrix}.  While the storage is different, both packages can be made to mimic the default of the other.  
 
 Also note that the \textbf{qdap} \texttt{summary} method for \texttt{wfm} provides the user with information similar to the \texttt{TermDocumentMatrix}/\texttt{DocumentTermMatrix} functions' default \texttt{print} method.
 
@@ -315,7 +316,7 @@ Now we'll look at some \textbf{qdap} functions that enable the user to move betw
 
 \section{Converting Data Forms}
 
-\hspace{.4cm} We'll again use the following preset data.
+\hspace{.4cm} We'll again use the following preset data:
 
 <<data_set_up>>=
 tm_dat <- qdap_dat <- DATA[1:4, c (1, 4) ]
@@ -330,8 +331,6 @@ tm_tdm <- TermDocumentMatrix (tm_dat,
     )
 )
 @
-
-\newpage
 
 \begin{enumerate}
   \item \texttt{qdap\_dat} -- is a \underline{\textbf{qdap} raw text} form
@@ -551,7 +550,6 @@ class(out)
 Here are some further examples to try:
 
 <<apply_as_tm4, eval=FALSE>>=
-apply_as_tm(a, tm::dissimilarity, method = "cosine")
 apply_as_tm(a, tm::findAssocs, "computer", .8)
 apply_as_tm(a, tm::findFreqTerms, 2, 3)
 apply_as_tm(a, tm::Zipf_plot)

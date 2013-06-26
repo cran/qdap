@@ -60,7 +60,7 @@
 #' @examples
 #' \dontrun{
 #' #Note: to view the document below use the path:
-#' gsub("trans1.docx", "", system.file("extdata/transcripts/trans1.docx", package = "qdap"))
+#' system.file("extdata/transcripts/", package = "qdap")
 #' (doc1 <- system.file("extdata/transcripts/trans1.docx", package = "qdap"))
 #' (doc2 <- system.file("extdata/transcripts/trans2.docx", package = "qdap"))
 #' (doc3 <- system.file("extdata/transcripts/trans3.docx", package = "qdap"))
@@ -156,6 +156,11 @@ function(file, col.names = NULL, text.var = NULL, merge.broke.tot = TRUE,
             },
         docx = {
             x <- read.docx(file, skip = skip, sep = sep)
+            sep_hits <- grepl(sep, x[, 2])
+            if(any(sep_hits)) {
+                warning(sprintf("The following text contains the \"%s\" separator and may not have split correctly:\n", sep), 
+                    paste(which(sep_hits), collapse=", "))
+                }
             },
         csv = {
             x <- read.csv(file,  header = header, 

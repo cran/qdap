@@ -2,19 +2,18 @@ Package: qdap
 Type: Package
 Title: Bridging the gap between qualitative data and quantitative
         analysis
-Version: 2.1.0
+Version: 2.1.1
 Date: 2013-06-26
 Authors@R: c(person("Bryan", "Goodrich", role = "ctb"), person("Dason",
     "Kurkiewicz", role = "ctb"), person("Tyler", "Rinker", email =
     "tyler.rinker@gmail.com", role = c("aut", "cre")))
 Maintainer: Tyler Rinker <tyler.rinker@gmail.com>
 Depends: R (>= 3.0.0), ggplot2 (>= 0.9.3.1), qdapDictionaries (>=
-        1.0.1), qdapTools (>= 1.0.1), RColorBrewer
-Imports: chron, dplyr, gdata, grid, gridExtra, igraph, RCurl, openNLP
-        (>= 0.2-1), NLP, parallel, plotrix, reports, reshape2, scales,
-        tm (>= 0.6), tools, venneuler, wordcloud, xlsx, XML
-Suggests: english, koRpus, knitr, lda, proxy, stringi, SnowballC,
-        testthat
+        1.0.2), qdapTools (>= 1.0.1), RColorBrewer
+Imports: chron, dplyr, gdata, grid, gridExtra, igraph, NLP, openNLP (>=
+        0.2-1), parallel, plotrix, RCurl, reports, reshape2, scales,
+        stringdist, tm (>= 0.6), tools, venneuler, wordcloud, xlsx, XML
+Suggests: koRpus, knitr, lda, proxy, stringi, SnowballC, testthat
 LazyData: TRUE
 VignetteBuilder: knitr
 Description: This package automates many of the tasks associated with
@@ -31,10 +30,10 @@ Description: This package automates many of the tasks associated with
 License: GPL-2
 URL: http://trinker.github.com/qdap/
 BugReports: http://github.com/trinker/qdap/issues
-Packaged: 2014-06-15 08:02:20 UTC; trinker
+Packaged: 2014-08-02 02:35:17 UTC; trinker
 Author: Bryan Goodrich [ctb],
   Dason Kurkiewicz [ctb],
   Tyler Rinker [aut, cre]
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2014-06-15 12:29:24
+Date/Publication: 2014-08-02 16:06:56

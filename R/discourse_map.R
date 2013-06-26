@@ -48,7 +48,7 @@
 #' 
 #' plot(mygraph, edge.curved=TRUE)
 #' 
-#' V(mygraph)$sex <- V(mygraph)$name %l% raj.demographics[, 1:2]
+#' V(mygraph)$sex <- V(mygraph)$name %lc% raj.demographics[, 1:2]
 #' V(mygraph)$color <- ifelse(V(mygraph)$sex=="f", "pink", "lightblue")
 #' 
 #' plot(mygraph, edge.curved=TRUE)
@@ -59,6 +59,12 @@
 #'     unique(V(mygraph)$family), cols)
 #' 
 #' plot(mygraph, edge.curved=TRUE)
+#' 
+#' ## Community detection
+#' x <- with(mraja1, discourse_map(dialogue, person))
+#' wc <- walktrap.community(visual(x))
+#' colors <- rainbow(max(membership(wc)))
+#' plot(x, vertex.color=colors[membership(wc)])
 #' 
 #' ## Repeated Measures (BASIC EXAMPLE)
 #' ##------------------------------
@@ -124,7 +130,7 @@
 #' library(animation)
 #' library(igraph)
 #' 
-#' loc <- folder(animation_dialogue)
+#' loc <- reports::folder(animation_dialogue)
 #' ans <- Animate(test)
 #' 
 #' ## Set up the plotting function
@@ -158,7 +164,7 @@
 #' ## More Elaborate Layout
 #' test2 <- with(mraja1, discourse_map(dialogue, person))
 #' 
-#' loc2 <- folder(animation_dialogue2)
+#' loc2 <- reports::folder(animation_dialogue2)
 #' ans2 <- Animate(test2)
 #' ## Set up the plotting function
 #' oopt <- animation::ani.options(interval = 0.1)
@@ -317,9 +323,9 @@ plot.discourse_map <- function(x, ...){
 
 }
 
-#' Plots a animated_discourse_map  Object
+#' Plots an animated_discourse_map  Object
 #' 
-#' Plots a animated_discourse_map  object.
+#' Plots an animated_discourse_map  object.
 #' 
 #' @param x The animated_discourse_map  object.
 #' @param \ldots Other arguments passed to \code{print.animated_discourse_map }.
@@ -392,9 +398,9 @@ animated_discourse_map <- function(DF, edge.constant, sep = "_",
     igraph_objs
 }
 
-#' Prints a animated_discourse_map  Object
+#' Prints an animated_discourse_map  Object
 #' 
-#' Prints a animated_discourse_map  object.
+#' Prints an animated_discourse_map  object.
 #' 
 #' @param x The animated_discourse_map  object.
 #' @param title The title of the plot.

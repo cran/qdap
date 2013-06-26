@@ -45,6 +45,7 @@
 #' issue of Foundations of Science, 7 (3), 293-340.
 #' @keywords formality, explicit, parts-of-speech, pos
 #' @export
+#' @rdname formality
 #' @examples
 #' \dontrun{
 #' with(DATA, formality(state, person))
@@ -65,6 +66,7 @@
 #' data(rajPOS) #A data set consisting of a pos list object
 #' x2 <- with(raj, formality(rajPOS, act))
 #' plot(x2)
+#' cumulative(x2)
 #' x3 <- with(raj, formality(rajPOS, person))
 #' plot(x3, bar.colors="Dark2")
 #' plot(x3, bar.colors=c("Dark2", "Set1"))
@@ -136,7 +138,7 @@
 #' form_bar <- Animate(form_ani2, as.network=FALSE)
 #' 
 #' ## Generate a folder
-#' loc <- folder(animation_formality)
+#' loc <- reports::folder(animation_formality)
 #' 
 #' ## Set up the plotting function
 #' oopt <- animation::ani.options(interval = 0.1)
@@ -208,7 +210,7 @@
 #' m
 #' print(m, bg="grey97", vertex.color="grey75")
 #' 
-#' print(m, title="Polarity Discourse Map", title.color="white", bg="black",
+#' print(m, title="Formality Discourse Map", title.color="white", bg="black",
 #'     legend.text.color="white", vertex.label.color = "grey70", 
 #'     edge.label.color="yellow")
 #'     
@@ -219,6 +221,23 @@
 #' dev.off()
 #' m + theme_nightheat(title="Formality Discourse Map", 
 #'     vertex.label.color = "grey50")
+#'     
+#' #===============================#
+#' ## Formality Over Time Example ##
+#' #===============================#
+#' formpres <- lapply(with( pres_debates2012, split(dialogue, time)), function(x) {
+#'     formality(x)
+#' })
+#' formplots <- lapply(seq_along(formpres), function(i) {
+#'     m <- plot(cumulative(formpres[[i]]))
+#'     if (i != 2) m <- m + ylab("")
+#'     if (i != 3) m <- m + xlab(NULL)
+#'     m + ggtitle(paste("Debate", i))
+#' })
+#' 
+#' library(grid)
+#' library(gridExtra)
+#' do.call(grid.arrange, formplots)
 #' }
 formality <- function(text.var, grouping.var = NULL,                    
     order.by.formality = TRUE, digits = 2, ...){  
@@ -396,8 +415,8 @@ article <- function(x) {
 #' names for more compact plot width.
 #' @param min.wrdcnt A minimum word count threshold that must be achieved to be 
 #' considered in the results.  Default includes all subgroups.
-#' @param order.by.formality logical.  If \code{TRUE} the group polarity plot 
-#' will be ordered by average polarity score, otherwise alphabetical order is 
+#' @param order.by.formality logical.  If \code{TRUE} the group formality plot 
+#' will be ordered by average formality score, otherwise alphabetical order is 
 #' assumed.
 #' @param plot logical.  If \code{TRUE} the plot will automatically plot.  
 #' The user may wish to set to \code{FALSE} for use in knitr, sweave, etc.
@@ -1234,7 +1253,7 @@ plot.animated_formality  <- function(x, ...){
 #' @param contextual The color to use for 0\% formality (purely contextual).
 #' @param formal The color to use for 100\% formality (purely formal).
 #' @param edge.constant A constant to multiple edge width by.
-#' @param title The title to apply to the Networkd image(s).
+#' @param title The title to apply to the \code{Network}ed image(s).
 #' @param digits The number of digits to use in the current turn of talk 
 #' formality.
 #' @param plus.300.color The bar color to use for grouping variables exceeding 
@@ -1384,3 +1403,214 @@ form_fun2 <- function (z) {
     out[, paste0("prop_", names(out)[1:2])] <- out[, 1:2]/out[, 3]
     data.frame(`from|to` = z[, 1], wc = z[, "wrd.cnt"], out, check.names=FALSE)
 }
+
+
+
+#' \code{cumulative.formality} - Generate formality over time (duration in 
+#' sentences).
+#' @rdname cumulative
+#' @export
+#' @method cumulative formality
+cumulative.formality <- function(x, ...){
+    
+    v <- x[["POSfreq"]]
+
+    colnms1 <- colnames(scores(x))[1]
+    ord <- levels(scores(x)[, 1])
+    nas <- which(is.na(x[["text"]]))
+
+    if(!identical(nas, integer(0))) {
+        x[["POSfreq"]][nas,] <- 0
+        x[["POSfreq"]][nas, 1] <- 1
+    }
+    
+    ## Count the articles per row
+    articles <- unlist(lapply(x[["text"]], function(x){  
+            if(identical(x, character(0)) ) return(0)                               
+            sum(article(x))                                                      
+    })) 
+
+    if (!is.null(v$DT)) {                                                            
+        PD <- v$DT-articles                                                          
+    } else {
+        PD <- rep(0, nrow(v))
+    }    
+
+    ## tally parts of speech for formality stat
+    z <- data.frame(                                    
+        noun = rowSums(v[, names(v) %in% c("NN", "NNS", "NNP", "NNPS",               
+            "POS", "JI", "JK"), drop=FALSE]),                                                    
+        adj = rowSums(cbind(v[, names(v) %in% c("CD", "JJ", "JJR", "JJS",            
+            "JI", "JK"), drop=FALSE], PD)),                                                      
+        prep = rowSums(v[, names(v) %in% c("IN", "RP", "TO", "JI", "JK"), 
+            drop=FALSE]),          
+        articles = articles,                                                         
+        pronoun = rowSums(v[, names(v) %in% c("PRP", "PRP$", "PRP.", "WDT",          
+            "WP", "WP$", "WP.", "JI", "JK", "EX"), drop=FALSE]),                                 
+        verb = rowSums(v[, names(v) %in% c("MD", "VB", "VBD", "VBG",                 
+            "VBN", "VBP", "VBZ", "JI", "JK"), drop=FALSE]),                                      
+        adverb = rowSums(v[, names(v) %in% c("RB", "RBR", "RBS", "WRB",              
+            "JI", "JK"), drop=FALSE]),                                                           
+        interj = rowSums(v[, names(v) %in% c("UH", "JI", "JK"), drop=FALSE]))
+
+    z_form <- v[, 1, drop=FALSE]
+    z_form[, "formal"] <- rowSums(z[, c("noun", "articles", "adj", "prep")])
+    z_form[, "contextual"] <- rowSums(z[, c("pronoun", "verb", "adverb", "interj")])
+
+    n.obs <- nrow(z_form)
+
+    out <- list(cumulative_formality = sapply(1:n.obs, function(i) {
+        x <- colSums(z_form[1:i, ], na.rm=TRUE)
+        x[paste0("prop_", names(x)[2:3])] <- x[2:3]/x[1]
+
+        unname(50*(1 +(x["prop_formal"] - x["prop_contextual"])/x["wrd.cnt"]))
+
+    }), greater_than_300 = which(cumsum(z_form[, 1]) >= 300)[1])
+
+    class(out) <- "cumulative_formality"
+    out
+
+}
+
+#' \code{cumulative.pos} - Generate formality over time (duration in 
+#' sentences).
+#' @rdname cumulative
+#' @export
+#' @method cumulative pos
+cumulative.pos <- cumulative.formality
+
+#' \code{cumulative.pos_by} - Generate formality over time (duration in 
+#' sentences).
+#' @rdname cumulative
+#' @export
+#' @method cumulative pos_by
+cumulative.pos_by <- cumulative.formality
+
+#' Plots a cumulative_formality Object
+#' 
+#' Plots a cumulative_formality object.
+#' 
+#' @param x The cumulative_formality object.
+#' @param \ldots ignored
+#' @method plot cumulative_formality 
+#' @export
+plot.cumulative_formality <- function(x, ...){
+
+    g300 <- x[[2]]
+    len <- length(x[[1]])
+    form_range <- range(x[[1]][g300:len])
+    cumformality <- data.frame(cum_mean = x[[1]], Time = 1:len, drop=TRUE)
+    cumformality <- cumformality[g300:length(x[[1]]), ]    
+    note <- sprintf("*Note: After 300 Words (Begins With Statement %s)", g300)
+    note_coord <- c(x[[2]], x[[1]][g300] + (diff(form_range) * .01))
+
+
+    ggplot2::ggplot() + ggplot2::theme_bw() +
+        ggplot2::geom_smooth(data = cumformality, ggplot2::aes_string(y="cum_mean", 
+            x = "Time")) +
+        ggplot2::geom_hline(y=mean(x[[1]]), color="grey30", size=1, alpha=.3, linetype=2) + 
+        ggplot2::annotate("text", x = len/2, y = mean(x[[1]]), color="grey30", 
+            label = "Average Formality", vjust = .3, size=4) +
+        ggplot2::geom_line(data = cumformality, ggplot2::aes_string(y="cum_mean", 
+            x = "Time"), size=1) +
+        ggplot2::ylab("Cumulative Average Formality") + 
+        ggplot2::xlab("Duration") +
+        ggplot2::scale_x_continuous(expand = c(.01,.01)) +
+        ggplot2::annotate("text", x = note_coord[1], y = note_coord[2], 
+            color="grey40", label = note, size=2.5, fontface = 3, hjust=0, alpha=.4) 
+
+}
+
+#' Prints a cumulative_formality Object
+#' 
+#' Prints a cumulative_formality  object.
+#' 
+#' @param x The cumulative_formality object.
+#' @param \ldots ignored
+#' @method print cumulative_formality
+#' @export
+print.cumulative_formality <- function(x, ...) {
+    print(plot.cumulative_formality(x, ...))
+}
+
+#' \code{cumulative.animated_formality} - Generate animated formality over time 
+#' (duration in sentences).
+#' @rdname cumulative
+#' @export
+#' @method cumulative animated_formality
+cumulative.animated_formality <- function(x, ...) {
+
+    if(attributes(x)[["network"]]) {
+        stop("Output must be from an `Animate.formality` when `network = FALSE`")
+    }
+
+    out <- c(NA, unlist(lapply(x, grab_ave_formality), use.names = FALSE))
+    out[1] <- out[2]
+    avepol <- tail(out, 1)
+    len <- length(out)
+    
+    output <- data.frame(cum_mean = out, Time = 1:len, drop=TRUE) 
+
+    class(output) <- c("cumulative_animated_formality", class(output))
+    attributes(output)[["length"]] <- len
+    attributes(output)[["average.formality"]] <- avepol    
+    attributes(output)[["range"]] <- x[[1]][["scales"]][["scales"]][[1]][["limits"]]  
+    output
+}
+
+
+#' Plots a cumulative_animated_formality Object
+#' 
+#' Plots a cumulative_animated_formality object.
+#' 
+#' @param x The cumulative_animated_formality object.
+#' @param \ldots ignored
+#' @method plot cumulative_animated_formality 
+#' @export
+plot.cumulative_animated_formality <- function(x, ...){
+   
+    output <- lapply(1:nrow(x), function(i) {
+
+        ggplot2::ggplot() + ggplot2::theme_bw() +
+            ggplot2::geom_line(data = x[1:i, ,drop=FALSE], ggplot2::aes_string(y="cum_mean", 
+                x = "Time"), size=1) +
+            ggplot2::geom_hline(yintercept=0, size=1.5, color="grey50", linetype="dashed") + 
+            ggplot2::geom_hline(y=attributes(x)[["average.formality"]], 
+                color="grey30", size=1, alpha=.3) + 
+            ggplot2::ylab("Cumulative Average formality") + 
+            ggplot2::xlab("Duration") +
+            ggplot2::scale_x_continuous(expand = c(0, 0), 
+                limits = c(0, attributes(x)[["length"]])) +
+            ggplot2::ylim(range(x[["cum_mean"]])) +
+            ggplot2::annotate("point", y = x[i, "cum_mean"], 
+                x =x[i, "Time"], colour = "red", size = 1.5) 
+    })
+
+    output[[1]][["layers"]][[4]][["geom_params"]][["colour"]] <- NA
+    output[[length(output)]] <- output[[length(output)]] + 
+        ggplot2::geom_smooth(data = x, 
+            ggplot2::aes_string(y="cum_mean", x = "Time")) 
+
+    output
+}
+
+#' Prints a cumulative_animated_formality Object
+#' 
+#' Prints a cumulative_animated_formality  object.
+#' 
+#' @param x The cumulative_animated_formality object.
+#' @param \ldots ignored
+#' @method print cumulative_animated_formality
+#' @export
+print.cumulative_animated_formality <- function(x, ...) {
+    print(plot.cumulative_animated_formality(x, ...))
+}
+
+grab_ave_formality <- function(x, left="Total Discourse Formality:", 
+    right = "Current Speaker:") {
+
+    genXtract(x[["labels"]][["title"]], left, right) %>% 
+    Trim() %>% 
+    as.numeric() 
+}
+

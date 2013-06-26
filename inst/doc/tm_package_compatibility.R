@@ -185,7 +185,6 @@ summary(out)
 class(out)
 
 ## ----apply_as_tm4, eval=FALSE-----------------------------------------------------------
-#  apply_as_tm(a, tm::dissimilarity, method = "cosine")
 #  apply_as_tm(a, tm::findAssocs, "computer", .8)
 #  apply_as_tm(a, tm::findFreqTerms, 2, 3)
 #  apply_as_tm(a, tm::Zipf_plot)

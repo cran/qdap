@@ -66,7 +66,7 @@
 #' speech <- stemmer(dat$dialogue)
 #' mytable1 <- with(dat, as.tdm(speech, list(person, time), stopwords = Top25Words))
 #' 
-#' fit <- ca(mytable1)
+#' fit <- ca(as.matrix(mytable1))
 #' summary(fit)
 #' plot(fit)
 #' plot3d.ca(fit, labels=1)
@@ -74,7 +74,7 @@
 #' 
 #' mytable2 <- with(dat, as.tdm(speech, list(person, time), stopwords = Top200Words))
 #' 
-#' fit2 <- ca(mytable2)
+#' fit2 <- ca(as.matrix(mytable2))
 #' summary(fit2)
 #' plot(fit2)
 #' plot3d.ca(fit2, labels=1)
@@ -349,6 +349,16 @@ as.dtm <- function(text.var, grouping.var = NULL, vowel.check = TRUE, ...) {
 #' @export
 as.DocumentTermMatrix <- as.dtm
 
+#' \code{as.tdm.Corpus} - Corpus method for \code{as.tdm} used to 
+#' convert to a \code{\link[tm]{DocumentTermMatrix}}.
+#' @rdname as.tdm
+#' @export
+#' @method as.tdm Corpus 
+as.tdm.Corpus <- 
+function(text.var, grouping.var = NULL, vowel.check = TRUE, ...) {
+    tm::TermDocumentMatrix(x = text.var, ...)
+}
+
 #' \code{as.tdm.default} - Default method for \code{as.tdm} used to 
 #' convert to a \code{\link[tm]{TermDocumentMatrix}}.
 #' @rdname as.tdm
@@ -364,6 +374,64 @@ as.tdm.default <- function(text.var, grouping.var = NULL, vowel.check = TRUE, ..
 #' @export
 #' @method as.tdm character
 as.tdm.character <- function(text.var, grouping.var = NULL, vowel.check = TRUE, ...) {
+
+    out <- tm_tdm_interface2(text.var = text.var, grouping.var = grouping.var, 
+        ...)
+
+    if (vowel.check) {
+        out <- out[vowel_check(rownames(out)), ]
+    }
+    out
+}
+
+
+## Helper function to check on words w/o vowels (matches tm output)
+vowel_check <- function(text.var) {
+    grepl("[aeiouy]", text.var)
+}
+
+#' \code{as.dtm.Corpus} - Corpus method for \code{as.dtm} used to 
+#' convert to a \code{\link[tm]{DocumentTermMatrix}}.
+#' @rdname as.tdm
+#' @export
+#' @method as.dtm Corpus 
+as.dtm.Corpus <- 
+function(text.var, grouping.var = NULL, vowel.check = TRUE, ...) {
+    tm::DocumentTermMatrix(x = text.var, ...)
+}
+
+#' \code{as.dtm.default} - Default method for \code{as.dtm} used to 
+#' convert to a \code{\link[tm]{DocumentTermMatrix}}.
+#' @rdname as.tdm
+#' @export
+#' @method as.dtm default 
+as.dtm.default <- 
+function(text.var, grouping.var = NULL, vowel.check = TRUE, ...) {
+    tm::as.DocumentTermMatrix(x = text.var, ...)
+}
+
+#' \code{as.dtm.character} - character method for \code{as.dtm} used to 
+#' convert to a \code{\link[tm]{DocumentTermMatrix}}.
+#' @rdname as.tdm
+#' @export
+#' @method as.dtm character
+as.dtm.character <- function(text.var, grouping.var = NULL, vowel.check = TRUE, ...) {
+
+    out <- tm_dtm_interface2(text.var = text.var, grouping.var = grouping.var, 
+        ...)
+
+    if (vowel.check) {
+        out <- out[, vowel_check(colnames(out))]
+    }
+    out
+}
+
+#' \code{as.tdm.wfm} - wfm method for \code{as.tdm} used to 
+#' convert to a \code{\link[tm]{TermDocumentMatrix}}.
+#' @rdname as.tdm
+#' @export
+#' @method as.tdm wfm    
+as.tdm.wfm <- function(text.var, grouping.var = NULL, vowel.check = TRUE, ...) {
 
     x <- wfm2xtab(text.var = text.var, grouping.var = grouping.var, ...)
 
@@ -392,29 +460,12 @@ as.tdm.character <- function(text.var, grouping.var = NULL, vowel.check = TRUE, 
     a
 }
 
-
-## Helper function to check on words w/o vowels (matches tm output)
-vowel_check <- function(text.var) {
-    grepl("[aeiouy]", text.var)
-}
-
-
-#' \code{as.dtm.default} - Default method for \code{as.dtm} used to 
-#' convert to a \code{\link[tm]{DocumentTermMatrix}}.
+#' \code{as.dtm.wfm} - wfm method for \code{as.dtm} used to 
+#' convert to a \code{\link[tm]{TermDocumentMatrix}}.
 #' @rdname as.tdm
 #' @export
-#' @method as.dtm default 
-as.dtm.default <- 
-function(text.var, grouping.var = NULL, vowel.check = TRUE, ...) {
-    tm::as.DocumentTermMatrix(x = text.var, ...)
-}
-
-#' \code{as.dtm.character} - character method for \code{as.dtm} used to 
-#' convert to a \code{\link[tm]{DocumentTermMatrix}}.
-#' @rdname as.tdm
-#' @export
-#' @method as.dtm character
-as.dtm.character <- 
+#' @method as.dtm wfm    
+as.dtm.wfm <- 
     function(text.var, grouping.var = NULL, vowel.check = TRUE, ...) {
 
     x <- t(wfm2xtab(text.var = text.var, grouping.var = grouping.var, ...))
@@ -444,20 +495,6 @@ as.dtm.character <-
     a
 }
 
-#' \code{as.tdm.wfm} - wfm method for \code{as.tdm} used to 
-#' convert to a \code{\link[tm]{TermDocumentMatrix}}.
-#' @rdname as.tdm
-#' @export
-#' @method as.tdm wfm    
-as.tdm.wfm <- as.tdm.character
-
-#' \code{as.dtm.wfm} - wfm method for \code{as.dtm} used to 
-#' convert to a \code{\link[tm]{TermDocumentMatrix}}.
-#' @rdname as.tdm
-#' @export
-#' @method as.dtm wfm    
-as.dtm.wfm <- as.dtm.character
-
 wfm2xtab <- function(text.var, grouping.var = NULL, ...) {
   
     if (!is(text.var, "true.matrix")) {
@@ -483,36 +520,42 @@ wfm2xtab <- function(text.var, grouping.var = NULL, ...) {
 #' @param sent.split logical.  If \code{TRUE} the text variable sentences will 
 #' be split into individual rows.
 #' @param row.names \code{NULL} or a character vector giving the row names for 
-#' the data frame. Not used in \pkg{qdap}; for base genric consistency.
+#' the data frame. Not used in \pkg{qdap}; for base generic consistency.
 #' @param optional logical. If \code{TRUE}, setting row names and converting 
-#' column names is optional. Not used in \pkg{qdap}; for base genric consistency.
+#' column names is optional. Not used in \pkg{qdap}; for base generic consistency.
 #' @return \code{as.data.frame} - Converts a \code{\link[tm]{Corpus}} and returns 
-#' a qdap oriented dataframe.
+#' a \pkg{qdap} oriented \code{\link[base]{data.frame}}.
 #' @rdname as.tdm
 #' @export
 #' @importFrom qdapTools list2df
 #' @method as.data.frame Corpus
 as.data.frame.Corpus <- function(x, row.names, optional, ..., doc = "docs", 
-    text = "text", sent.split = TRUE) {
+    text = "text", sent.split = FALSE) {
 
     if(!is(x[[1]], "PlainTextDocument")) {
-        x <- tm_map(x, PlainTextDocument)
+        x <- tm::tm_map(x, PlainTextDocument)
     }
 
     qpaste <- function(x) paste(as.character(x), collapse = " ")
     out <- list2df(lapply(x, qpaste), col1 = text, col2 = doc)[, 2:1]
 
     metadat <- NLP::meta(x)
-    if (ncol(metadat) > 1) {
+    if(!is.null(metadat[["labels"]])) {
+        out[[1]] <- metadat[["labels"]]
+    } 
+    if (ncol(metadat) > 1 && all(out[[1]] %in% metadat[[1]])) {
         colnames(metadat)[1] <- doc
         out <- key_merge(out, metadat)
     }
 
     if (sent.split) {
+        if(any(end_mark(out[["text"]]) == "_")) {
+            warning("Missing end marks. This may result in lost data.
+                \nConsider setting: sent.split = FALSE\n")
+        }        
         out <- sentSplit(out, text, ...)
     }
     out
-
 }
 
 
@@ -615,10 +658,12 @@ as.Corpus.default <- function(text.var, grouping.var = NULL, demographic.vars,
     ## Split apart by grouping variables and collapse text
     LST <- sapply(split(DF[, "text.var"], DF[, "grouping"]), 
         paste, collapse = " ")
-
+    LST_DF <- qdapTools::list2df(LST, "text.var", "grouping")
+    
     ## Use the tm package to convert to a Corpus
-    mycorpus <- Corpus(VectorSource(LST), ...)
- 
+    mycorpus <- tm::VCorpus(tm::DataframeSource(LST_DF), 
+        readerControl=list(reader=qdap_tm_reader))
+
     ## Add metadata info
     NLP::meta(mycorpus, "MetaID") <- names(LST)
     NLP::meta(mycorpus, "labels") <- names(LST)
@@ -667,9 +712,12 @@ as.Corpus.default <- function(text.var, grouping.var = NULL, demographic.vars,
     mycorpus
 }
 
+## helper readers
+qdap_tm_reader <- tm::readTabular(mapping=list(content="text.var", id="grouping"))
 
-compare <- function(v) all(sapply( as.list(v[-1]), 
-    FUN=function(z) {identical(z, v[1])}))
+compare <- function(v) {
+    all(sapply( as.list(v[-1]), FUN=function(z) {identical(z, v[1])}))
+}
 
 
 #' Transposes a TermDocumentMatrix object
@@ -885,6 +933,206 @@ Filter.DocumentTermMatrix <- function(x, min = 1, max = Inf,
 
 }
 
+
+tm_tdm_interface2 <- function(text.var, grouping.var, stopwords, char2space, 
+    apostrophe.remove, ...){
+
+    if(is.null(grouping.var)) {
+        G <- "all"
+    } else {
+        if (is.list(grouping.var)) {
+            m <- unlist(as.character(substitute(grouping.var))[-1])
+            m <- sapply(strsplit(m, "$", fixed=TRUE), function(x) {
+                    x[length(x)]
+                }
+            )
+            G <- paste(m, collapse="&")
+        } else {
+            G <- as.character(substitute(grouping.var))
+            G <- G[length(G)]
+        }
+    }
+    if(is.null(grouping.var)){
+        grouping <- rep("all", length(text.var))
+    } else {
+        if (is.list(grouping.var) & length(grouping.var)>1) {
+            grouping <- paste2(grouping.var)
+        } else {
+            grouping <- unlist(grouping.var)
+        } 
+    } 
+    DF <- data.frame(grouping, text.var, check.names = FALSE, 
+        stringsAsFactors = FALSE)
+
+    ## convert text.var to character and grouping.var to factor
+    DF[, "grouping"] <- factor(DF[, "grouping"])
+    DF[, "text.var"] <- as.character(DF[, "text.var"])
+
+    ## Split apart by grouping variables and collapse text
+    LST <- sapply(split(DF[, "text.var"], DF[, "grouping"]), 
+        paste, collapse = " ")
+
+    LST_DF <- qdapTools::list2df(LST, "text.var", "grouping")
+    
+    ## Use the tm package to convert to a Corpus
+    mycorpus <- tm::VCorpus(tm::DataframeSource(LST_DF), 
+        readerControl=list(reader=qdap_tm_reader))
+ 
+    ## Add metadata info
+    NLP::meta(mycorpus, "MetaID") <- names(LST)
+    NLP::meta(mycorpus, "labels") <- names(LST)
+    pers <- unname(Sys.info()["user"])
+    if (!is.null(pers)) {
+        tm::DublinCore(mycorpus, tag = "creator") <- pers
+    }
+
+    if(missing(char2space)) char2space <- "~~"
+
+    if(missing(apostrophe.remove)) apostrophe.remove <- FALSE
+
+    apo_rm <- TRUE
+
+    if(!apostrophe.remove) {
+        apo_rm <- function(x) gsub(paste0(".*?($|'|", paste(paste0("\\", 
+            char2space), collapse = "|"), "|[^[:punct:]]).*?"), 
+            "\\1", x)
+    }
+
+    if(missing(stopwords)) stopwords <- FALSE
+
+    tm::TermDocumentMatrix(mycorpus,
+        control = list(
+            removePunctuation = apo_rm,
+            wordLengths =c(0, Inf),
+            stopwords = FALSE,
+            removeNumbers = stopwords
+        )
+    )
+
+}
+
+
+tm_dtm_interface2 <- function(text.var, grouping.var, stopwords, char2space, 
+    apostrophe.remove, ...){
+
+    if(is.null(grouping.var)) {
+        G <- "all"
+    } else {
+        if (is.list(grouping.var)) {
+            m <- unlist(as.character(substitute(grouping.var))[-1])
+            m <- sapply(strsplit(m, "$", fixed=TRUE), function(x) {
+                    x[length(x)]
+                }
+            )
+            G <- paste(m, collapse="&")
+        } else {
+            G <- as.character(substitute(grouping.var))
+            G <- G[length(G)]
+        }
+    }
+    if(is.null(grouping.var)){
+        grouping <- rep("all", length(text.var))
+    } else {
+        if (is.list(grouping.var) & length(grouping.var)>1) {
+            grouping <- paste2(grouping.var)
+        } else {
+            grouping <- unlist(grouping.var)
+        } 
+    } 
+    DF <- data.frame(grouping, text.var, check.names = FALSE, 
+        stringsAsFactors = FALSE)
+
+    ## convert text.var to character and grouping.var to factor
+    DF[, "grouping"] <- factor(DF[, "grouping"])
+    DF[, "text.var"] <- as.character(DF[, "text.var"])
+
+    ## Split apart by grouping variables and collapse text
+    LST <- sapply(split(DF[, "text.var"], DF[, "grouping"]), 
+        paste, collapse = " ")
+
+    LST_DF <- qdapTools::list2df(LST, "text.var", "grouping")
+    
+    ## Use the tm package to convert to a Corpus
+    mycorpus <- tm::VCorpus(tm::DataframeSource(LST_DF), 
+        readerControl=list(reader=qdap_tm_reader))
+ 
+    ## Add metadata info
+    NLP::meta(mycorpus, "MetaID") <- names(LST)
+    NLP::meta(mycorpus, "labels") <- names(LST)
+    pers <- unname(Sys.info()["user"])
+    if (!is.null(pers)) {
+        tm::DublinCore(mycorpus, tag = "creator") <- pers
+    }
+
+    if(missing(char2space)) char2space <- "~~"
+
+    if(missing(apostrophe.remove)) apostrophe.remove <- FALSE
+
+    apo_rm <- TRUE
+
+    if(!apostrophe.remove) {
+        apo_rm <- function(x) gsub(paste0(".*?($|'|", paste(paste0("\\", 
+            char2space), collapse = "|"), "|[^[:punct:]]).*?"), 
+            "\\1", x)
+    }
+
+    if(missing(stopwords)) stopwords <- FALSE
+
+    tm::DocumentTermMatrix(mycorpus,
+        control = list(
+            removePunctuation = apo_rm,
+            wordLengths =c(0, Inf),
+            stopwords = stopwords,
+            removeNumbers = TRUE
+        )
+    )
+}
+
+#' \code{as.Corpus.TermDocumentMatrix} - \code{TermDocumentMatrix} method for 
+#' \code{as.Corpus} used to convert a \code{\link[tm]{Corpus}}.
+#' @rdname as.tdm
+#' @export
+#' @method as.Corpus TermDocumentMatrix 
+as.Corpus.TermDocumentMatrix <- function(text.var, ...){
+
+    LST_DF <- qdapTools::list2df(mat2word_list(text.var), "text.var", "grouping")
+
+    ## Use the tm package to convert to a Corpus
+    tm::VCorpus(tm::DataframeSource(LST_DF), 
+        readerControl=list(reader=qdap_tm_reader))
+
+}
+
+#' \code{as.Corpus.DocumentTermMatrix} - \code{DocumentTermMatrix} method for 
+#' \code{as.Corpus} used to convert a \code{\link[tm]{Corpus}}.
+#' @rdname as.tdm
+#' @export
+#' @method as.Corpus DocumentTermMatrix 
+as.Corpus.DocumentTermMatrix <- function(text.var, ...){
+
+    as.Corpus.TermDocumentMatrix(t(text.var))
+ 
+}
+
+#' \code{as.Corpus.wfm} - \code{wfm} method for 
+#' \code{as.Corpus} used to convert a \code{\link[tm]{Corpus}}.
+#' @rdname as.tdm
+#' @export
+#' @method as.Corpus wfm 
+as.Corpus.wfm <- function(text.var, ...){
+
+    as.Corpus.TermDocumentMatrix(as.tdm(text.var))
+
+}
+
+## helper function to construct Corpus from matrices
+mat2word_list <- function(mat){
+
+    apply(mat, 2, function(x) {
+        unbag(rep(names(x), x))
+    })
+
+}
 
 ##Removed after las archived:
 ## ## Latent Semantic Analysis
