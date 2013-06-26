@@ -183,11 +183,6 @@ pres
 (pres2 <- removeSparseTerms(pres, .3))
 plot(pres2, corThreshold = 0.95)
 
-## Latent Semantic Analysis
-library(lsa)
-lsa(tdm(x), dims=dimcalc_share())
-lsa(tdm(DATA$state, DATA$person), dims=dimcalc_share())
-
 shorts <- all_words(pres_debates2012)[,1][nchar(all_words(
     pres_debates2012)[,1]) < 4]
 
@@ -198,19 +193,6 @@ SW <- c(shorts, qdapDictionaries::contractions[, 1],
 DocTermMat2 <- with(pres_debates2012, dtm(dialogue, list(person, time), stopwords = SW))
 DocTermMat2 <- removeSparseTerms(DocTermMat2,0.95)
 DocTermMat2 <- DocTermMat2[rowSums(as.matrix(DocTermMat2))> 0,]
-
-out <- lsa(DocTermMat2, 6)
-out$tk
-out2 <- colsplit2df(matrix2df(out$tk), new.names = qcv(Person, Time))
-out2$Person <- factor(out2$Person,
-    levels = names(sort(colSums(with(pres_debates2012,
-        wfm(dialogue, person, stopwords = SW))), TRUE))
-)
-colnames(out2) <- gsub("X", "Topic ", colnames(out2))
-
-qheat(out2, facet.vars = "Time", high="darkgreen", plot=FALSE) +
-    theme(legend.title=element_blank()) +
-    guides(fill = guide_colorbar(barwidth = .5, barheight = 12))
 
 ## Correspondence Analysis
 library(ca)
@@ -437,6 +419,23 @@ finds <- apply_as_df(reuters, freq_terms, at.least = 5,
     top = 5, stopwords = Top100Words)
 apply_as_df(reuters, dispersion_plot, match.terms = finds[, 1],
     total.color = NULL)
+
+## Filter for Term Document Matrix/Document Term Matrix
+library(tm)
+data(crude)
+
+(tdm_in <- TermDocumentMatrix(crude, control = list(stopwords = TRUE)))
+Filter(tdm_in, 5)
+
+(dtm_in <- DocumentTermMatrix(crude, control = list(stopwords = TRUE)))
+Filter(dtm_in, 5)
+
+## Filter particular words based on max/min values in wfm
+v <- with(DATA, wfm(state, list(sex, adult)))
+Filter(dtm_in, 5, 7)
+Filter(dtm_in, 4, 4)
+Filter(tdm_in, 3, 4)
+Filter(tdm_in, 3, 4, stopwords = Top200Words)
 }
 }
 \seealso{
