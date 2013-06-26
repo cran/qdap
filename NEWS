@@ -17,6 +17,85 @@ And constructed with the following guidelines:
 * Bug fixes and misc. changes bumps the patch
 
 
+CHANGES IN qdap VERSION 2.1.0
+----------------------------------------------------------------
+
+BUG FIXES
+
+* `new_project` did not copy the .Rprofile over into the new project. This has 
+  been fixed. Reference issue #184.
+
+* `sentiment_frame` coerced words to factor.  `stringsAsFactors = FALSE` has 
+  been added to prebent this.
+
+* `polarity` did not work on > 1 grams due to a bug in `sentiment_frame` 
+  converting character to factor (chewth). See GitHub issue #185 for details.
+
+NEW FEATURES
+
+* `unique_by` added to allow the user to find terms unique to individual 
+  elements of a grouping variable.
+
+* `build_qdap_vignette` replaces the temporary place holder version of the 
+  *Introduction to qdap vignette*.  This function will replace the (1) HTML, 
+  (2) source, & (3) R code found in `browseVignettes(package = 'qdap')`.
+
+MINOR FEATURES
+
+* `sub_holder` picks up a `alpha.type` argument that allows the user to specify 
+  whether alpha or numeric keys should be used.
+
+* `replace_number` picks up a `remove` argument that removes numbers from text.
+
+IMPROVEMENTS
+
+* `qheat` becomes a generic method.  This means some of the internal function 
+  class checking has been moved to individual methods for those classes.  
+  Additionally, `qheat` now works with logical matrices/data.frames.
+
+* The `tm` package compatibility functions have been renamed in a more R-ish
+  way and take the form of generic methods for specific classes.  For example,
+  `df2tm_corpus` becomes `as.Corpus`.  Here is a complete list of changes:
+
+    - `df2tm_courpus` is now  `as.Corpus`
+    - `tm_corpus2df` is now `as.data.frame`
+    - `as.wfm` is now a generic method
+    - `tm_corpus2wfm` is now `as.wfm`
+    - `tm2qdap` is now `as.wfm`
+    - `tdm` is now `as.tdm` or `as.TermDocumentMatrix` 
+    - `dtm` is now `as.dtm` or `as.DocumentTermMatrix`
+
+CHANGES
+
+* `colsplit2df` and `colpaste2df` no longer convert character columns to factor.
+
+* `df2tm_corpus` is deprecated.  It will be removed in a subsequent version of 
+  `qdap`.  Use `as.Corpus` instead.
+
+* `tm_corpus2df` is deprecated.  It will be removed in a subsequent version of 
+  `qdap`.  Use `as.data.frame` instead.
+
+* `tm2qdap` is deprecated.  It will be removed in a subsequent version of 
+  `qdap`.  Use `as.wfm` instead.
+
+* `tm_corpus2wfm` is deprecated.  It will be removed in a subsequent version of 
+  `qdap`.  Use `as.wfm` instead.
+
+* `tdm` is deprecated.  It will be removed in a subsequent version of `qdap`.  
+  Use `as.tdm` or `as.TermDocumentMatrix` instead.
+
+* `dtm` is deprecated.  It will be removed in a subsequent version of `qdap`.  
+  Use `as.dtm` or `as.DocumentTermMatrix` instead.
+
+* The *Introduction to qdap* .Rmd vignette has been moved to an internal 
+  directory.  The HTML version is not built by default.  THis saves CRAN space 
+  and time checking the package source.  The file has been replaced with a
+  temporary place holder that contains instructions for building the actual 
+  vignette.  The user may also use the `build_qdap_vignette` directly.
+
+* `qdap` incorporates the chanegs from the `tm` package version: 0.6:
+  http://cran.r-project.org/web/packages/tm/news.html  Reference issue #187.
+
 CHANGES IN qdap VERSION 2.0.0
 ----------------------------------------------------------------
 
@@ -436,8 +515,8 @@ BUG FIXES
 * `termco` family of functions did not handle `NA` values.  This has been fixed. 
   (Matt Williamson) See GitHub issue #147 for details.
 
-* `pos` threw an error for vectors of length 1.  This has been fixed. (Kurt 
-  Hornik) See GitHub issue #150 for details.
+* `pos` threw an error for vectors of length 1.  This has been fixed (Kurt 
+  Hornik). See GitHub issue #150 for details.
 
 * `formality` threw an error for vectors of length 1.  This has been fixed. (Kurt 
   Hornik) See GitHub issue #151 for details.

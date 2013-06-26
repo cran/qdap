@@ -65,7 +65,7 @@ summary(with(qdap_dat, wfm(state, person)))
 ## ----data_set_up------------------------------------------------------------------------
 tm_dat <- qdap_dat <- DATA[1:4, c (1, 4) ]
 rownames (tm_dat) <- paste ("docs", 1: nrow (tm_dat))
-tm_dat <- Corpus ( DataframeSource (tm_dat[, 2, drop=FALSE]))
+tm_dat <- Corpus(DataframeSource (tm_dat[, 2, drop=FALSE]))
 
 qdap_wfm <- with (qdap_dat, wfm (state, person))
 tm_tdm <- TermDocumentMatrix (tm_dat,
@@ -82,38 +82,38 @@ tm_tdm <- TermDocumentMatrix (tm_dat,
 #  tm_tdm; inspect(tm_tdm)
 
 ## ----corp2df, eval=FALSE----------------------------------------------------------------
-#  tm_corpus2df(tm_dat)
+#  as.data.frame(tm_dat)
 
 ## ----corp2df2, echo=FALSE---------------------------------------------------------------
-tm_corpus2df(tm_dat)
+as.data.frame(tm_dat)
 
 ## ----df2corp, eval=FALSE----------------------------------------------------------------
-#  with(qdap_dat, df2tm_corpus(state, person))
+#  with(qdap_dat, as.Corpus(state, person))
 
 ## ----df2corp2, echo=FALSE---------------------------------------------------------------
-with(qdap_dat, df2tm_corpus(state, person))
+with(qdap_dat, as.Corpus(state, person))
 
-## ----tdm2wfm, eval=FALSE----------------------------------------------------------------
+## ----as.wfm1, eval=FALSE----------------------------------------------------------------
 #  as.wfm(tm_tdm)
 
-## ----tdm2wfm2, echo=FALSE---------------------------------------------------------------
+## ----as.wfm2, echo=FALSE----------------------------------------------------------------
 as.wfm(tm_tdm)
 
 ## ----wfm2tdm, eval=FALSE----------------------------------------------------------------
-#  tdm(qdap_wfm)
-#  dtm(qdap_wfm)
+#  as.tdm(qdap_wfm)
+#  as.dtm(qdap_wfm)
 
 ## ----wfm2tdm2, echo=FALSE---------------------------------------------------------------
-tdm(qdap_wfm)
+as.tdm(qdap_wfm)
 
 ## ----wfm2tdm3, echo=FALSE---------------------------------------------------------------
-dtm(qdap_wfm)
+as.dtm(qdap_wfm)
 
 ## ----corp2wfma, eval=FALSE--------------------------------------------------------------
-#  tm_corpus2wfm(tm_dat)
+#  as.wfm(tm_dat)
 
 ## ----corp2wfmb, echo=FALSE--------------------------------------------------------------
-tm_corpus2wfm(tm_dat)
+as.wfm(tm_dat)
 
 ## ----stem, eval=FALSE-------------------------------------------------------------------
 #  sentSplit(qdap_dat, "state", stem = TRUE)
@@ -190,7 +190,7 @@ class(out)
 #  apply_as_tm(a, tm::findFreqTerms, 2, 3)
 #  apply_as_tm(a, tm::Zipf_plot)
 #  apply_as_tm(a, tm::Heaps_plot)
-#  apply_as_tm(a, tm::plot.TermDocumentMatrix, corThreshold = 0.4)
+#  apply_as_tm(a, tm:::plot.TermDocumentMatrix, corThreshold = 0.4)
 #  
 #  library(proxy)
 #  apply_as_tm(a, tm::weightBin)
