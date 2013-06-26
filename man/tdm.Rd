@@ -1,11 +1,13 @@
 \name{tdm}
+\alias{apply_as_df}
 \alias{apply_as_tm}
 \alias{df2tm_corpus}
 \alias{dtm}
 \alias{tdm}
 \alias{tm2qdap}
 \alias{tm_corpus2df}
-\title{tm Package Compatability Tools: Apply to or Convert to/from Term Document
+\alias{tm_corpus2wfm}
+\title{tm Package Compatibility Tools: Apply to or Convert to/from Term Document
 Matrix or Document Term Matrix}
 \usage{
 tdm(text.var, grouping.var = NULL, vowel.check = TRUE, ...)
@@ -18,7 +20,11 @@ apply_as_tm(wfm.obj, tmfun, ..., to.qdap = TRUE)
 
 tm_corpus2df(tm.corpus, col1 = "docs", col2 = "text")
 
+tm_corpus2wfm(tm.corpus, col1 = "docs", col2 = "text", ...)
+
 df2tm_corpus(text.var, grouping.var = NULL, ...)
+
+apply_as_df(tm.corpus, qdapfun, ...)
 }
 \arguments{
   \item{text.var}{The text variable or a
@@ -34,7 +40,9 @@ df2tm_corpus(text.var, grouping.var = NULL, ...)
   Other arguments passed to functions used on the tm
   package's \code{"TermDocumentMatrix"}.  If
   \code{df2tm_corpus} - Other arguments passed to the tm
-  package's \code{\link[tm]{Corpus}}.}
+  package's \code{\link[tm]{Corpus}}.  If
+  \code{tm_corpus2wfm} - Other arguments passed to
+  \code{\link[qdap]{wfm}}.}
 
   \item{vowel.check}{logical.  Should terms without vowels
   be remove?}
@@ -57,6 +65,9 @@ df2tm_corpus(text.var, grouping.var = NULL, ...)
 
   \item{col2}{Name for column 2 (the names of the
   vectors).}
+
+  \item{qdapfun}{A qdap function that is usually used on
+  text.variable ~ grouping variable.}
 }
 \value{
 \code{tdm} - Returns a
@@ -66,15 +77,17 @@ df2tm_corpus(text.var, grouping.var = NULL, ...)
 \code{\link[tm]{DocumentTermMatrix}}.
 
 \code{tm2qdap} - Returns a \code{\link[qdap]{wfm}} object
-or \code{\link[qdap]{wfm_weight}} object.
+or \code{weight} object.
 
 \code{apply_as_tm} - Applies a tm oriented function to a
 \code{\link[qdap]{wfm}} and attempts to simplify back to a
-\code{\link[qdap]{wfm}} or \code{\link[qdap]{wfm_weight}}
-format.
+\code{\link[qdap]{wfm}} or \code{weight} format.
 
 \code{tm_corpus2df} - Converts a \code{\link[tm]{Corpus}}
 and returns a qdap oriented dataframe.
+
+\code{df2tm_wfm} - Converts a qdap oriented dataframe and
+returns a \code{\link[qdap]{wfm}}.
 
 \code{df2tm_corpus} - Converts a qdap oriented dataframe
 and returns a \code{\link[tm]{Corpus}}.
@@ -100,8 +113,14 @@ the \code{tm} package's
 \code{tm_corpus2df} - Convert a tm package corpus to a
 dataframe.
 
+\code{tm_corpus2wfm} - Convert a \code{\link[tm]{Corpus}}
+package corpus to a \code{\link[qdap]{wfm}}.
+
 \code{df2tm_corpus} - Convert a qdap dataframe to a tm
 package \code{\link[tm]{Corpus}}.
+
+Apply a \pkg{tm} \code{\link[tm]{Corpus}} as a qdap
+dataframe.
 }
 \details{
 Produces output that is identical to the \code{tm}
@@ -109,6 +128,10 @@ package's \code{\link[tm]{TermDocumentMatrix}},
 \code{\link[tm]{DocumentTermMatrix}},
 \code{\link[tm]{Corpus}} or allows convenient interface
 between the qdap and tm packages.
+}
+\note{
+\code{aply_ad_df} coerces to a dataframe with columns named
+`docs` and the other named `docs`.
 }
 \examples{
 \dontrun{
@@ -323,6 +346,40 @@ inspect(x)
 class(x)
 
 (y <- with(pres_debates2012, df2tm_corpus(dialogue, list(person, time))))
+
+## Apply qdap functions meant for dataframes from sentSplit to tm Corpus
+library(tm)
+reut21578 <- system.file("texts", "crude", package = "tm")
+reuters <- Corpus(DirSource(reut21578),
+    readerControl = list(reader = readReut21578XML))
+
+apply_as_df(reuters, word_stats)
+apply_as_df(reuters, formality)
+apply_as_df(reuters, word_list)
+apply_as_df(reuters, polarity)
+apply_as_df(reuters, Dissimilarity)
+apply_as_df(reuters, diversity)
+apply_as_df(reuters, pos_by)
+apply_as_df(reuters, flesch_kincaid)
+apply_as_df(reuters, trans_venn)
+apply_as_df(reuters, gantt_plot)
+apply_as_df(reuters, rank_freq_mplot)
+apply_as_df(reuters, termco,
+    match.list = list(
+        oil = qcv(oil, Texas, crude),
+        money = c("economic", "money")
+    ))
+plot(apply_as_df(reuters, termco,
+    match.list = list(
+        oil = qcv(oil, Texas, crude),
+        money = c("economic", "money")
+    ), elim.old = FALSE), values = TRUE, high="red")
+apply_as_df(reuters, word_cor,
+    word = qcv(oil, Texas, crude, economic, money)
+)
+plot(apply_as_df(reuters, word_cor,
+    word = qcv(oil, Texas, crude, economic, money)
+))
 }
 }
 \seealso{

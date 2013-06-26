@@ -1,9 +1,13 @@
 \name{wfm}
+\alias{Filter}
+\alias{Filter.wfm}
+\alias{as.wfm}
+\alias{weight.wfdf}
+\alias{weight.wfm}
 \alias{wfdf}
 \alias{wfm}
 \alias{wfm_combine}
 \alias{wfm_expanded}
-\alias{wfm_weight}
 \title{Word Frequency Matrix}
 \usage{
 wfm(text.var = NULL, grouping.var = NULL, output = "raw",
@@ -16,7 +20,17 @@ wfm_expanded(text.var, grouping.var = NULL, ...)
 
 wfm_combine(wf.obj, word.lists, matrix = TRUE)
 
-wfm_weight(wfm.obj, type = "prop")
+\method{weight}{wfm}(x, type = "prop", ...)
+
+\method{weight}{wfm}(x, type = "prop", ...)
+
+Filter(x, min = 1, max = Inf, count.apostrophe = TRUE, stopwords = NULL,
+  ...)
+
+\method{Filter}{wfm}(x, min = 1, max = Inf, count.apostrophe = TRUE,
+  stopwords = NULL, ...)
+
+as.wfm(matrix.object)
 }
 \arguments{
   \item{text.var}{The text variable.}
@@ -54,8 +68,6 @@ wfm_weight(wfm.obj, type = "prop")
 
   \item{wf.obj}{A \code{wfm} or \code{wfdf} object.}
 
-  \item{wfm.obj}{A \code{\link[qdap]{wfm}} object.}
-
   \item{type}{The type of weighting to use:
   c(\code{"prop"}, \code{"max"}, \code{"scaled"}).  All
   weight by column.  \code{"prop"} uses a proportion
@@ -65,6 +77,18 @@ wfm_weight(wfm.obj, type = "prop")
   \code{\link[base]{scale}} to scale with \code{center =
   FALSE}; output is not integer and column sums may not be
   equal.}
+
+  \item{x}{A \code{\link[qdap]{wfm}} object.}
+
+  \item{min}{Minimum word length.}
+
+  \item{max}{Maximum word length.}
+
+  \item{count.apostrophe}{logical.  If \code{TRUE}
+  apostrophes are counted as characters.}
+
+  \item{matrix.object}{A matrix object with words for row
+  names and integer values.}
 }
 \value{
 \code{wfm} - returns a word frequency of the class matrix.
@@ -82,8 +106,12 @@ dummy coded to indicate that number of uses.
 combined word.lists merged and remaining terms
 (\code{else}).
 
-\code{wfm_weight} - Returns a weighted matrix for use with
+\code{weight} - Returns a weighted matrix for use with
 other R packages. The output is not of the class "wfm".
+
+\code{Filter} - Returns a matrix of the class "wfm".
+
+\code{as.wfm} - Returns a matrix of the class "wfm".
 }
 \description{
 \code{wfm} - Generate a word frequency matrix by grouping
@@ -98,8 +126,23 @@ have multiple rows for each word.
 \code{wfm_combine} - Combines words (rows) of a word
 frequency matrix (\code{wfdf}) together.
 
-\code{wfm_weight} - Weight a word frequency matrix for
-analysis were such weighting is sensible..
+\code{weight} - Weight a word frequency matrix for analysis
+where such weighting is sensible.
+
+\code{weight.wfdf} - Weight a word frequency matrix for
+analysis where such weighting is sensible.
+
+\code{Filter} - Filter words from a wfm that meet max/min
+word length criteria.
+
+\code{Filter.wfm} - Filter words from a wfm that meet
+max/min word length criteria.
+
+\code{as.wfm} - Attempts to coerce a matrix to a
+\code{\link[qdap]{wfm}}.
+}
+\details{
+wfm Method for Filter
 }
 \note{
 Words can be kept as one by inserting a double tilde
@@ -112,7 +155,17 @@ keeping proper names as a single unit.
 ## word frequency matrix (wfm) example:
 with(DATA, wfm(state, list(sex, adult)))[1:15, ]
 with(DATA, wfm(state, person))[1:15, ]
+Filter(with(DATA, wfm(state, list(sex, adult))), 5)
 with(DATA, wfm(state, list(sex, adult)))
+
+## Filter particular words based on max/min values
+v <- with(DATA, wfm(state, list(sex, adult)))
+Filter(v, 5)
+Filter(v, 5, count.apostrophe = FALSE)
+Filter(v, 5, 7)
+Filter(v, 4, 4)
+Filter(v, 3, 4)
+Filter(v, 3, 4, stopwords = Top25Words)
 
 ## insert double tilde ("~~") to keep phrases(i.e., first last name)
 alts <- c(" fun", "I ")
@@ -168,6 +221,11 @@ z <- wfm_combine(y, worlis)
 
 chisq.test(z)
 chisq.test(wfm(y))
+
+## Dendrogram
+presdeb <- with(pres_debates2012, wfm(dialogue, list(person, time)))
+library(sjPlot)
+sjc.dend(t(presdeb), 2:4)
 
 ## Words correlated within turns of talk
 ## EXAMPLE 1
@@ -266,10 +324,10 @@ plot3d.ca(fit2, labels=1)
 
 ## Weight a wfm
 WFM <- with(DATA, wfm(state, list(sex, adult)))
-plot(wfm_weight(WFM, "scaled"), TRUE)
-wfm_weight(WFM, "prop")
-wfm_weight(WFM, "max")
-wfm_weight(WFM, "scaled")
+plot(weight(WFM, "scaled"), TRUE)
+weight(WFM, "prop")
+weight(WFM, "max")
+weight(WFM, "scaled")
 }
 }
 \keyword{word-frequency-matrix}

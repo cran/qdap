@@ -86,6 +86,27 @@
 #' sam: You liar, it stinks!"
 #' 
 #' read.transcript(text=trans)
+#' 
+#' ## Read in text specify spaces as sep
+#' ## EXAMPLE 1
+#' 
+#' read.transcript(text="34    The New York Times reports a lot of words here.
+#' 12    Greenwire reports a lot of words.
+#' 31    Only three words.
+#'  2    The Financial Times reports a lot of words.
+#'  9    Greenwire short.
+#' 13    The New York Times reports a lot of words again.", 
+#'     col.names=qcv(NO,    ARTICLE), sep="   ")
+#' 
+#' ## EXAMPLE 2
+#' 
+#' read.transcript(text="34..    The New York Times reports a lot of words here.
+#' 12..    Greenwire reports a lot of words.
+#' 31..    Only three words.
+#'  2..    The Financial Times reports a lot of words.
+#'  9..    Greenwire short.
+#' 13..    The New York Times reports a lot of words again.", 
+#'     col.names=qcv(NO,    ARTICLE), sep="\\.\\.")
 #' }
 read.transcript <-
 function(file, col.names = NULL, text.var = NULL, merge.broke.tot = TRUE, 
@@ -100,6 +121,19 @@ function(file, col.names = NULL, text.var = NULL, merge.broke.tot = TRUE,
     } else {
         y <- file_ext(file)
     }
+
+    ## Handling for text= && multi-char sep
+    revert <- FALSE
+    if (!is.null(sep) && !missing(text) && nchar(sep) > 1) {
+    
+        text <- gsub(sep, "QDAP_SEP_HOLDER", text)                
+        text <- gsub(":", "QDAP_PLACE_HOLDER", text)
+        text <- gsub("QDAP_SEP_HOLDER", ":", text)
+        sep <- ":"
+        revert <- TRUE
+    
+    }
+
     if (is.null(sep)) {
         if (y %in% c("docx", "txt", "text")) {
             sep <- ":"
@@ -135,6 +169,9 @@ function(file, col.names = NULL, text.var = NULL, merge.broke.tot = TRUE,
         },
         text = {
             x <- read.table(text=text, header = header, sep = sep, skip=skip)
+            if(revert) {
+                x[, 2] <- gsub("QDAP_PLACE_HOLDER", ":", x[, 2])
+            }
         },
         stop("invalid file extension:\n \bfile must be a .docx .csv .xls or .xlsx" )
     )

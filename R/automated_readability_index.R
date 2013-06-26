@@ -10,10 +10,14 @@
 #' @param rm.incomplete logical.  If \code{TRUE} removes incomplete sentences 
 #' from the analysis.
 #' @param \ldots Other arguments passed to \code{\link[qdap]{end_inc}}.
-#' @return Returns a dataframe with selected readability statistic by grouping 
-#' variable(s).  The \code{frey} function returns a graphic representation of 
-#' the readability as well as a list of two dataframe: 1) \code{SENTENCES_USED} 
-#' and 2) \code{SENTENCE_AVERAGES}.
+#' @return Returns a list of 2 dataframes: (1) Counts and (2) Readability.  
+#' Counts are the raw scores used to calculate readability score and can be
+#' accessed via \code{\link[qdap]{counts}}.  Readability is the dataframe
+#' with the selected readability statistic by grouping variable(s) and can be 
+#' access via \code{\link[qdap]{scores}}.  The \code{\link[qdap]{fry}} function 
+#' returns a graphic representation of the readability as the 
+#' \code{\link[qdap]{scores}} returns the information for graphing but not a
+#' readability score.
 #' @rdname Readability
 #' @section Warning: Many of the indices (e.g., Automated Readability Index) 
 #' are derived from word difficulty (letters per word) and sentence difficulty 
@@ -40,33 +44,80 @@
 #' @examples
 #' \dontrun{
 #' AR1 <- with(rajSPLIT, automated_readability_index(dialogue, list(person, act)))
-#' htruncdf(AR1,, 15)
+#' ltruncdf(AR1,, 15)
+#' scores(AR1)
+#' counts(AR1)
+#' plot(AR1)
+#' plot(counts(AR1))
+#' 
 #' AR2 <- with(rajSPLIT, automated_readability_index(dialogue, list(sex, fam.aff)))
-#' htruncdf(AR2,, 15)
+#' ltruncdf(AR2,, 15)
+#' scores(AR2)
+#' counts(AR2)
+#' plot(AR2)
+#' plot(counts(AR2))
+#' 
+#' AR3 <- with(rajSPLIT, automated_readability_index(dialogue, person))
+#' ltruncdf(AR3,, 15)
+#' scores(AR3)
+#' head(counts(AR3))
+#' plot(AR3)
+#' plot(counts(AR3))
 #' 
 #' CL1 <- with(rajSPLIT, coleman_liau(dialogue, list(person, act)))
-#' head(CL1)
+#' ltruncdf(CL1, 20)
+#' head(counts(CL1))
+#' plot(CL1)
+#' 
 #' CL2 <- with(rajSPLIT, coleman_liau(dialogue, list(sex, fam.aff)))
-#' head(CL2)
+#' ltruncdf(CL2)
+#' plot(counts(CL2))
 #' 
-#' SM1 <- with(rajSPLIT, SMOG(dialogue, list(person, act)))
-#' head(SM1)
-#' SM2 <- with(rajSPLIT, SMOG(dialogue, list(sex, fam.aff)))
-#' head(SM2)
+#' (SM1 <- with(rajSPLIT, SMOG(dialogue, list(person, act))))
+#' plot(counts(SM1))
+#' plot(SM1)
 #' 
-#' FL1 <- with(rajSPLIT, flesch_kincaid(dialogue, list(person, act)))
-#' head(FL1)
-#' FL2 <-  with(rajSPLIT, flesch_kincaid(dialogue, list(sex, fam.aff)))
-#' head(FL2)
+#' (SM2 <- with(rajSPLIT, SMOG(dialogue, list(sex, fam.aff))))
 #' 
-#' FR <- with(rajSPLIT, fry(dialogue, list(sex, fam.aff)))
-#' htruncdf(FR$SENTENCES_USED)
-#' head(FR$SENTENCE_AVERAGES)
+#' (FL1 <- with(rajSPLIT, flesch_kincaid(dialogue, list(person, act))))
+#' plot(scores(FL1))
+#' plot(counts(FL1))
 #' 
+#' (FL2 <-  with(rajSPLIT, flesch_kincaid(dialogue, list(sex, fam.aff))))
+#' plot(scores(FL2))
+#' plot(counts(FL2))
+#' 
+#' FR1 <- with(rajSPLIT, fry(dialogue, list(sex, fam.aff)))
+#' scores(FR1)
+#' plot(scores(FR1))
+#' counts(FR1)
+#' plot(counts(FR1))
+#' 
+#' FR2 <- with(rajSPLIT, fry(dialogue, person))
+#' scores(FR2)
+#' plot(scores(FR2))
+#' counts(FR2)
+#' plot(counts(FR2))
+#' 
+#' FR3 <- with(pres_debates2012, fry(dialogue, list(time, person)))
+#' colsplit2df(scores(FR3))
+#' plot(scores(FR3), auto.label = FALSE)
+#' counts(FR3)
+#' plot(counts(FR3))
+#' 
+#' library(ggplot2)
+#' ggplot(colsplit2df(counts(FR3)), aes(sent.per.100.wrds, 
+#'     syllables.per.100.wrds)) +
+#'     geom_point(aes(fill=person), shape=21, size=3) +
+#'     facet_grid(person~time)
+#'     
 #' LW1 <- with(rajSPLIT, linsear_write(dialogue, list(person, act)))
-#' head(LW1)
+#' plot(scores(LW1))
+#' plot(counts(LW1))
+#' 
 #' LW2 <- with(rajSPLIT, linsear_write(dialogue, list(sex, fam.aff)))
-#' head(LW2)
+#' plot(scores(LW2), method="lm")
+#' plot(counts(LW2))
 #' }
 automated_readability_index <-
 function(text.var, grouping.var = NULL, rm.incomplete = FALSE, ...) {
@@ -99,6 +150,10 @@ function(text.var, grouping.var = NULL, rm.incomplete = FALSE, ...) {
         stringsAsFactors = FALSE))
     if (rm.incomplete) {
         DF <- end_inc(dataframe = DF, text.var = text.var, ...)
+    }   
+    if (is.dp(text.var = DF[, "text.var"])) {
+        warning(paste0("\n  Some rows contain double punctuation.", 
+            "  Suggested use of sentSplit function."))
     }    
     DF$word.count <- word_count(DF$text.var, missing = 0)
     i <- as.data.frame(table(DF$group))
@@ -111,12 +166,30 @@ function(text.var, grouping.var = NULL, rm.incomplete = FALSE, ...) {
     DF2$character.count <- aggregate(character.count ~ 
         group, DF, sum)$character.count 
     ari <- function(tse, tw, tc) 4.71*(tc/tw) + .5*(tw/tse) - 21.43
-    DF2$Automated_Readability_Index <- round(with(DF2, 
-        ari(tse = sentence.count, tc = character.count, tw = word.count)), 
-        digits = 1)
+    DF2$Automated_Readability_Index <- with(DF2, 
+        ari(tse = sentence.count, tc = character.count, tw = word.count))
+    rownames(DF) <- NULL
     names(DF2)[1] <- G
-    DF2
+    o <- list(Counts = DF, Readability = DF2)
+    class(o) <- c("automated_readability_index", class(DF2))
+    o
 }
+
+
+#' Prints an automated_readability_index Object
+#' 
+#' Prints an automated_readability_index object.
+#' 
+#' @param x The automated_readability_index object.
+#' @param digits The number of digits displayed if \code{values} is \code{TRUE}.
+#' @param \ldots ignored
+#' @method print automated_readability_index 
+#' @S3method print automated_readability_index 
+print.automated_readability_index <- function(x, digits = 3, ...) {
+    print(scores(x), digits = digits, ...)
+}
+
+
 
 #' Coleman Liau Readability
 #' 
@@ -157,6 +230,10 @@ function(text.var, grouping.var = NULL, rm.incomplete = FALSE, ...) {
     if (rm.incomplete) {
         DF <- end_inc(dataframe = DF, text.var = text.var, ...)
     }
+    if (is.dp(text.var = DF[, "text.var"])) {
+        warning(paste0("\n  Some rows contain double punctuation.", 
+            "  Suggested use of sentSplit function."))
+    }    
     DF$word.count <- word_count(DF$text.var, missing = 0, digit.remove = FALSE)
     i <- as.data.frame(table(DF$group))
     DF$group <- DF$group[ , drop=TRUE]
@@ -170,10 +247,13 @@ function(text.var, grouping.var = NULL, rm.incomplete = FALSE, ...) {
         group, DF, sum)$character.count 
     clf <- function(tse, tw, tc) (.0588*((100*tc)/tw)) - 
       (.296*((100*tse)/tw) ) - 15.8
-    DF2$Coleman_Liau <- round(with(DF2, clf(tse = sentence.count, 
-        tc = character.count, tw = word.count)), digits = 1)
+    DF2$Coleman_Liau <- with(DF2, clf(tse = sentence.count, 
+        tc = character.count, tw = word.count))
     names(DF2)[1] <- G
-    DF2
+    rownames(DF) <- NULL    
+    o <- list(Counts = DF, Readability = DF2)
+    class(o) <- "coleman_liau"
+    o
 }
 
 
@@ -219,6 +299,10 @@ function(text.var, grouping.var = NULL, output = "valid",
     if (rm.incomplete) {
         DF <- end_inc(dataframe = DF, text.var = text.var, ...)
     }
+    if (is.dp(text.var = DF[, "text.var"])) {
+        warning(paste0("\n  Some rows contain double punctuation.", 
+            "  Suggested use of sentSplit function."))
+    }    
     DF$word.count <- word_count(DF$text.var, missing = 0)
     i <- as.data.frame(table(DF$group))
     if (output == "valid") {
@@ -236,12 +320,14 @@ function(text.var, grouping.var = NULL, output = "valid",
     DF2$polysyllable.count <- aggregate(polysyllable.count ~ 
         group, DF, sum)$polysyllable.count   
     smog <- function(tse, tpsy) 1.043 * sqrt(tpsy * (30/tse)) + 3.1291 
-    DF2$SMOG <- round(with(DF2, smog(tse = sentence.count, 
-        tpsy = polysyllable.count)), digits = 1)
+    DF2$SMOG <- with(DF2, smog(tse = sentence.count, 
+        tpsy = polysyllable.count))
     DF2$validity <- ifelse(DF2$sentence.count < 30, "n < 30", "valid")
     if(output == "valid") DF2$validity <- NULL
     names(DF2)[1] <- G
-    DF2
+    o <- list(Counts = DF, Readability = DF2)
+    class(o) <- "SMOG"
+    o
 }
 
 
@@ -284,6 +370,10 @@ function(text.var, grouping.var = NULL, rm.incomplete = FALSE, ...) {
     if (rm.incomplete) {
         DF <- end_inc(dataframe = DF, text.var = text.var, ...)
     }
+    if (is.dp(text.var = DF[, "text.var"])) {
+        warning(paste0("\n  Some rows contain double punctuation.", 
+            "  Suggested use of sentSplit function."))
+    }
     DF$word.count <- word_count(DF$text.var, missing = 0)
     DF$syllable.count <- syllable_sum(DF$text.var)
     DF$tot.n.sent <- 1:nrow(DF)
@@ -294,12 +384,14 @@ function(text.var, grouping.var = NULL, rm.incomplete = FALSE, ...) {
         sum)$syllable.count  
     fkgl <- function(tw, tse, tsy) 0.39 * (tw/tse) + 11.8 * (tsy/tw) - 15.59
     fre <- function(tw, tse, tsy) 206.835 - 1.015 * (tw/tse) - 84.6 * (tsy/tw)
-    DF2$FK_grd.lvl <- round(with(DF2, fkgl(tw = word.count, 
-        tse = sentence.count, tsy = syllable.count)), digits = 1)
-    DF2$FK_read.ease <- round(with(DF2, fre(tw = word.count, 
-        tse = sentence.count, tsy = syllable.count)), digits = 3)
+    DF2$FK_grd.lvl <- with(DF2, fkgl(tw = word.count, 
+        tse = sentence.count, tsy = syllable.count))
+    DF2$FK_read.ease <- with(DF2, fre(tw = word.count, 
+        tse = sentence.count, tsy = syllable.count))
     names(DF2)[1] <- G
-    DF2
+    o <- list(Counts = DF, Readability = DF2)
+    class(o) <- "flesch_kincaid"
+    o
 }
 
 
@@ -311,13 +403,15 @@ function(text.var, grouping.var = NULL, rm.incomplete = FALSE, ...) {
 #' @rdname Readability
 #' @param auto.label  logical.  If \code{TRUE} labels automatically added.  If 
 #' \code{FALSE} the user clicks interactively.
-#' @param grid logical.  If \code{TRUE} a micro grid is dsicplayed similar to 
-#' Fry's original depiction, though this makes visualizing more difficult.
+#' @param grid logical.  If \code{TRUE} a micro grid is displayed, similar to 
+#' Fry's original depiction, though this may make visualizing more difficult.
 #' @param div.col The color of the grade level division lines.
+#' @param plot logical.  If \code{TRUE} a graph is plotted corresponding to Fry's 
+#' graphic representation.
 #' @export
 fry <-
-function(text.var, grouping.var = NULL, auto.label = TRUE, 
-    rm.incomplete = FALSE, grid = FALSE, div.col = "grey85", ...) {
+function(text.var, grouping.var = NULL, rm.incomplete = FALSE, 
+    auto.label = TRUE, grid = FALSE, div.col = "grey85", plot = TRUE, ...) {
     read.gr <- group <- NULL  
     if(is.null(grouping.var)) {
         G <- "all"
@@ -349,6 +443,10 @@ function(text.var, grouping.var = NULL, auto.label = TRUE,
     if (rm.incomplete) {
         DF <- end_inc(dataframe = DF, text.var = text.var, ...)
     }
+    if (is.dp(text.var = DF[, "text.var"])) {
+        warning(paste0("\n  Some rows contain double punctuation.", 
+            "  Suggested use of sentSplit function."))
+    }       
     DF$word.count <- word_count(DF$text.var, missing = 0)
     DF$tot.n.sent <- 1:nrow(DF)
     DF <- DF[with(DF, order(group, DF$tot.n.sent)), ]
@@ -386,6 +484,942 @@ function(text.var, grouping.var = NULL, auto.label = TRUE,
     DF5$syll.count <- syllable_sum(lapply(DF5$text.var, hun.grab))
     DF6 <- aggregate(syll.count ~ group, DF5, mean)
     DF6$ave.sent.per.100 <- aggregate(sent.per.100 ~ group, DF5, mean)[, 2]
+    names(DF6) <- c(G, "ave.syll.per.100", "ave.sent.per.100")
+    colnames(DF5)[c(2, 4, 5)] <- c(colnames(DF6)[1], "sent.per.100.wrds",
+        "syllables.per.100.wrds")
+    DF5 <- DF5[, -1]
+    
+    out <- list(Counts = DF5[, c(1, 3:4, 2)], Readability = DF6)
+    attributes(out) <- list(
+            class = "fry",
+            names = names(out),
+            plot_instructions = list(auto.label = auto.label, 
+                grid = grid, div.col = div.col, plot = plot)
+    )
+    out
+}
+
+
+
+#' Linsear Write Readability
+#' 
+#' \code{linsear_write} - Apply Linsear Write Readability to transcript(s) by 
+#' zero or more grouping variable(s).
+#' @rdname Readability
+#' @export 
+linsear_write <-
+function(text.var, grouping.var = NULL, rm.incomplete = FALSE, ...) {
+    read.gr <- group <- NULL
+    if(is.null(grouping.var)) {
+        G <- "all"
+    } else {
+        if (is.list(grouping.var)) {
+            m <- unlist(as.character(substitute(grouping.var))[-1])
+            m <- sapply(strsplit(m, "$", fixed=TRUE), function(x) {
+                    x[length(x)]
+                }
+            )
+            G <- paste(m, collapse="&")
+        } else {
+            G <- as.character(substitute(grouping.var))
+            G <- G[length(G)]
+        }
+    }
+    if(is.null(grouping.var)){
+        grouping <- rep("all", length(text.var))
+    } else {
+        if (is.list(grouping.var) & length(grouping.var)>1) {
+            grouping <- paste2(grouping.var)
+        } else {
+            grouping <- unlist(grouping.var)
+        } 
+    } 
+    text <- as.character(text.var)
+    DF <- na.omit(data.frame(group = grouping, text.var = text, 
+        stringsAsFactors = FALSE))
+    if (rm.incomplete) {
+        DF <- end_inc(dataframe = DF, text.var = text.var, ...)
+    }
+    if (is.dp(text.var = DF[, "text.var"])) {
+        warning(paste0("\n  Some rows contain double punctuation.", 
+            "  Suggested use of sentSplit function."))
+    }       
+    DF$word.count <- word_count(DF$text.var)
+    DF$tot.n.sent <- 1:nrow(DF)
+    DF <- DF[with(DF, order(group, DF$tot.n.sent)), ]
+    DF$read.gr <- unlist(by(DF$word.count, DF$group, partition))
+    LIST <- names(which(tapply(DF$word.count, DF$group, function(x) {
+            max(cumsum(x))
+        }
+    ) >= 100))
+    DF2 <- subset(DF, group %in% LIST & read.gr != "NA")
+    DF2$group <- DF2$group[, drop = TRUE]
+    DF2$sub <- with(DF2, paste(group, read.gr, sep = "_"))
+    DF2b <- DF2[order(DF2$sub), ]
+    DF2b$cumsum.gr <- unlist(tapply(DF2$word.count, DF2$sub, cumsum))
+    DF2 <- DF2b[order(DF2b$group, DF2b$tot.n.sent), ]
+    DF2$wo.last <- DF2$cumsum.gr - DF2$word.count
+    DF2$hun.word <- 100 - DF2$wo.last
+    DF2$frac.sent <- ifelse(DF2$hun.word/DF2$word.count > 1, 1, 
+        DF2$hun.word/DF2$word.count)  
+    DF3b <- unique(data.frame(sub = DF2$sub, group = DF2$group))
+    DF3 <- data.frame(sub = DF2$sub, group = DF2$group, text.var = 
+        DF2$text.var, frac.sent = DF2$frac.sent)
+    CHOICES <- tapply(as.character(DF3b$sub), DF3b$group, function(x) {
+            sample(x, 1, replace = FALSE)
+        }
+    )
+    CHOICES <- as.character(unlist(CHOICES))
+    DF4 <- DF3[which(DF3$sub %in% CHOICES), ]
+    DF4$sub <- DF4$sub[, drop = TRUE]
+    FUN <- function(x) paste(as.character(unlist(x)), collapse = " ")
+    DF5 <- aggregate(text.var ~ sub + group, DF4, FUN)
+    sent.per.100 <- as.data.frame(tapply(DF2$frac.sent, DF2$sub, sum))
+    names(sent.per.100) <- "x"
+    DF5$sent.per.100 <- sent.per.100[as.character(DF5$sub), "x"]
+    hun.grab <- function(x) paste(unblanker(unlist(word_split(reducer(
+        unlist(strip(x))))))[1:100], collapse = " ")
+    DF5$SYL.LIST <- lapply(DF5$text.var, function(x) unlist(syllable_count(
+        hun.grab(x))$syllables))
+    DF5$hard_easy_sum <- unlist(lapply(DF5$SYL.LIST, function(x) {
+          sum(ifelse(x >= 3, 3, 1))
+    }))
+    DF5$HE_tsent_ratio <- unlist(DF5$hard_easy_sum)/DF5$sent.per.100
+    DF5$Linsear_Write <- ifelse(DF5$sent.per.100 > 20, 
+        DF5$HE_tsent_ratio/2, 
+        (DF5$HE_tsent_ratio - 2)/2)
+    DF5 <- DF5[, c(2, 4, 6, 8)]
+    names(DF5) <- c(G, "sent.per.100", "hard_easy_sum", "Linsear_Write")
+    names(DF)[1] <- names(DF5)[1]
+    o <- list(Counts = DF, Readability = DF5)
+    class(o) <- "linsear_write"
+    o
+}
+
+
+#' Readability Measures
+#' 
+#' \code{scores.automated_readability_index} - View scores from \code{\link[qdap]{automated_readability_index}}.
+#' 
+#' automated_readability_index Method for scores
+#' @param x The automated_readability_index object.
+#' @param \ldots ignored
+#' @export
+#' @method scores automated_readability_index
+scores.automated_readability_index <- function(x, ...) {
+
+    out <- x[["Readability"]]
+    attributes(out) <- list(
+            class = c("readability_score", class(out)),
+            type = "automated_readability_index_scores",
+            names = colnames(out),
+            row.names = rownames(out)
+    )
+    out
+}
+
+#' Prints a readability_score Object
+#' 
+#' Prints a readability_score object.
+#' 
+#' @param x The readability_score object.
+#' @param digits The number of digits displayed if \code{values} is \code{TRUE}.
+#' @param \ldots ignored
+#' @method print readability_score
+#' @S3method print readability_score
+print.readability_score <-
+    function(x, digits = 3, ...) {
+    class(x) <- "data.frame"
+    WD <- options()[["width"]]
+    options(width=3000)
+    x[, -1] <- round(x[, -1], digits = digits)
+    print(x)
+    options(width=WD)
+}
+
+
+#' Readability Measures
+#' 
+#' \code{counts.automated_readability_index} - View counts from \code{\link[qdap]{automated_readability_index}}.
+#' 
+#' @param x The automated_readability_index object.
+#' @param \ldots ignored
+#' automated_readability_index Method for counts.
+#' @export
+#' @method counts automated_readability_index
+counts.automated_readability_index <- function(x, ...) {
+    out <- x[["Counts"]]
+    attributes(out) <- list(
+            class = c("readability_count", class(out)),
+            type = "automated_readability_index_count",
+            names = colnames(out),
+            row.names = rownames(out)
+    )
+    out
+}
+
+
+
+#' Prints a readability_count Object
+#' 
+#' Prints a readability_count object.
+#' 
+#' @param x The readability_count object.
+#' @param digits The number of digits displayed.
+#' @param \ldots ignored
+#' @method print readability_count
+#' @S3method print readability_count
+print.readability_count <-
+    function(x, digits = 3, ...) {
+    class(x) <- "data.frame"
+    WD <- options()[["width"]]
+    options(width=3000)
+    print(x)
+    options(width=WD)
+}
+
+
+
+
+#' Plots a readability_count Object
+#' 
+#' Plots a readability_count object.
+#' 
+#' @param x The readability_count object.
+#' @param alpha The alpha level to use for points.
+#' @param \ldots ignored
+#' @importFrom ggplot2 ggplot aes geom_point theme theme_minimal ylab xlab scale_size_continuous element_blank guides 
+#' @importFrom scales alpha
+#' @method plot readability_count
+#' @export
+plot.readability_count <- function(x, alpha = .3, ...){ 
+
+    type <- attributes(x)[["type"]]
+
+    switch(type,
+        automated_readability_index_count = {
+            word_counts(DF = x, x = "word.count", y = "character.count", 
+                z = NULL, g = "group", alpha = alpha)
+        },
+        coleman_liau_count = {
+            word_counts(DF = x, x = "word.count", y = "character.count", 
+                z = NULL, g = "group", alpha = alpha)
+        },
+        SMOG_count = {
+            word_counts(DF = x, x = "word.count", y = "polysyllable.count", 
+                z = NULL, g = "group", alpha = alpha)
+        },
+        flesch_kincaid_count = {
+            word_counts(DF = x, x = "word.count", y = "syllable.count", 
+                z = NULL, g = "group", alpha = alpha)
+        },
+        fry_count = {
+            
+            word_counts3(DF = x, x = "sent.per.100.wrds", 
+                y = "syllables.per.100.wrds", 
+                z = NULL, g = colnames(x)[1])
+        },        
+        stop("Not a plotable readability count")
+    )
+
+}
+
+#' Plots a readability_score Object
+#' 
+#' Plots a readability_score object.
+#' 
+#' @param x The readability_score object.
+#' @param alpha The alpha level to be used for the points.
+#' @param auto.label  logical.  For plotting \code{\link[qdap]{fry}} only, if 
+#' \code{TRUE} labels automatically added.  If \code{FALSE} the user clicks 
+#' interactively.
+#' @param grid logical.  For plotting \code{\link[qdap]{fry}} only, if 
+#' \code{TRUE} a micro grid is displayedsimilar to Fry's original depiction, 
+#' though this makes visualizing more difficult.
+#' @param div.col For plotting \code{\link[qdap]{fry}} only, the color of the 
+#' grade level division lines.
+#' @param \ldots ignored
+#' @importFrom ggplot2 ggplot aes geom_smooth facet_wrap guide_colorbar geom_point theme ggplotGrob theme_bw ylab xlab scale_fill_gradient element_blank guides 
+#' @importFrom gridExtra grid.arrange
+#' @importFrom scales alpha
+#' @method plot readability_score
+#' @export
+plot.readability_score <- function(x, alpha = .3, auto.label, 
+    grid, div.col, ...){ 
+
+    type <- attributes(x)[["type"]]
+
+    switch(type,
+        automated_readability_index_scores = {
+            plot_automated_readability_index(x)
+        },
+        coleman_liau_scores = {
+            plot_coleman_liau(x)
+        },
+        SMOG_scores = {
+            plot_SMOG(x)
+        },
+        flesch_kincaid_scores = {
+            plot_flesch_kincaid(x)
+        },
+        fry_scores = {
+            ## Plotting attributes
+            PA <- attributes(x)[["plot_instructions"]]
+        
+            if (missing(auto.label)) {
+                auto.label <- PA[["auto.label"]]
+            }
+            if (missing(grid)) {
+                grid <- PA[["grid"]]
+            }
+            if (missing(div.col)) {
+                div.col <- PA[["div.col"]]
+            }    
+            plot_fry(x, auto.label = auto.label, grid = grid, 
+                    div.col = div.col)
+        },
+        stop("Not a plotable readability score")
+    )
+
+}
+
+
+plot_automated_readability_index <- function(x) {
+
+    character.count <- sentence.count <- Coleman_Liau <- word.count <- grvar <- 
+        Readability_count <-NULL
+
+    names(x)[ncol(x)] <- "Readability_count"
+    x  <- x[order(x[, "Readability_count"]), ]
+    x[, 1] <- factor(x[, 1], levels = x[, 1])
+    forlater <-  names(x)[1]
+    names(x)[1] <- "grvar"
+    plot1 <- ggplot(x, aes(fill = word.count, x = sentence.count, 
+        y = character.count)) + geom_point(size=2.75, shape=21, colour="grey65") +
+        theme_bw() + 
+        scale_fill_gradient(high="red", low="pink", name="Word\nCount") +
+        ylab("Character Count") + 
+        xlab("Sentence Count") + 
+        theme(panel.grid = element_blank(),
+            legend.position = "bottom") +
+        guides(fill = guide_colorbar(barwidth = 10, barheight = .5)) 
+    plot2 <- ggplot(x, aes(y = grvar, x = Readability_count)) +
+        geom_point(size=2) + 
+        ylab(gsub("&", " & ", forlater)) + 
+        xlab("Automated Readability Index")
+
+    grid.arrange(plot2, plot1, ncol=2)
+}
+
+#' Plots a automated_readability_index Object
+#' 
+#' Plots a automated_readability_index object.
+#' 
+#' @param x The readability_score object.
+#' @param \ldots ignored
+#' @importFrom ggplot2 ggplot aes guide_colorbar geom_point theme ggplotGrob theme_bw ylab xlab scale_fill_gradient element_blank guides 
+#' @importFrom gridExtra grid.arrange
+#' @export
+#' @method plot automated_readability_index
+plot.automated_readability_index <- function(x, ...){ 
+
+    plot.readability_score(scores(x))
+
+}
+
+## Generic helper plotting function for counts
+word_counts <- function(DF, x, y, z = NULL, g, alpha = .3) {
+
+    NMS <- rename(c(x, y, z))
+
+    AES <- aes(x=x, y=y, color=g)
+    if (!is.null(z)) {
+        AES[["size"]] <- g
+    }
+    MAX <- max(DF[, y])
+
+    plot <- ggplot(data.frame(x=DF[, x], y=DF[, y], z=DF[, z], g=DF[, g]), AES) + 
+        geom_point(alpha=alpha) + facet_wrap(~g) + 
+        geom_smooth() + ylim(0, MAX + MAX*.05) +
+        guides(color=FALSE) +
+        ylab(NMS[2]) + xlab(NMS[1]) +
+        theme_minimal() + 
+        theme(panel.grid = element_blank(),
+            panel.margin = unit(1, "lines")) +
+        ggplot2::annotate("segment", x=-Inf, xend=Inf, y=-Inf, yend=-Inf)+
+        ggplot2::annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf)
+
+
+    if (!is.null(z)) {
+        plot <- plot + scale_size_continuous(names=gsub(" ", "\n", NMS[3]))
+    }
+
+    suppressMessages(suppressWarnings(print(plot)))
+
+}
+
+word_counts2 <- function(DF, x, y, z = NULL, g, alpha = .3) {
+
+    NMS <- rename(c(x, y, z))
+
+    AES <- aes(x=x, y=y, color=g)
+    if (!is.null(z)) {
+        AES[["size"]] <- g
+    }
+    MAX <- max(DF[, y])
+
+    plot <- ggplot(data.frame(x=DF[, x], y=DF[, y], z=DF[, z], g=DF[, g]), AES) + 
+        geom_point(alpha=alpha) + facet_wrap(~g) + 
+        geom_smooth() + ylim(0, MAX + MAX*.05) +
+        guides(color=FALSE) +
+        ylab(NMS[2]) + xlab(NMS[1]) +
+        theme_minimal() + 
+        theme(panel.grid = element_blank(),
+            panel.margin = unit(1, "lines")) +
+        ggplot2::annotate("segment", x=-Inf, xend=Inf, y=-Inf, yend=-Inf)+
+        ggplot2::annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf)
+
+
+    if (!is.null(z)) {
+        plot <- plot + scale_size_continuous(names=gsub(" ", "\n", NMS[3]))
+    }
+
+    invisible(    suppressMessages(suppressWarnings(plot)))
+
+}
+
+word_counts3 <- function(DF, x, y, z = NULL, g) {
+
+    NMS <- rename(c(x, y, z))
+
+    AES <- aes(x=x, y=y, fill=g)
+    if (!is.null(z)) {
+        AES[["size"]] <- g
+    }
+    MAX <- max(DF[, y])
+
+    avs <- matrix2df(do.call(rbind, lapply(split(DF[, 2:3], 
+        DF[,1]), colMeans)), "g")
+
+    plot <- ggplot(data.frame(x=DF[, x], y=DF[, y], z=DF[, z], g=DF[, g]), AES) + 
+        geom_point(shape=21, size=3) + facet_wrap(~g) + 
+        guides(color=FALSE, fill=FALSE) +
+        ylab(NMS[2]) + xlab(NMS[1]) +
+        geom_point(data=avs, shape=3, colour="black", aes_string(x=x, y=y, group="g")) 
+
+    if (!is.null(z)) {
+        plot <- plot + scale_size_continuous(names=gsub(" ", "\n", NMS[3]))
+    }
+
+    suppressMessages(suppressWarnings(print(plot)))
+
+}
+
+
+## Generic helper funciton for word_counts plotting to rename axi labels
+rename <- function(x) {
+
+    input <- c("word.count",  "character.count", "polysyllable.count",
+        "syllable.count", "polysyl2word.ratio", "sent.per.100.wrds",
+        "syllables.per.100.wrds")
+    output <- c("Words Per Sentence", "Characters Per Sentence", 
+        "Polysyllables Per Sentence", "Syllables Per Sentence",
+        "Polysyllables Per Word", "Sentences Per 100 Words", 
+        "Syllables Per 100 Words")
+    mgsub(input, output, x)
+
+}
+
+#' Readability Measures
+#' 
+#' \code{scores.SMOG} - View scores from \code{\link[qdap]{SMOG}}.
+#' 
+#' SMOG Method for scores
+#' @param x The SMOG object.
+#' @param \ldots ignored
+#' @export
+#' @method scores SMOG
+scores.SMOG <- function(x, ...) {
+
+    out <- x[["Readability"]]
+    attributes(out) <- list(
+            class = c("readability_score", class(out)),
+            type = "SMOG_scores",
+            names = colnames(out),
+            row.names = rownames(out)
+    )
+    out
+}
+
+
+#' Prints an SMOG Object
+#' 
+#' Prints an SMOG object.
+#' 
+#' @param x The SMOG object.
+#' @param digits The number of digits displayed if \code{values} is \code{TRUE}.
+#' @param \ldots ignored
+#' @method print SMOG
+#' @S3method print SMOG
+print.SMOG <- function(x, digits = 3, ...) {
+    print(scores(x), digits = digits, ...)
+}
+
+
+#' Readability Measures
+#' 
+#' \code{counts.SMOG} - View counts from \code{\link[qdap]{SMOG}}.
+#' 
+#' SMOG Method for counts.
+#' @param x The SMOG object.
+#' @param \ldots ignored
+#' @export
+#' @method counts SMOG
+counts.SMOG <- function(x, ...) {
+    out <- x[["Counts"]]
+    attributes(out) <- list(
+            class = c("readability_count", class(out)),
+            type = "SMOG_count",
+            names = colnames(out),
+            row.names = rownames(out)
+    )
+    out
+}
+
+
+#' Plots a SMOG Object
+#' 
+#' Plots a SMOG object.
+#' 
+#' @param x The readability_score object.
+#' @param \ldots ignored
+#' @importFrom ggplot2 ggplot aes geom_point theme ylab xlab scale_size_continuous  element_rect
+#' @importFrom gridExtra grid.arrange
+#' @export
+#' @method plot SMOG
+plot.SMOG <- function(x, ...){ 
+
+    plot.readability_score(scores(x))
+
+}
+
+
+plot_SMOG <- function(x, ...){ 
+
+    sentence.count <- SMOG <- word.count <- grvar <- NULL
+    
+    x  <- x[order(x[, "SMOG"]), ]
+    x[, 1] <- factor(x[, 1], levels = x[, 1])
+    forlater <-  names(x)[1]
+    names(x)[1] <- "grvar"
+
+    ggplot(x, aes(y = grvar, x = SMOG)) +
+        geom_point(aes(size = word.count), color="grey75") +
+        geom_point(size=2.2) + 
+        ylab(gsub("&", " & ", forlater)) + 
+        xlab("SMOG") +
+        scale_size_continuous(name="  Word\n  Count") + 
+        theme(legend.key = element_rect(fill = NA))
+
+}
+
+#' Readability Measures
+#' 
+#' \code{scores.flesch_kincaid} - View scores from \code{\link[qdap]{flesch_kincaid}}.
+#' 
+#' flesch_kincaid Method for scores
+#' @param x The flesch_kincaid object.
+#' @param \ldots ignored
+#' @export
+#' @method scores flesch_kincaid
+scores.flesch_kincaid <- function(x, ...) {
+
+    out <- x[["Readability"]]
+    attributes(out) <- list(
+            class = c("readability_score", class(out)),
+            type = "flesch_kincaid_scores",
+            names = colnames(out),
+            row.names = rownames(out)
+    )
+    out
+}
+
+
+#' Prints an flesch_kincaid Object
+#' 
+#' Prints an flesch_kincaid object.
+#' 
+#' @param x The flesch_kincaid object.
+#' @param digits The number of digits displayed if \code{values} is \code{TRUE}.
+#' @param \ldots ignored
+#' @method print flesch_kincaid
+#' @S3method print flesch_kincaid
+print.flesch_kincaid <- function(x, digits = 3, ...) {
+    print(scores(x), digits = digits, ...)
+}
+
+
+#' Readability Measures
+#' 
+#' \code{counts.flesch_kincaid} - View counts from \code{\link[qdap]{flesch_kincaid}}.
+#' 
+#' flesch_kincaid Method for counts.
+#' @param x The flesch_kincaid object.
+#' @param \ldots ignored
+#' @export
+#' @method counts flesch_kincaid
+counts.flesch_kincaid <- function(x, ...) {
+    out <- x[["Counts"]]
+    attributes(out) <- list(
+            class = c("readability_count", class(out)),
+            type = "flesch_kincaid_count",
+            names = colnames(out),
+            row.names = rownames(out)
+    )
+    out
+}
+
+
+#' Plots a flesch_kincaid Object
+#' 
+#' Plots a flesch_kincaid object.
+#' 
+#' @param x The readability_score object.
+#' @param \ldots ignored
+#' @importFrom ggplot2 ggplot aes guide_colorbar geom_point theme ggplotGrob theme_bw ylab xlab scale_fill_gradient element_blank guides 
+#' @importFrom gridExtra grid.arrange
+#' @export
+#' @method plot flesch_kincaid
+plot.flesch_kincaid <- function(x, ...){ 
+
+    plot.readability_score(scores(x))
+
+}
+
+
+plot_flesch_kincaid <- function(x, ...){ 
+
+    character.count <- sentence.count <- FK_grd.lvl <- FK_read.ease <- 
+        word.count <- grvar <- value <- syllable.count <- NULL
+
+    x  <- x[order(x[, "FK_grd.lvl"]), ]
+    x[, 1] <- factor(x[, 1], levels = x[, 1])
+    forlater <-  names(x)[1]
+    names(x)[1] <- "grvar"
+    plot1 <- ggplot(x, aes(x = sentence.count, 
+        y = syllable.count)) + geom_point(size=2.75, alpha=.3) +
+        theme_bw() + 
+        ylab("Syllable Count") + 
+        xlab("Sentence Count") + 
+        theme(panel.grid = element_blank())
+    
+    x2 <- melt(x[, c(1, 5:6)], id="grvar")
+    x2[, "variable"] <- mgsub(c("FK_grd.lvl", "FK_read.ease"),
+        c("Flesch Kincaid Grade Level", 
+        "Flesch Kincaid Reading Ease"), x2[, "variable"])
+
+    plot2 <- ggplot(x2, aes(y = grvar, x = value)) +
+        geom_point(size=2) + 
+        ylab(gsub("&", " & ", forlater)) + 
+        xlab("score") +
+        facet_grid(.~variable, scales="free_x") 
+
+    grid.arrange(plot2, plot1, ncol=2, widths=2:1)
+}
+
+#' Readability Measures
+#' 
+#' \code{scores.linsear_write} - View scores from \code{\link[qdap]{linsear_write}}.
+#' 
+#' linsear_write Method for scores
+#' @param x The linsear_write object.
+#' @param \ldots ignored
+#' @export
+#' @method scores linsear_write
+scores.linsear_write <- function(x, ...) {
+
+    out <- x[["Readability"]]
+    attributes(out) <- list(
+            class = c("linsear_write_scores", class(out)),
+            type = "linsear_write_scores",
+            names = colnames(out),
+            row.names = rownames(out)
+    )
+    out
+}
+
+#' Prints a linsear_write_scores Object
+#' 
+#' Prints a linsear_write_scores object.
+#' 
+#' @param x The linsear_write_scores object.
+#' @param digits The number of digits displayed.
+#' @param \ldots ignored
+#' @method print linsear_write_scores
+#' @S3method print linsear_write_scores
+print.linsear_write_scores <-
+    function(x, digits = 3, ...) {
+    class(x) <- "data.frame"
+    WD <- options()[["width"]]
+    options(width=3000)
+    print(x)
+    options(width=WD)
+}
+
+
+#' Prints an linsear_write Object
+#' 
+#' Prints an linsear_write object.
+#' 
+#' @param x The linsear_write object.
+#' @param digits The number of digits displayed if \code{values} is \code{TRUE}.
+#' @param \ldots ignored
+#' @method print linsear_write
+#' @S3method print linsear_write
+print.linsear_write <- function(x, digits = 3, ...) {
+    print(scores(x), digits = digits, ...)
+}
+
+
+#' Readability Measures
+#' 
+#' \code{counts.linsear_write} - View counts from \code{\link[qdap]{linsear_write}}.
+#' 
+#' linsear_write Method for counts.
+#' @param x The linsear_write object.
+#' @param \ldots ignored
+#' @export
+#' @method counts linsear_write
+counts.linsear_write <- function(x, ...) {
+    out <- x[["Counts"]]
+    rownames(out) <- NULL
+    
+    attributes(out) <- list(
+            class = c("linsear_write_count", class(out)),
+            type = "linsear_write_count",
+            names = colnames(out),
+            row.names = rownames(out)
+    )
+    out
+}
+
+#' Prints a linsear_write_count Object
+#' 
+#' Prints a linsear_write_count object.
+#' 
+#' @param x The linsear_write_count object.
+#' @param digits The number of digits displayed.
+#' @param \ldots ignored
+#' @method print linsear_write_count
+#' @S3method print linsear_write_count
+print.linsear_write_count <-
+    function(x, digits = 3, ...) {
+    class(x) <- "data.frame"
+    WD <- options()[["width"]]
+    options(width=3000)
+    print(x)
+    options(width=WD)
+}
+
+
+#' Plots a linsear_write_count Object
+#' 
+#' Plots a linsear_write_count object.
+#' 
+#' @param x The linsear_write_count object.
+#' @param \ldots ignored
+#' @importFrom ggplot2 scale_colour_manual ylab
+#' @export
+#' @method plot linsear_write_count
+plot.linsear_write_count <- function(x, ...){ 
+
+    x[, "Selected"] <- ifelse(is.na(x[, "read.gr"]), "Used", "Not Used")
+    nms1 <- paste(sapply(unlist(strsplit(names(x)[1], "\\&")), 
+        Caps), collapse = " & ")
+    names(x)[1] <- "group"
+    x[, "group"] <- paste(1:nrow(x), x[, "group"], sep="|||")
+
+    dat <- gantt(x[, "text.var"], x[, "group"])
+    dat[, "group"] <- sapply(strsplit(as.character(dat[, "group"]), "\\|\\|\\|"), "[", 2)
+    dat[, "Selected"] <- ifelse(is.na(x[, "read.gr"]), "Used", "Not Used")
+
+    plot1 <- gantt_wrap(dat, "group", fill.var = "Selected", plot = FALSE)
+
+    plot1 + 
+        scale_colour_manual(values=c("grey90", "red")) +
+        ylab(nms1) 
+}
+
+
+
+#' Plots a linsear_write Object
+#' 
+#' Plots a linsear_write object.
+#' 
+#' @param x The readability_score object.
+#' @param alpha The alpha level for the points and smooth fill in the 
+#' scatterplot (length one or two; if two 1-points, 2-smooth fill).
+#' @param \ldots ignored
+#' @importFrom ggplot2 ggplot aes geom_point geom_smooth theme ggplotGrob theme_bw ylab xlab
+#' @importFrom gridExtra grid.arrange
+#' @importFrom scales alpha
+#' @export
+#' @method plot linsear_write
+plot.linsear_write <- function(x, alpha = .4, ...){ 
+
+    plot(scores(x, alpha = alpha, ...))
+
+}
+
+#' Plots a linsear_write_scores Object
+#' 
+#' Plots a linsear_write_scores object.
+#' 
+#' @param x The readability_score object.
+#' @param alpha The alpha level for the points and smooth fill in the 
+#' scatterplot (length one or two; if two 1-points, 2-smooth fill).
+#' @param \ldots Other arguments passed to \code{\link[ggplot2]{geom_smooth}}.
+#' @importFrom ggplot2 ggplot aes geom_point geom_smooth theme ggplotGrob theme_bw ylab xlab
+#' @importFrom gridExtra grid.arrange
+#' @importFrom scales alpha
+#' @export
+#' @method plot linsear_write_scores
+plot.linsear_write_scores <- function(x, alpha = c(.4, .08), ...){ 
+
+    hard_easy_sum <- Linsear_Write <- NULL
+    
+    character.count <- sent.per.100 <- Linsear_write <- 
+        hard_easy_sumt <- grvar <- NULL
+  
+    x  <- x[order(x[, "Linsear_Write"]), ]
+    x[, 1] <- factor(x[, 1], levels = x[, 1])
+    forlater <-  names(x)[1]
+    names(x)[1] <- "grvar"
+
+    plot1 <- ggplot(x, aes(y = hard_easy_sum, 
+        x = sent.per.100)) + 
+        geom_smooth(fill="blue", colour="darkblue", size=1, 
+            alpha = tail(alpha, 1), ...) +
+        geom_point(size=2.75, alpha = head(alpha, 1)) +
+        theme_bw() + 
+        xlab("Sentence Per 100 Words") + 
+        ylab("3 x Hard Words + Easy Words") + 
+        theme(panel.grid = element_blank()) 
+    plot2 <- ggplot(x, aes(y = grvar, x = Linsear_Write)) +
+        geom_point(size=2) + 
+        ylab(gsub("&", " & ", forlater)) + 
+        xlab("Linsear Write")
+
+    grid.arrange(plot2, plot1, ncol=2)
+}
+
+####=============Template================
+
+#' Readability Measures
+#' 
+#' \code{scores.coleman_liau} - View scores from \code{\link[qdap]{coleman_liau}}.
+#' 
+#' coleman_liau Method for scores
+#' @param x The coleman_liau object.
+#' @param \ldots ignored
+#' @export
+#' @method scores coleman_liau
+scores.coleman_liau <- function(x, ...) {
+
+    out <- x[["Readability"]]
+    attributes(out) <- list(
+            class = c("readability_score", class(out)),
+            type = "coleman_liau_scores",
+            names = colnames(out),
+            row.names = rownames(out)
+    )
+    out
+}
+
+
+#' Prints an coleman_liau Object
+#' 
+#' Prints an coleman_liau object.
+#' 
+#' @param x The coleman_liau object.
+#' @param digits The number of digits displayed if \code{values} is \code{TRUE}.
+#' @param \ldots ignored
+#' @method print coleman_liau
+#' @S3method print coleman_liau
+print.coleman_liau <- function(x, digits = 3, ...) {
+    print(scores(x), digits = digits, ...)
+}
+
+
+#' Readability Measures
+#' 
+#' \code{counts.coleman_liau} - View counts from \code{\link[qdap]{coleman_liau}}.
+#' 
+#' coleman_liau Method for counts.
+#' @param x The coleman_liau object.
+#' @param \ldots ignored
+#' @export
+#' @method counts coleman_liau
+counts.coleman_liau <- function(x, ...) {
+    out <- x[["Counts"]]
+    attributes(out) <- list(
+            class = c("readability_count", class(out)),
+            type = "coleman_liau_count",
+            names = colnames(out),
+            row.names = rownames(out)
+    )
+    out
+}
+
+
+#' Plots a coleman_liau Object
+#' 
+#' Plots a coleman_liau object.
+#' 
+#' @param x The readability_score object.
+#' @param \ldots ignored
+#' @importFrom ggplot2 ggplot aes guide_colorbar geom_point theme ggplotGrob theme_bw ylab xlab scale_fill_gradient element_blank guides 
+#' @importFrom gridExtra grid.arrange
+#' @export
+#' @method plot coleman_liau
+plot.coleman_liau <- function(x, ...){ 
+
+    plot.readability_score(scores(x))
+
+}
+
+
+plot_coleman_liau <- function(x, ...){ 
+
+    character.count <- sentence.count <- Coleman_Liau <- word.count <- grvar <- 
+        NULL
+    
+    x  <- x[order(x[, "Coleman_Liau"]), ]
+    x[, 1] <- factor(x[, 1], levels = x[, 1])
+    forlater <-  names(x)[1]
+    names(x)[1] <- "grvar"
+    plot1 <- ggplot(x, aes(fill = word.count, x = sentence.count, 
+        y = character.count)) + geom_point(size=2.75, shape=21, colour="grey65") +
+        theme_bw() + 
+        scale_fill_gradient(high="red", low="pink", name="Word\nCount") +
+        ylab("Character Count") + 
+        xlab("Sentence Count") + 
+        theme(panel.grid = element_blank(),
+            legend.position = "bottom") +
+        guides(fill = guide_colorbar(barwidth = 10, barheight = .5)) 
+    plot2 <- ggplot(x, aes(y = grvar, x = Coleman_Liau)) +
+        geom_point(size=2) + 
+        ylab(gsub("&", " & ", forlater)) + 
+        xlab("Coleman Liau")
+
+    grid.arrange(plot2, plot1, ncol=2)
+}
+
+###==============End of template==========
+
+plot_fry <- function(x, auto.label = TRUE, grid = FALSE, div.col = "grey85", ...) {
+
+    ## Setting up the graph
     suppressWarnings(plot(1, 1, xlim = c(108, 182), ylim = c(2, 
         25), axes = FALSE, type = "n", 
         xlab = "Average number of syllables per 100 words", 
@@ -440,105 +1474,106 @@ function(text.var, grouping.var = NULL, auto.label = TRUE,
     text(171, 3.5, 15, col = "darkgreen", cex = 1.25)
     text(176.7, 3.5, 16, col = "darkgreen", cex = 1.25)
     text(180.7, 3.5, 17, col = "darkgreen", cex = 1.25)
-    with(DF6, points(syll.count, ave.sent.per.100, pch = 19, cex = 1, 
-        col = "red"))
-    with(DF6, points(syll.count, ave.sent.per.100, pch = 3, cex = 3, 
-        col = "black"))   
+
+    ## Actually plotting the points
+    points(x[, "ave.syll.per.100"], x[, "ave.sent.per.100"], pch = 19, cex = 1, 
+        col = "red")
+    points(x[, "ave.syll.per.100"], x[, "ave.sent.per.100"], pch = 3, cex = 3, 
+        col = "black")  
     if (!auto.label) {
-        with(DF6, identify(syll.count, ave.sent.per.100, group))
+        identify(x[, "ave.syll.per.100"], x[, "ave.sent.per.100"], x[, 1])
     } else {
-        with(DF6, text(syll.count, ave.sent.per.100, labels = group, 
-            adj = c(1, -0.5)))
-    }      
-    names(DF6) <- c(G, "ave.syll.per.100", "ave.sent.per.100")
-    invisible(list(SENTENCES_USED = DF5, SENTENCE_AVERAGES = DF6))
+        text(x[, "ave.syll.per.100"], x[, "ave.sent.per.100"], labels = x[, 1], 
+            adj = c(1, -0.5))
+    }  
 }
 
-
-#' Linsear Write Readability
+#' Readability Measures
 #' 
-#' \code{linsear_write} - Apply Linsear Write Readability to transcript(s) by 
-#' zero or more grouping variable(s).
-#' @rdname Readability
-#' @export 
-linsear_write <-
-function(text.var, grouping.var = NULL, rm.incomplete = FALSE, ...) {
-    read.gr <- group <- NULL
-    if(is.null(grouping.var)) {
-        G <- "all"
-    } else {
-        if (is.list(grouping.var)) {
-            m <- unlist(as.character(substitute(grouping.var))[-1])
-            m <- sapply(strsplit(m, "$", fixed=TRUE), function(x) {
-                    x[length(x)]
-                }
-            )
-            G <- paste(m, collapse="&")
-        } else {
-            G <- as.character(substitute(grouping.var))
-            G <- G[length(G)]
-        }
-    }
-    if(is.null(grouping.var)){
-        grouping <- rep("all", length(text.var))
-    } else {
-        if (is.list(grouping.var) & length(grouping.var)>1) {
-            grouping <- paste2(grouping.var)
-        } else {
-            grouping <- unlist(grouping.var)
-        } 
-    } 
-    text <- as.character(text.var)
-    DF <- na.omit(data.frame(group = grouping, text.var = text, 
-        stringsAsFactors = FALSE))
-    if (rm.incomplete) {
-        DF <- end_inc(dataframe = DF, text.var = text.var, ...)
-    }
-    DF$word.count <- word_count(DF$text.var)
-    DF$tot.n.sent <- 1:nrow(DF)
-    DF <- DF[with(DF, order(group, DF$tot.n.sent)), ]
-    DF$read.gr <- unlist(by(DF$word.count, DF$group, partition))
-    LIST <- names(which(tapply(DF$word.count, DF$group, function(x) {
-            max(cumsum(x))
-        }
-    ) >= 100))
-    DF2 <- subset(DF, group %in% LIST & read.gr != "NA")
-    DF2$group <- DF2$group[, drop = TRUE]
-    DF2$sub <- with(DF2, paste(group, read.gr, sep = "_"))
-    DF2b <- DF2[order(DF2$sub), ]
-    DF2b$cumsum.gr <- unlist(tapply(DF2$word.count, DF2$sub, cumsum))
-    DF2 <- DF2b[order(DF2b$group, DF2b$tot.n.sent), ]
-    DF2$wo.last <- DF2$cumsum.gr - DF2$word.count
-    DF2$hun.word <- 100 - DF2$wo.last
-    DF2$frac.sent <- ifelse(DF2$hun.word/DF2$word.count > 1, 1, 
-        round(DF2$hun.word/DF2$word.count, digits = 3))  
-    DF3b <- unique(data.frame(sub = DF2$sub, group = DF2$group))
-    DF3 <- data.frame(sub = DF2$sub, group = DF2$group, text.var = 
-        DF2$text.var, frac.sent = DF2$frac.sent)
-    CHOICES <- tapply(as.character(DF3b$sub), DF3b$group, function(x) {
-            sample(x, 1, replace = FALSE)
-        }
+#' \code{scores.fry} - View scores from \code{\link[qdap]{fry}}.
+#' 
+#' fry Method for scores
+#' @param x The fry object.
+#' @param \ldots ignored
+#' @export
+#' @method scores fry
+scores.fry <- function(x, ...) {
+
+    out <- x[["Readability"]]
+    attributes(out) <- list(
+            class = c("readability_score", class(out)),
+            type = "fry_scores",
+            names = colnames(out),
+            row.names = rownames(out),
+            plot_instructions = attributes(x)[["plot_instructions"]]
     )
-    CHOICES <- as.character(unlist(CHOICES))
-    DF4 <- DF3[which(DF3$sub %in% CHOICES), ]
-    DF4$sub <- DF4$sub[, drop = TRUE]
-    FUN <- function(x) paste(as.character(unlist(x)), collapse = " ")
-    DF5 <- aggregate(text.var ~ sub + group, DF4, FUN)
-    sent.per.100 <- as.data.frame(tapply(DF2$frac.sent, DF2$sub, sum))
-    names(sent.per.100) <- "x"
-    DF5$sent.per.100 <- sent.per.100[as.character(DF5$sub), "x"]
-    hun.grab <- function(x) paste(unblanker(unlist(word_split(reducer(
-        unlist(strip(x))))))[1:100], collapse = " ")
-    DF5$SYL.LIST <- lapply(DF5$text.var, function(x) unlist(syllable_count(
-        hun.grab(x))$syllables))
-    DF5$hard_easy_sum <- unlist(lapply(DF5$SYL.LIST, function(x) {
-          sum(ifelse(x >= 3, 3, 1))
-    }))
-    DF5$HE_tsent_ratio <- unlist(DF5$hard_easy_sum)/DF5$sent.per.100
-    DF5$Linsear_Write <- ifelse(DF5$sent.per.100 > 20, 
-        round(DF5$HE_tsent_ratio/2, digits = 2), 
-        round((DF5$HE_tsent_ratio - 2)/2, digits = 2))
-    DF5 <- DF5[, c(2, 4, 6, 8)]
-    names(DF5) <- c(G, "sent.per.100", "hard_easy_sum", "Linsear_Write")
-    DF5
+    out
 }
+
+
+#' Prints an fry Object
+#' 
+#' Prints an fry object.
+#' 
+#' @param x The fry object.
+#' @param digits The number of digits displayed if \code{values} is \code{TRUE}.
+#' @param auto.label  logical.  If \code{TRUE} labels automatically added.  If 
+#' \code{FALSE} the user clicks interactively.
+#' @param grid logical.  If \code{TRUE} a micro grid is displayedsimilar to 
+#' Fry's original depiction, though this makes visualizing more difficult.
+#' @param div.col The color of the grade level division lines.
+#' @param plot logical.  If \code{TRUE} a graph is plotted corresponding to Fry's 
+#' graphic representation.
+#' @param \ldots ignored
+#' @method print fry
+#' @S3method print fry
+print.fry <- function(x, digits = 3, auto.label, 
+    grid, div.col, plot, ...) {
+
+    print(scores(x), digits = digits, ...)
+
+    ## Plotting attributes
+    PA <- attributes(x)[["plot_instructions"]]
+
+    if (missing(auto.label)) {
+        auto.label <- PA[["auto.label"]]
+    }
+    if (missing(grid)) {
+        grid <- PA[["grid"]]
+    }
+    if (missing(div.col)) {
+        div.col <- PA[["div.col"]]
+    }
+    if (missing(plot)) {
+        plot <- PA[["plot"]]
+    }
+
+    if (plot) {
+        plot_fry(scores(x), auto.label = auto.label, grid = grid, 
+            div.col = div.col)
+    }
+
+}
+
+
+#' Readability Measures
+#' 
+#' \code{counts.fry} - View counts from \code{\link[qdap]{fry}}.
+#' 
+#' fry Method for counts.
+#' @param x The fry object.
+#' @param \ldots ignored
+#' @export
+#' @method counts fry
+counts.fry <- function(x, ...) {
+    out <- x[["Counts"]]
+    attributes(out) <- list(
+            class = c("readability_count", class(out)),
+            type = "fry_count",
+            names = colnames(out),
+            row.names = rownames(out)
+    )
+    out
+}
+
+

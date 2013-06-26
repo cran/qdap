@@ -32,7 +32,17 @@
 #' ## word frequency matrix (wfm) example:
 #' with(DATA, wfm(state, list(sex, adult)))[1:15, ]
 #' with(DATA, wfm(state, person))[1:15, ]
+#' Filter(with(DATA, wfm(state, list(sex, adult))), 5)
 #' with(DATA, wfm(state, list(sex, adult)))
+#' 
+#' ## Filter particular words based on max/min values
+#' v <- with(DATA, wfm(state, list(sex, adult)))
+#' Filter(v, 5)
+#' Filter(v, 5, count.apostrophe = FALSE)
+#' Filter(v, 5, 7)
+#' Filter(v, 4, 4)
+#' Filter(v, 3, 4)
+#' Filter(v, 3, 4, stopwords = Top25Words)
 #' 
 #' ## insert double tilde ("~~") to keep phrases(i.e., first last name)
 #' alts <- c(" fun", "I ")
@@ -88,6 +98,11 @@
 #'                                                                  
 #' chisq.test(z)                                                      
 #' chisq.test(wfm(y)) 
+#' 
+#' ## Dendrogram
+#' presdeb <- with(pres_debates2012, wfm(dialogue, list(person, time)))
+#' library(sjPlot)
+#' sjc.dend(t(presdeb), 2:4)
 #' 
 #' ## Words correlated within turns of talk
 #' ## EXAMPLE 1
@@ -186,10 +201,10 @@
 #' 
 #' ## Weight a wfm
 #' WFM <- with(DATA, wfm(state, list(sex, adult)))
-#' plot(wfm_weight(WFM, "scaled"), TRUE)
-#' wfm_weight(WFM, "prop")
-#' wfm_weight(WFM, "max")
-#' wfm_weight(WFM, "scaled")
+#' plot(weight(WFM, "scaled"), TRUE)
+#' weight(WFM, "prop")
+#' weight(WFM, "max")
+#' weight(WFM, "scaled")
 #' }
 wfm <- 
 function(text.var = NULL, grouping.var = NULL, output = "raw", stopwords = NULL, 
@@ -249,9 +264,9 @@ function(text.var = NULL, grouping.var = NULL, output = "raw", stopwords = NULL,
 }
 
 
-#' Prints an wfm Object
+#' Prints a wfm Object
 #' 
-#' Prints an wfm object.
+#' Prints a wfm object.
 #' 
 #' @param x The wfm object.
 #' @param digits The number of digits displayed if \code{values} is \code{TRUE}.
@@ -445,9 +460,7 @@ wfm_combine <- function(wf.obj, word.lists, matrix = TRUE){
     if (matrix) {
         DFF2 <- as.matrix(DFF[, -1])
         rownames(DFF2) <- as.character(DFF[, 1])
-        DFF <- DFF2
-        class(DFF) <- c("wfm", "true.matrix", class(DFF))
-        return(DFF)
+        return(as.wfm(DFF2))
     }
     class(DFF) <- c("wfdf", class(DFF))
     DFF
@@ -590,10 +603,9 @@ summary.wfdf <- function(object, ...) {
 
 #' Weighted Word Frequency Matrix
 #' 
-#' \code{wfm_weight} - Weight a word frequency matrix for analysis were such 
-#' weighting is sensible..
+#' \code{weight} - Weight a word frequency matrix for analysis where such 
+#' weighting is sensible.
 #' 
-#' @param wfm.obj A \code{\link[qdap]{wfm}} object.
 #' @param type The type of weighting to use: c(\code{"prop"}, \code{"max"}, 
 #' \code{"scaled"}).  All weight by column.  \code{"prop"} uses a proportion
 #' weighting and all columns sum to 1.  \code{"max"} weights in proportion to 
@@ -603,12 +615,14 @@ summary.wfdf <- function(object, ...) {
 #' equal.
 #' @rdname Word_Frequency_Matrix
 #' @export
-#' @return \code{wfm_weight} - Returns a weighted matrix for use with other R 
+#' @return \code{weight} - Returns a weighted matrix for use with other R 
 #' packages. The output is not of the class "wfm".
-wfm_weight <- function(wfm.obj, type = "prop") {
+#' @S3method weight wfm
+#' @method weight wfm
+weight.wfm <- function(x, type = "prop", ...) {
 
-    if (is(wfm.obj, "wfdf") && !is(wfm.obj, "f.df")) {
-        wfm.obj <- wfm(wfm.obj)
+    if (is(x, "wfdf") && !is(x, "f.df")) {
+        x <- wfm(x)
     }
   
     types <- c("prop", "max", "scaled")
@@ -622,13 +636,53 @@ wfm_weight <- function(wfm.obj, type = "prop") {
         max = {FUN <- function(x) apply(x, 2, function(y) round(y *(max(x)/max(y)), 0))},
         scaled = {FUN <- function(x) {
                 o <- apply(x, 2, function(y) scale(y, FALSE))
-                rownames(o) <- rownames(wfm.obj)
+                rownames(o) <- rownames(x)
                 o
             }} ,
         stop("`type` must be one of c(\"prop\", \"max\", \"scaled\")")
     )
 
-    out <- FUN(wfm.obj)
+    out <- FUN(x)
+    class(out) <- c("weighted_wfm", class(out))
+    attributes(out)[["Weighting"]] <- type
+
+    out
+}
+
+#' Weighted Word Frequency Matrix
+#' 
+#' \code{weight.wfdf} - Weight a word frequency matrix for analysis where such 
+#' weighting is sensible.
+#' 
+#' @rdname Word_Frequency_Matrix
+#' @S3method weight wfm
+#' @method weight wfm
+weight.wfdf <- function(x, type = "prop", ...) {
+
+    if (is(x, "wfdf") && !is(x, "f.df")) {
+        x <- wfm(x)
+    } else {
+        stop(paste("no applicable method for 'weight' applied to an object of", "class \"wfdf\" that is proportional"))
+    }
+  
+    types <- c("prop", "max", "scaled")
+
+    if (is.numeric(type)) {
+        type <- types[type]
+    }
+
+    switch(type,
+        prop = {FUN <- function(x) apply(x, 2, function(y) y/sum(y))},
+        max = {FUN <- function(x) apply(x, 2, function(y) round(y *(max(x)/max(y)), 0))},
+        scaled = {FUN <- function(x) {
+                o <- apply(x, 2, function(y) scale(y, FALSE))
+                rownames(o) <- rownames(x)
+                o
+            }} ,
+        stop("`type` must be one of c(\"prop\", \"max\", \"scaled\")")
+    )
+
+    out <- FUN(x)
     class(out) <- c("weighted_wfm", class(out))
     attributes(out)[["Weighting"]] <- type
 
@@ -683,3 +737,89 @@ plot.weighted_wfm <- function(x, non.zero = FALSE, digits = 0, by.column = NULL,
     }
     invisible(out)
 }
+
+
+#' Word Frequency Matrix
+#' 
+#' \code{Filter} - Filter words from a wfm that meet max/min word length 
+#' criteria.
+#' 
+#' @param x A \code{\link[qdap]{wfm}} object.
+#' @param min Minimum word length.
+#' @param max Maximum word length.
+#' @param count.apostrophe logical.  If \code{TRUE} apostrophes are counted as 
+#' characters.
+#' @rdname Word_Frequency_Matrix
+#' @export
+#' @return \code{Filter} - Returns a matrix of the class "wfm".
+Filter <-
+function(x, min = 1, max = Inf, count.apostrophe = TRUE, stopwords = NULL, ...){
+    min
+    max
+    count.apostrophe
+    stopwords
+    UseMethod("Filter")
+}
+
+#' Word Frequency Matrix
+#' 
+#' \code{Filter.wfm} - Filter words from a wfm that meet max/min word length 
+#' criteria.
+#' 
+#' wfm Method for Filter
+#' @rdname Word_Frequency_Matrix
+#' @export
+#' @method Filter wfm
+Filter.wfm <- 
+function(x, min = 1, max = Inf, count.apostrophe = TRUE, 
+    stopwords = NULL, ...) {
+
+    if (!is.null(stopwords)) {
+        x <- x[!rownames(x) %in% stopwords, ]
+    }
+
+    nms <- rownames(x)
+    if (!count.apostrophe) {
+        nms <- gsub("'", "", nms)
+    }
+
+    lens <- nchar(nms)
+    as.wfm(x[lens >= min & lens <= max, ])
+
+}
+
+
+#' @S3method Filter default  
+Filter.default <- 
+function(..., min = 1, max = Inf, count.apostrophe, 
+    stopwords = NULL, x){
+        LIS <- list(...)
+        return(Filter.wfm(LIS, min, max, count.apostrophe))
+}
+
+
+#' Word Frequency Matrix
+#' 
+#' \code{as.wfm} - Attempts to coerce a matrix to a \code{\link[qdap]{wfm}}.
+#' 
+#' @param matrix.object A matrix object with words for row names and integer 
+#' values.
+#' @rdname Word_Frequency_Matrix
+#' @export
+#' @return \code{as.wfm} - Returns a matrix of the class "wfm".
+as.wfm <- function(matrix.object) {
+
+    if(!all(is.Integer(matrix.object))){
+        stop("matrix.object must contain only integer values")
+    }
+    if (!is.matrix(matrix.object)) {
+        warning("Not a matrix.object; may not convert correctly",
+            immediate. = TRUE)
+        matrix.object <- as.matrix(matrix.object)
+    } 
+    class(matrix.object) <- c("wfm", "true.matrix", class(matrix.object))
+    matrix.object    
+}
+
+is.Integer <- 
+function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol

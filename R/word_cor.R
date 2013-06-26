@@ -9,7 +9,7 @@
 #' @param word The word(s) vector to find associated words for.
 #' @param r The correlation level find associated words for.  If positive this
 #' is the minimum value, if negative this is the maximum value.
-#' @param values logical.  If \code{TRUE}returns the named correlates (names are 
+#' @param values logical.  If \code{TRUE} returns the named correlates (names are 
 #' the words).  If \code{FALSE} only the associated words are returned.
 #' @param method A character string indicating which correlation coefficient is 
 #' to be computed (\code{"pearson"}, \code{"kendall"}, or \code{"spearman"}).
@@ -48,13 +48,13 @@
 #' ## Find correlations between words per turn of talk by person
 #' ## Throws multiple warning because small data set
 #' lapply(DATA3, function(x) {
-#'     word_cor(x[, "state"], ID(x), qcv(computer, i, no, good), r = NULL)
+#'     word_cor(x[, "state"], id(x), qcv(computer, i, no, good), r = NULL)
 #' })
 #' 
 #' ## Find words correlated per turn of talk by person
 #' ## Throws multiple warning because small data set
 #' lapply(DATA3, function(x) {
-#'     word_cor(x[, "state"], ID(x), qcv(computer, i, no, good))
+#'     word_cor(x[, "state"], id(x), qcv(computer, i, no, good))
 #' })
 #' 
 #' 
@@ -82,6 +82,21 @@
 #' out <- word_cor(t(z), word = c(names(worlis), "else.words"), r = NULL)
 #' out
 #' plot(out)
+#' 
+#' ## Additional plotting/viewing
+#' require(tm)
+#' data("crude")
+#' 
+#' out1 <- word_cor(t(tm_corpus2wfm(crude)), word = "oil", r=.7)
+#' vect2df(out1[[1]], "word", "cor")
+#' 
+#' plot(out1)
+#' qheat(vect2df(out1[[1]], "word", "cor"), values=TRUE, high="red", 
+#'     digits=2, order.by ="cor", plot=FALSE) + coord_flip()
+#' 
+#' 
+#' out2 <- word_cor(t(tm_corpus2wfm(crude)), word = c("oil", "country"), r=.7)
+#' plot(out2)
 #' }
 word_cor <- function(text.var, grouping.var = NULL, word, r = .7, 
     values = TRUE, method = "pearson", ...) {
@@ -106,7 +121,8 @@ word_cor <- function(text.var, grouping.var = NULL, word, r = .7,
 
     if (sum(test1) < 2) {
         if (is.null(r) & sum(test1) == 1) {
-            warning(sprintf("Only `%s` was found in the data set.  NULL returned", word))
+            warning(sprintf("Only `%s` was found in the data set. NULL returned", 
+                word))
             return(NULL)
         } else {
             if (sum(test1) == 0) {
@@ -122,6 +138,11 @@ word_cor <- function(text.var, grouping.var = NULL, word, r = .7,
             vals = values, positive = posit, meth = method)
         names(L1) <- word
         out <- L1
+        attributes(out) <- list(
+            class = c("word_cor", class(out)), 
+            type = c("cor_list"),
+            names = names(out)
+        ) 
     } else {
         out <- cor(WFM[, word], method = method)
         attributes(out) <- list(
@@ -145,15 +166,24 @@ word_cor <- function(text.var, grouping.var = NULL, word, r = .7,
 #' @method print word_cor
 print.word_cor <-
 function(x, digits = 3, ...) {
-    WD <- options()[["width"]]
 
+    WD <- options()[["width"]]
     if (attributes(x)[["type"]] == "cor_matrix") {
         options(width=3000)
         class(x) <- "matrix"
         attributes(x)[["type"]] <- NULL
+        print(round(x, digits = digits))
+        options(width=WD)
+        return()
     }
-    print(round(x, digits = digits))
-    options(width=WD)
+    if (attributes(x)[["type"]] == "cor_list") {
+        class(x) <- "list"
+        attributes(x)[["type"]] <- NULL
+        print(lapply(x, function(y) {
+            if (is.null(y)) return(NULL)
+            round(y, digits = digits)
+        }))
+    }
 }
 
 #' Plots a word_cor object
@@ -168,32 +198,59 @@ function(x, digits = 3, ...) {
 #' @param low The color to be used for lower values.
 #' @param high The color to be used for higher values.
 #' @param grid The color of the grid (Use \code{NULL} to remove the grid).  
-#' @param \ldots Other arguments passed to qheat.
+#' @param \ldots Other arguments passed to qheat if matrix and other arguments 
+#' passed to \code{\link[ggplot2]{geom_point}} if a list.
+#' @importFrom ggplot2 ggplot aes facet_grid geom_point xlab ylab
 #' @method plot word_cor
 #' @S3method plot word_cor
 plot.word_cor <- function(x, label = TRUE, lab.digits = 3, high="red", 
     low="white", grid=NULL, ...) {
     
-    qheat(t(x), diag.na = TRUE, diag.values = "", by.column = NULL, 
-        values = TRUE, digits = lab.digits, high = high, 
-        low = low, grid = grid, ...)
+    word <- cor <- comp_word <- NULL
+
+    if (attributes(x)[["type"]] == "cor_matrix") {
+        qheat(t(x), diag.na = TRUE, diag.values = "", by.column = NULL, 
+            values = TRUE, digits = lab.digits, high = high, 
+            low = low, grid = grid, ...)
+    }
+    if (attributes(x)[["type"]] == "cor_list") {
+        dat <- list_vect2df(x, "word", "comp_word", "cor")
+        if (length(x) == 1) {
+            facets <- reformulate("word", ".")
+        } else {
+            facets <- reformulate(".", "word")
+        }
+        ggplot(dat, aes(cor, comp_word)) +
+            geom_point(...) +
+            facet_grid(facets, space="free_y", scales="free_y") +
+            ylab("Words") + xlab("Correlation")
+    }
+
 }
 
 
 cor_help1 <- function(n, m, o, sORw, vals, positive, meth) {
+
     L <- sapply(m[, !colnames(m) %in% tolower(n)], function(x) {
-        cor(x, m[, tolower(n)], method = meth)
+        suppressWarnings(cor(x, m[, tolower(n)], method = meth))
     })
+
+    NAS <- is.na(L)
+    if(sum(NAS) > 0) {
+        warning("The sd on the following words was 0:\n", 
+            paste(names(L[NAS]), collapse=", "))
+        L <- L[!NAS]
+    }
 
     if (positive) {
         extr <- L > o
         phr <- "at least"
     } else {
-        extr <- L < o
+        extr <- L <= o
         phr <- "less than or equal to"
     }
 
-    if (all(sapply(extr, is.na)) | sum(extr) == 0) {
+    if (all(sapply(extr, is.na)) | sum(extr, na.rm = TRUE) == 0) {
         if (sORw) {
             stop(sprintf("No words correlate %s %s", phr, o))
         } else {

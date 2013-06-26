@@ -1,4 +1,3 @@
-
 NEWS 
 ====
 
@@ -15,17 +14,74 @@ And constructed with the following guidelines:
   and patch)
 * New additions without breaking backward compatibility bumps the minor 
   (and resets the patch)
-* Bug fixes and misc changes bumps the patch
+* Bug fixes and misc. changes bumps the patch
+
+CHANGES IN qdap VERSION 1.2.0
+----------------------------------------------------------------
+
+BUG FIXES
+
+NEW FEATURES
+
+* `Filter` added to give the ability to provide a range of character 
+  lengths to filter from a `wfm` object.
+
+* `scores` generic method added to view scores from select qdap objects.
+
+* `counts` generic method added to view counts from select qdap objects.
+
+* `proportions` generic method added to view proportions from select qdap 
+  objects.
+
+* `preprocessed` generic method added to view preprocessed data from select qdap 
+  objects.
+
+* `apply_as_df` added to allow the user to apply qdap functions to a Corpus 
+  directly.
+
+MINOR FEATURES
+
+* `tm_corpus2wfm` added to quickly convert from a tm package `Corpus` to a qdap
+  `wfm` object.
+
+* `as.wfm` added as a means to attempt to coerce a matrix to a `wfm` object.
+
+* `%l+%` added as a counterpart to `%l%` that assumes `missing = NULL`.
+
+* `%bs%` added as quick counterpart to `boolean_search` for indexing.
+
+IMPROVEMENTS
+
+* `df2tm_corpus` now sets metaData information for ID and creator (based on) 
+  `Sys.info()["user"]`.
+
+* `matrix2df` now accepts a simple_triplet_matrix object as well.
+
+* `word_cor` output that was a list (not a correlation matrix) did not have a 
+  plot method.  The plot method for `word_cor` now handles both matrices and the 
+  lsit of correlations.
+
+* `rm_row` picks up the `contains` argument that allows the user to search for, 
+  and remove rows of, within the string, not just the beginning.
+
+* `read.transcript` now handles multiple character spaces as an argument to 
+  `sep` when `text` argument is used.
+
+CHANGES
+
+* `dissimilarity` has been renamed to `Dissimilarity` to prevent tm package 
+  conflicts.  The old version has been deprecated and will be removed in a the
+  next version (minor or major) push to CRAN.
 
 
 CHANGES IN qdap VERSION 1.1.0
 ----------------------------------------------------------------
 
-A version bump necessary for Re-Sumbission to CRAN.  
+A version bump necessary for Re-Submission to CRAN.  
 
 CHANGES
 
-*  Down graded the version requirement for the reports package to 
+* Downgraded the version requirement for the reports package to 
   reports (>= 0.1.2) in order to upload to CRAN.  reports (>= 0.2.0) is not yet
   available on CRAN.
 
@@ -131,12 +187,12 @@ NEW FEATURES
   output from: `termco`, `question_type`, `pos_by`, adn 1character_table`.
 
 * `lview` a function to unclass a list output that has a special print method 
-  that returns only a portion of the output.  `lview` reclasses to "list".
+  that returns only a portion of the output.  `lview` re-classes to "list".
 
 * `word_cor` added to find words within grouping variables that are associated
   based on correlation.
 
-* `tm2wfm` a function to convert `"TermDocumentMatrix"` and 
+* `tm2qdap` a function to convert `"TermDocumentMatrix"` and 
   `"DocumentTermMatrix"` to a `wfm` added to allow easier integration with the 
   `tm` package.
 
@@ -157,6 +213,9 @@ NEW FEATURES
 * `cm_distance` now uses resampling of data from the null model to generate
   pvalues for the mean code distances.  Useful for determining if an association 
   (small distance) between codes is likely to happen if the null is true.
+
+*  `dispersion_plot` added to enable viewing of word dispersion through 
+  discourse.
 
 * `word_proximity` added to compliment `dispersion_plot` and `word_cor` 
   functions.  `word_proximity` gives the average distance between words in 
@@ -249,6 +308,9 @@ MINOR FEATURES
 
 * `rm_url` removes/repalces URLs in a string(s).
 
+* `matrix2df` added (under `list2df`) to convert rownnames of matrix to a 
+  dataframe column.
+
 CHANGES
 
 * The dictionaries and word lists for qdap have been moved to their own package, 
@@ -258,9 +320,9 @@ CHANGES
   major release number has been upped to 1.  The following name changes have 
   occurred:
 
-    - increase.amplification.words -> became -> amplification.words
+    - `increase.amplification.words` -> became -> `amplification.words`
 
-    - The deamplification.words and env.pol wordlist and dictionary were added as 
+    - The `deamplification.words` wordlist  and `env.pol` dictionary were added as 
         well.
 
 * qdap gains an HTML package vignette to better explain the intended work flow 
@@ -302,9 +364,6 @@ CHANGES
 
 * `replace_number`'s `num.paste` becomes logical rather than character input.
   This makes use easier as the user doesn't need to remember arguments.
-
-* `matrix2df` added (under `list2df`) to convert rownnames of matrix to a 
-  dataframe column.
 
 
 CHANGES IN qdap VERSION 0.2.5

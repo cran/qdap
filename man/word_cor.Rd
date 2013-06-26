@@ -20,7 +20,7 @@ word_cor(text.var, grouping.var = NULL, word, r = 0.7, values = TRUE,
   If positive this is the minimum value, if negative this
   is the maximum value.}
 
-  \item{values}{logical.  If \code{TRUE}returns the named
+  \item{values}{logical.  If \code{TRUE} returns the named
   correlates (names are the words).  If \code{FALSE} only
   the associated words are returned.}
 
@@ -64,13 +64,13 @@ DATA3 <- split(DATA2, DATA2$person)
 ## Find correlations between words per turn of talk by person
 ## Throws multiple warning because small data set
 lapply(DATA3, function(x) {
-    word_cor(x[, "state"], ID(x), qcv(computer, i, no, good), r = NULL)
+    word_cor(x[, "state"], id(x), qcv(computer, i, no, good), r = NULL)
 })
 
 ## Find words correlated per turn of talk by person
 ## Throws multiple warning because small data set
 lapply(DATA3, function(x) {
-    word_cor(x[, "state"], ID(x), qcv(computer, i, no, good))
+    word_cor(x[, "state"], id(x), qcv(computer, i, no, good))
 })
 
 
@@ -98,6 +98,21 @@ z <- wfm_combine(y, worlis)
 out <- word_cor(t(z), word = c(names(worlis), "else.words"), r = NULL)
 out
 plot(out)
+
+## Additional plotting/viewing
+require(tm)
+data("crude")
+
+out1 <- word_cor(t(tm_corpus2wfm(crude)), word = "oil", r=.7)
+vect2df(out1[[1]], "word", "cor")
+
+plot(out1)
+qheat(vect2df(out1[[1]], "word", "cor"), values=TRUE, high="red",
+    digits=2, order.by ="cor", plot=FALSE) + coord_flip()
+
+
+out2 <- word_cor(t(tm_corpus2wfm(crude)), word = c("oil", "country"), r=.7)
+plot(out2)
 }
 }
 \seealso{

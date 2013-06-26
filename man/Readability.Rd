@@ -17,8 +17,8 @@ SMOG(text.var, grouping.var = NULL, output = "valid",
 
 flesch_kincaid(text.var, grouping.var = NULL, rm.incomplete = FALSE, ...)
 
-fry(text.var, grouping.var = NULL, auto.label = TRUE,
-  rm.incomplete = FALSE, grid = FALSE, div.col = "grey85", ...)
+fry(text.var, grouping.var = NULL, rm.incomplete = FALSE,
+  auto.label = TRUE, grid = FALSE, div.col = "grey85", plot = TRUE, ...)
 
 linsear_write(text.var, grouping.var = NULL, rm.incomplete = FALSE, ...)
 }
@@ -45,18 +45,26 @@ linsear_write(text.var, grouping.var = NULL, rm.incomplete = FALSE, ...)
   interactively.}
 
   \item{grid}{logical.  If \code{TRUE} a micro grid is
-  dsicplayed similar to Fry's original depiction, though
-  this makes visualizing more difficult.}
+  displayed, similar to Fry's original depiction, though
+  this may make visualizing more difficult.}
 
   \item{div.col}{The color of the grade level division
   lines.}
+
+  \item{plot}{logical.  If \code{TRUE} a graph is plotted
+  corresponding to Fry's graphic representation.}
 }
 \value{
-Returns a dataframe with selected readability statistic by
-grouping variable(s).  The \code{frey} function returns a
-graphic representation of the readability as well as a list
-of two dataframe: 1) \code{SENTENCES_USED} and 2)
-\code{SENTENCE_AVERAGES}.
+Returns a list of 2 dataframes: (1) Counts and (2)
+Readability. Counts are the raw scores used to calculate
+readability score and can be accessed via
+\code{\link[qdap]{counts}}.  Readability is the dataframe
+with the selected readability statistic by grouping
+variable(s) and can be access via
+\code{\link[qdap]{scores}}.  The \code{\link[qdap]{fry}}
+function returns a graphic representation of the
+readability as the \code{\link[qdap]{scores}} returns the
+information for graphing but not a readability score.
 }
 \description{
 \code{automated_readability_index} - Apply Automated
@@ -88,33 +96,80 @@ transcript(s) by zero or more grouping variable(s).
 \examples{
 \dontrun{
 AR1 <- with(rajSPLIT, automated_readability_index(dialogue, list(person, act)))
-htruncdf(AR1,, 15)
+ltruncdf(AR1,, 15)
+scores(AR1)
+counts(AR1)
+plot(AR1)
+plot(counts(AR1))
+
 AR2 <- with(rajSPLIT, automated_readability_index(dialogue, list(sex, fam.aff)))
-htruncdf(AR2,, 15)
+ltruncdf(AR2,, 15)
+scores(AR2)
+counts(AR2)
+plot(AR2)
+plot(counts(AR2))
+
+AR3 <- with(rajSPLIT, automated_readability_index(dialogue, person))
+ltruncdf(AR3,, 15)
+scores(AR3)
+head(counts(AR3))
+plot(AR3)
+plot(counts(AR3))
 
 CL1 <- with(rajSPLIT, coleman_liau(dialogue, list(person, act)))
-head(CL1)
+ltruncdf(CL1, 20)
+head(counts(CL1))
+plot(CL1)
+
 CL2 <- with(rajSPLIT, coleman_liau(dialogue, list(sex, fam.aff)))
-head(CL2)
+ltruncdf(CL2)
+plot(counts(CL2))
 
-SM1 <- with(rajSPLIT, SMOG(dialogue, list(person, act)))
-head(SM1)
-SM2 <- with(rajSPLIT, SMOG(dialogue, list(sex, fam.aff)))
-head(SM2)
+(SM1 <- with(rajSPLIT, SMOG(dialogue, list(person, act))))
+plot(counts(SM1))
+plot(SM1)
 
-FL1 <- with(rajSPLIT, flesch_kincaid(dialogue, list(person, act)))
-head(FL1)
-FL2 <-  with(rajSPLIT, flesch_kincaid(dialogue, list(sex, fam.aff)))
-head(FL2)
+(SM2 <- with(rajSPLIT, SMOG(dialogue, list(sex, fam.aff))))
 
-FR <- with(rajSPLIT, fry(dialogue, list(sex, fam.aff)))
-htruncdf(FR$SENTENCES_USED)
-head(FR$SENTENCE_AVERAGES)
+(FL1 <- with(rajSPLIT, flesch_kincaid(dialogue, list(person, act))))
+plot(scores(FL1))
+plot(counts(FL1))
+
+(FL2 <-  with(rajSPLIT, flesch_kincaid(dialogue, list(sex, fam.aff))))
+plot(scores(FL2))
+plot(counts(FL2))
+
+FR1 <- with(rajSPLIT, fry(dialogue, list(sex, fam.aff)))
+scores(FR1)
+plot(scores(FR1))
+counts(FR1)
+plot(counts(FR1))
+
+FR2 <- with(rajSPLIT, fry(dialogue, person))
+scores(FR2)
+plot(scores(FR2))
+counts(FR2)
+plot(counts(FR2))
+
+FR3 <- with(pres_debates2012, fry(dialogue, list(time, person)))
+colsplit2df(scores(FR3))
+plot(scores(FR3), auto.label = FALSE)
+counts(FR3)
+plot(counts(FR3))
+
+library(ggplot2)
+ggplot(colsplit2df(counts(FR3)), aes(sent.per.100.wrds,
+    syllables.per.100.wrds)) +
+    geom_point(aes(fill=person), shape=21, size=3) +
+    facet_grid(person~time)
 
 LW1 <- with(rajSPLIT, linsear_write(dialogue, list(person, act)))
-head(LW1)
+plot(scores(LW1))
+plot(counts(LW1))
+
 LW2 <- with(rajSPLIT, linsear_write(dialogue, list(sex, fam.aff)))
-head(LW2)
+plot(scores(LW2), method="lm")
+plot(counts(LW2))
 }
 }
 \references{

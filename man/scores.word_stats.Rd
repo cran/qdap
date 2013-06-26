@@ -1,0 +1,18 @@
+\name{scores.word_stats}
+\alias{scores.word_stats}
+\title{Word Stats}
+\usage{
+\method{scores}{word_stats}(x, ...)
+}
+\arguments{
+  \item{x}{The \code{\link[qdap]{question_type}} object.}
+
+  \item{\ldots}{ignored}
+}
+\description{
+View question_type scores.
+}
+\details{
+question_type Method for scores
+}
+

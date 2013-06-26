@@ -64,19 +64,28 @@
 #' @examples
 #' \dontrun{
 #' ## Inspect the algorithm classification
-## x <- c("Kate's got no appetite doesn't she?",
-##     "Wanna tell Daddy what you did today?",
-##     "You helped getting out a book?", "umm hum?",
-##     "Do you know what it is?", "What do you want?",
-##     "Who's there?", "Whose?", "Why do you want it?",
-##     "Want some?", "Where did it go?", "Was it fun?")
-## 
-## left_just(question_type(x)$raw[, c(2, 6)])
+#' x <- c("Kate's got no appetite doesn't she?",
+#'     "Wanna tell Daddy what you did today?",
+#'     "You helped getting out a book?", "umm hum?",
+#'     "Do you know what it is?", "What do you want?",
+#'     "Who's there?", "Whose?", "Why do you want it?",
+#'     "Want some?", "Where did it go?", "Was it fun?")
+#' 
+#' left_just(preprocessed(question_type(x))[, c(2, 6)])
 #' 
 #' ## Transcript/dialogue examples
 #' (x <- question_type(DATA.SPLIT$state, DATA.SPLIT$person))
-#' truncdf(x$raw, 15)
-#' x$count
+#' 
+#' ## methods
+#' scores(x)
+#' plot(scores(x))
+#' counts(x)
+#' plot(counts(x))
+#' proportions(x)
+#' plot(proportions(x))
+#' truncdf(preprocessed(x), 15)
+#' plot(preprocessed(x))
+#' 
 #' plot(x)
 #' plot(x, label = TRUE)
 #' plot(x, label = TRUE, text.color = "red")
@@ -306,7 +315,7 @@ question_type <- function(text.var, grouping.var = NULL,
     rnp <- data.frame(DF2[, 1:2], rnp, check.names = FALSE) 
     o <- list(raw = DF3, count = DF, prop = DF2, rnp = rnp, 
         inds = DF3[, "n.row"], missing = rows.removed, percent = percent, 
-        zero.replace = zero.replace)
+        zero.replace = zero.replace, digits = digits)
     class(o) <- "question_type"
     o
 }
@@ -409,3 +418,163 @@ function(mat, combined.columns){
 
     data.frame(mat, DF, check.names = FALSE)
 }
+
+#' Question Counts
+#' 
+#' View question_type scores.
+#' 
+#' question_type Method for scores
+#' @param x The \code{\link[qdap]{question_type}} object.
+#' @param \ldots ignored
+#' @export
+#' @method scores question_type
+scores.question_type <- function(x, ...) {
+
+    out <- x[["rnp"]]
+    attributes(out) <- list(
+            class = c("table_score", class(out)),
+            type = "question_type_scores",
+            names = colnames(out),
+            row.names = rownames(out)
+    )
+    out
+}
+
+
+#' Question Counts
+#' 
+#' View question_type counts.
+#' 
+#' question_type Method for counts
+#' @param x The \code{\link[qdap]{question_type}} object.
+#' @param \ldots ignored
+#' @export
+#' @method counts question_type
+counts.question_type <- function(x, ...) {
+
+    out <- x[["count"]]
+    attributes(out) <- list(
+            class = c("table_count", class(out)),
+            type = "question_type_counts",
+            names = colnames(out),
+            row.names = rownames(out)
+    )
+    out
+}
+
+#' Question Counts
+#' 
+#' View \code{\link[qdap]{question_type}} proportions.
+#' 
+#' question_type Method for proportions
+#' @param x The question_type object.
+#' @param \ldots ignored
+#' @export
+#' @method proportions question_type
+proportions.question_type <- function(x, ...) {
+
+    out <- x[["prop"]]
+    attributes(out) <- list(
+            class = c("table_proportion", class(out)),
+            type = "question_type_proportions",
+            names = colnames(out),
+            row.names = rownames(out)
+    )
+    out
+}
+
+
+#' Question Counts
+#' 
+#' View \code{\link[qdap]{question_type}} preprocessed.
+#' 
+#' question_type Method for preprocessed
+#' @param x The question_type object.
+#' @param \ldots ignored
+#' @export
+#' @method preprocessed question_type
+preprocessed.question_type <- function(x, ...) {
+
+    out <- x[["raw"]]
+    attributes(out) <- list(
+            class = c("question_type_preprocessed", class(out)),
+            type = "question_type_preprocessed",
+            names = colnames(out),
+            row.names = rownames(out)
+    )
+    out
+}
+
+
+#' Plots a question_type_preprocessed Object
+#' 
+#' Plots a question_type_preprocessed object.
+#' 
+#' @param x The question_type_preprocessed object.
+#' @param \ldots Arguments passed to \code{\link[qdap]{gantt_plot}}.
+#' @importFrom ggplot2 ylab xlab theme element_blank theme_minimal geom_bar guide_legend aes coord_flip
+#' @importFrom gridExtra grid.arrange
+#' @importFrom reshape2 melt
+#' @method plot question_type_preprocessed
+#' @export
+plot.question_type_preprocessed <- function(x, ...){ 
+    
+    Var1 <- value <- NULL
+    
+    dat2 <- melt(sort(table(x[, "q.type"])))
+    x[, "q.type"] <- factor(x[, "q.type"], levels=rev(dat2[, 1]))
+
+    out <- gantt_plot(text.var = x[, "raw.text"], 
+        grouping.var = x[, colnames(x)[1]], fill.var = x[, "q.type"],
+        plot = FALSE, ...)
+
+    nms <- paste(sapply(unlist(strsplit(colnames(x)[1], "\\&")), 
+        Caps), collapse = " & ")
+
+    x[, colnames(x)[1]] <- paste(1:nrow(x), x[, colnames(x)[1]], sep ="|||")
+    dat <- gantt(x[, "raw.text"], list(x[, colnames(x)[1]], x[, "q.type"]), 
+        col.sep ="&")
+
+    dat[, 1] <- sapply(strsplit(as.character(dat[, 1]), 
+        "\\|\\|\\|"), "[", 2)    
+    dat <- colsplit2df(dat, sep="&")
+    colnames(dat)[1:2] <- c("group", "q.type")
+    dat[, "q.type"] <- factor(dat[, "q.type"], levels=rev(levels(x[, 
+        "q.type"])))
+
+    plot1 <- gantt_wrap(dat, "group", fill.var="q.type", plot = FALSE) + 
+        ylab(nms)  +  xlab("Duration (in words)")  +
+        guides(colour=guide_legend(title="Question\nType", reverse=TRUE))
+
+    dat2[, "Var1"] <- mgsub(c("_", "/"), c(" ", ","), dat2[, "Var1"])
+    dat2[, "Var1"] <- factor(dat2[, "Var1"], levels=dat2[, "Var1"])
+    Max <- max(dat2[, "value"])
+
+    plot2 <- ggplot(dat2, aes(x=Var1)) + 
+        geom_bar(aes(weights=value, fill=Var1)) + 
+        scale_y_continuous(expand = c(0,0), limits = c(0,Max + Max*.05)) +
+        coord_flip() + xlab(NULL) + 
+        ylab("Count") + theme_qdap() +
+        theme(legend.position="none")
+
+    grid.arrange(plot2, plot1, ncol=2, widths=c(1,2,2,2))
+  
+}
+
+
+#' Prints a question_type_preprocessed object
+#' 
+#' Prints a question_type_preprocessed object
+#' 
+#' @param x The question_type_preprocessed object
+#' @param \ldots ignored
+#' @export
+print.question_type_preprocessed <-
+function(x, ...) {
+    WD <- options()[["width"]]
+    options(width=3000)
+    class(x) <- "data.frame"
+    print(x)
+    options(width=WD)
+}
+
