@@ -137,6 +137,151 @@
 #' POLENV <- polarity_frame(positive.words, negative.words)
 #' POLENV
 #' ls(POLENV)[1:20]
+#'
+#' ## ANIMATION
+#' #===========
+#' (deb2 <- with(subset(pres_debates2012, time=="time 2"),
+#'     polarity(dialogue, person)))
+#' 
+#' bg_black <- Animate(deb2, neutral="white", current.speaker.color="grey70")
+#' print(bg_black, pause=.75)
+#' 
+#' bgb <- vertex_apply(bg_black, label.color="grey80", size=20, color="grey40")
+#' bgb <- edge_apply(bgb, label.color="yellow")
+#' print(bgb, bg="black", pause=.75)
+#' 
+#' ## Save it
+#' library(animation)
+#' library(igraph)
+#' library(plotrix)
+#' 
+#' loc <- folder(animation_polarity)
+#' 
+#' ## Set up the plotting function
+#' oopt <- animation::ani.options(interval = 0.1)
+#' 
+#' FUN <- function() {
+#'     Title <- "Animated Polarity: 2012 Presidential Debate 2"
+#'     Legend <- c(-1.1, -1.25, -.2, -1.2)
+#'     Legend.cex <- 1
+#'     lapply(seq_along(bgb), function(i) {
+#'         par(mar=c(2, 0, 1, 0), bg="black")
+#'         set.seed(10)
+#'         plot.igraph(bgb[[i]], edge.curved=TRUE)
+#'         mtext(Title, side=3, col="white")
+#'         color.legend(Legend[1], Legend[2], Legend[3], Legend[4],
+#'               c("Negative", "Neutral", "Positive"), attributes(bgb)[["legend"]],
+#'               cex = Legend.cex, col="white")
+#'         animation::ani.pause()
+#'     })
+#' }
+#' 
+#' FUN()
+#' 
+#' ## Detect OS
+#' type <- if(.Platform$OS.type == "windows") shell else system
+#' 
+#' saveHTML(FUN(), autoplay = FALSE, loop = TRUE, verbose = FALSE,
+#'     ani.height = 500, ani.width=500,
+#'     outdir = file.path(loc, "new"), single.opts =
+#'     "'controls': ['first', 'play', 'loop', 'speed'], 'delayMin': 0")
+#' 
+#' ## Detect OS
+#' type <- if(.Platform$OS.type == "windows") shell else system
+#' 
+#' saveHTML(FUN2(), autoplay = FALSE, loop = TRUE, verbose = FALSE,
+#'     ani.height = 1000, ani.width=650,
+#'     outdir = loc2, single.opts =
+#'     "'controls': ['first', 'play', 'loop', 'speed'], 'delayMin': 0")
+#' 
+#' FUN2(TRUE)
+#' 
+#' #=====================#
+#' ## Complex Animation ##
+#' #=====================#
+#' library(animation)
+#' library(grid)
+#' library(gridBase)
+#' library(qdap)
+#' library(reports)
+#' library(igraph)
+#' library(plotrix)
+#' 
+#' deb2dat <- subset(pres_debates2012, time=="time 2")
+#' deb2dat[, "person"] <- factor(deb2dat[, "person"])
+#' (deb2 <- with(deb2dat, polarity(dialogue, person)))
+#' 
+#' ## Set up the network version
+#' bg_black <- Animate(deb2, neutral="white", current.speaker.color="grey70")
+#' bgb <- vertex_apply(bg_black, label.color="grey80", size=30, label.size=22,
+#'     color="grey40")
+#' bgb <- edge_apply(bgb, label.color="yellow")
+#' 
+#' ## Set up the bar version
+#' deb2_bar <- Animate(deb2, as.network=FALSE)
+#' 
+#' ## Generate a folder
+#' loc2 <- folder(animation_polarity2)
+#' 
+#' ## Set up the plotting function
+#' oopt <- animation::ani.options(interval = 0.1)
+#' 
+#' 
+#' FUN2 <- function(follow=FALSE, theseq = seq_along(bgb)) {
+#' 
+#'     Title <- "Animated Polarity: 2012 Presidential Debate 2"
+#'     Legend <- c(.2, -1.075, 1.5, -1.005)
+#'     Legend.cex <- 1
+#' 
+#'     lapply(theseq, function(i) {
+#'         if (follow) {
+#'             png(file=sprintf("%s/images/Rplot%s.png", loc2, i), 
+#'                 width=650, height=725)
+#'         }
+#'         ## Set up the layout
+#'         layout(matrix(c(rep(1, 9), rep(2, 4)), 13, 1, byrow = TRUE))
+#' 
+#'         ## Plot 1
+#'         par(mar=c(2, 0, 2, 0), bg="black")
+#'         #par(mar=c(2, 0, 2, 0))
+#'         set.seed(20)
+#'         plot.igraph(bgb[[i]], edge.curved=TRUE)
+#'         mtext(Title, side=3, col="white")
+#'         color.legend(Legend[1], Legend[2], Legend[3], Legend[4],
+#'               c("Negative", "Neutral", "Positive"), attributes(bgb)[["legend"]],
+#'               cex = Legend.cex, col="white")
+#' 
+#'         ## Plot2
+#'         plot.new()              
+#'         vps <- baseViewports()
+#' 
+#'         uns <- unit(c(-1.3,.5,-.75,.25), "cm")
+#'         p <- deb2_bar[[i]] + 
+#'             theme(plot.margin = uns,
+#'                 text=element_text(color="white"),
+#'                 plot.background = element_rect(fill = "black", 
+#'                     color="black")) 
+#'         print(p,vp = vpStack(vps$figure,vps$plot))
+#'         animation::ani.pause()
+#' 
+#'         if (follow) {
+#'             dev.off()
+#'         }
+#'     })
+#' 
+#' }
+#' 
+#' FUN2()
+#' 
+#' ## Detect OS
+#' type <- if(.Platform$OS.type == "windows") shell else system
+#' 
+#' saveHTML(FUN2(), autoplay = FALSE, loop = TRUE, verbose = FALSE,
+#'     ani.height = 1000, ani.width=650,
+#'     outdir = loc2, single.opts =
+#'     "'controls': ['first', 'play', 'loop', 'speed'], 'delayMin': 0")
+#' 
+#' FUN2(TRUE)
 #' }
 polarity <- function (text.var, grouping.var = NULL, 
     polarity.frame = qdapDictionaries::env.pol, 
@@ -857,3 +1002,403 @@ plot.polarity_score <- function(x, error.bar.height = .35,
     grid.arrange(plot2, plot1, ncol=2)
     invisible(list(plot1=plot2, plot2=plot1))
 }
+
+
+## Capture edges from an igraph object
+edge_capture <- function(iobj) {
+
+    data.frame(do.call(rbind, 
+        strsplit(bracketX(capture.output(E(iobj)))[-c(1:2)], 
+        " -> ")), stringsAsFactors = FALSE)
+
+}
+
+## generate a to and from column based on a column of froms
+from_to_End <- function(x) {
+
+    data.frame(from=as.character(x), to=c(as.character(x[-1]), 
+        "End"), stringsAsFactors = FALSE)
+
+}
+
+## aggregate polarity scores as you iterate through rows
+agg_pol <- function(a) {
+    b <- list_df2df(lapply(split(a[, c("polarity", "wc", "id")], a[, "from|to"]), function(x) {
+       data.frame(polarity=mean(x[, 1], na.rm = TRUE), 
+           wc=sum(x[, 2], na.rm = TRUE), id=max(x[, 3], na.rm = TRUE))
+   }), "group")
+    b[, "polarity"][is.nan(b[, "polarity"])] <- NA
+    b[, "prop_wc"] <- b[, "wc"]/sum(b[, "wc"], na.rm = TRUE)
+    b
+}
+
+Animate_polarity_net <- function(x, negative = "blue", positive = "red", 
+    neutral = "yellow", edge.constant, 
+    wc.time = TRUE, time.constant = 1, title = NULL, digits = 3, 
+    current.color = "black", current.speaker.color, non.speaker.color = NA, ...){
+
+    qsep <- "|-|qdap|-|"
+
+    brks <- c(-10:-2, seq(-1, -.6, by=.01), seq(-.5, 0, by=.001), 
+        seq(.001, .5, by=.001), seq(.6, 1, by=.01), 2:10)
+    max.color.breaks <- length(brks)
+
+    y2 <- y <- counts(x)
+    condlens <- rle(as.character(y[, 1]))
+    y[, "temp"] <- rep(paste0("X", pad(1:length(condlens[[2]]))),
+        condlens[[1]])
+    y[, "ave.polarity"] <- ave(y[, 3], y[, "temp"], FUN=mean)
+
+    ## Add to  and from columns
+    y <- cbind(y, from_to_End(y[, 1]))
+
+    ## repeat last to column to match with split sentence (i.e.
+    ## we don't want an edge to return to the node it leaves
+    tos <- split(y[, "to"], y[, "temp"])
+    tos_lens <- sapply(tos, length)
+    y[, "to"] <- rep(sapply(tos, tail, 1), tos_lens)
+  
+    ## make a combined from|to column
+    y[, "from|to"] <- paste2(y[, c("from", "to")], sep=qsep)
+
+    ## add id column
+    y[, "id"] <- 1:nrow(y)
+
+    ## get aggregated values iterating through rows
+    ## sum wc, max(id),  prop_wc
+    list_polarity <- lapply(1:nrow(y), function(i) {
+        agg_pol(y[1:i, , drop=FALSE])
+    })
+
+    ## combine into a dataframe by turn of talk
+    df_polarity <- list_df2df(list_polarity, "turn")
+
+    ## set up color gradients
+    colfunc <- colorRampPalette(c(negative, neutral, positive))
+    cols <- colfunc(max.color.breaks)
+   
+    ## add colors to df_polarity based on agrgegated 
+    ## average polarity per edge
+    cuts <- cut(df_polarity[, "polarity"], brks)
+
+    df_polarity[, "color"] <- cuts %l% data.frame(cut(brks, brks), cols)
+
+    ## split it back into the iterative per row 
+    ## dataframes of aggregated values
+    list_polarity <- lapply(split(df_polarity[, -1], df_polarity[, 1]), 
+        function(x) {
+            y <- colsplit2df(x, sep=qsep)
+            colnames(y)[1:2] <- c("from", "to")
+            y
+    })
+
+    ## create a single network plot with all values
+    dat <- sentCombine(y[, "text.var"], y[, "from"])
+    theplot <- discourse_map(dat[, "text.var"], dat[, "from"], 
+        ...)[["plot"]]
+
+    ## generate edge constant of needed
+    if (missing(edge.constant)) {
+        edge.constant <- length(unique(y[, 1])) * 2.5
+    }
+
+    ## function to added colr to edges in network plot
+    colorize <- function(x, y) {
+        E(y)$color <- paste2(edge_capture(y), sep="|-|qdap|-|") %l%
+            data.frame(edge=paste2(x[, 1:2], sep="|-|qdap|-|"), cols=x[, "color"])
+        y
+    }
+
+    ## Add colors from the aggregated list of average polarities
+    ## and output a corresponding list of network plots
+    new_pol_nets <- lapply(list_polarity, colorize, theplot)
+
+    ## Add edge weights etc to each graph
+    igraph_objs <- setNames(lapply(seq_along(new_pol_nets), 
+        function(i, grp =new_pol_nets, len=length(unique(y[, 1])), sep=qsep){
+
+        ## limit the edge weights (widths) of first 5 plots)
+        if (i %in% 1:5) {
+            edge.constant <- edge.constant/(len/i)
+        }
+
+        ## calculate edge widths
+        cur <- list_polarity[[i]]
+        cur[, "width"] <- edge.constant*cur[, "prop_wc"]
+
+        ## get current edge
+        cur_edge <- which.max(cur[, "id"])
+        cur_edge2 <- max(cur[, "id"])
+
+        ## create current edge label and polarity sign
+        cur_pol <- y[y[, "id"] == cur_edge2, "ave.polarity"]
+        symb <- ifelse(cur_pol == 0, "", ifelse(cur_pol < 0, "-", "+"))
+        lab <- numbformat(cur_pol, digits)
+        lab <- ifelse(symb == "", "0", sprintf("%s (%s)", lab, symb))
+        E(grp[[i]])$label <- NA
+        curkey <- data.frame(paste2(cur[cur_edge, 1:2], sep="|-|qdap|-|"), lab)
+
+        ## Set up widths and colors
+        tcols <- cur[, c("from", "to", "color"), drop=FALSE]
+        widths <- cur[, c("from", "to", "width"), drop=FALSE]
+        widths[, "width"] <- ceiling(widths[, "width"])
+        ekey <- paste2(edge_capture(grp[[i]]), sep=sep)
+        ckey <- colpaste2df(tcols, 1:2, sep = sep, keep.orig=FALSE)[, 2:1]
+        wkey <- colpaste2df(widths, 1:2, sep = sep, keep.orig=FALSE)[, 2:1]
+        E(grp[[i]])$width <- NAer(ekey %l% wkey, 1)
+        #plot(grp[[i]], edge.curved=TRUE)
+        E(grp[[i]])$color <- ekey %l% ckey
+        E(grp[[i]])$label <- ekey %l% curkey
+        V(grp[[i]])$frame.color <- NA
+        if (!is.null(current.speaker.color)) {
+            spkkey <- data.frame(as.character(cur[cur_edge, 1]), current.speaker.color, 
+                stringsAsFactors = FALSE)
+            V(grp[[i]])$frame.color <- V(grp[[i]])$name %l% spkkey
+        }
+        V(grp[[i]])$frame.color[is.na(V(grp[[i]])$frame.color)] <- non.speaker.color
+
+        ## change edge label color
+        E(grp[[i]])$label.color <- current.color
+        ##ekey %l% data.frame(curkey[1, 1], current.color)
+            
+        grp[[i]]
+    }), paste0("Turn_", pad(1:nrow(y))))
+
+    timings <- round(exp(y2[, "wc"]/(max(y2[, "wc"])/time.constant)))
+    if(wc.time) {
+        igraph_objs <- rep(igraph_objs, timings)
+    }
+
+    ## starts with a blank object
+    igraph_objs <- rep(igraph_objs, c(2, rep(1, length(igraph_objs) - 1)))
+    len <- nchar(char2end(names(igraph_objs)[1], "_"))
+    names(igraph_objs)[1] <- sprintf("turn_%s", paste(rep(0, len), collapse=""))
+
+    uncol <- E(igraph_objs[[1]])$color
+    E(igraph_objs[[1]])$color <- NA
+    E(igraph_objs[[1]])$label.color <- NA
+    E(igraph_objs[[1]])$label <- NA
+    V(igraph_objs[[1]])$frame.color <- non.speaker.color    
+
+    ## end with no label or frame color
+    igraph_objs <- rep(igraph_objs, c(rep(1, length(igraph_objs) - 1), 2))
+    E(igraph_objs[[length(igraph_objs)]])$label.color <- NA
+    E(igraph_objs[[length(igraph_objs)]])$label <- NA
+    V(igraph_objs[[length(igraph_objs)]])$frame.color <- non.speaker.color
+    
+    ## add class info
+    class(igraph_objs) <- "animated_polarity"
+    attributes(igraph_objs)[["title"]] <- title
+    attributes(igraph_objs)[["timings"]] <- timings
+    attributes(igraph_objs)[["network"]] <- TRUE
+    attributes(igraph_objs)[["legend"]] <- cols
+    igraph_objs
+}
+
+
+Animate_polarity_bar <- function(x, wc.time = TRUE, time.constant = 1, 
+    digits = 3, ave.color.line = "red", ...) {
+
+    input <- counts(x)
+    ord <- scores(x)[order(scores(x)[, "ave.polarity"]), 1]
+ 
+    grp <- colnms1 <- colnames(input)[1]
+    colnames(input)[1] <- "group"
+    input[, "group"] <- factor(input[, "group"], levels = ord)
+    listdat <- lapply(1:nrow(input), function(i) {
+        row_dat(input[1:i, ])
+    })
+    thedat <- list_df2df(listdat, "row")
+    rng <- range(thedat[, "ave.polarity"], na.rm=TRUE)
+
+
+    theplot <- ggbar(listdat[[length(listdat)]], grp = colnms1, rng = rng)
+
+    ggplots <- setNames(lapply(seq_along(listdat), function(i, aplot=theplot) {
+        listdat[[i]][, "group"] <- factor(listdat[[i]][, "group"], levels=ord)
+
+        tot_ave_pol <- mean(listdat[[i]][, "ave.polarity"], na.rm = TRUE)
+        titlepol <- numbformat(tot_ave_pol, digits)
+
+        aplot[["labels"]][["title"]] <- paste(sprintf("Average Discourse Polarity:  %s", 
+            titlepol), sprintf("%sCurrent Speaker:   %s", paste(rep(" ", 15), 
+            collapse=""), input[i, 1]))
+
+        aplot[["data"]] <- listdat[[i]]
+        aplot + geom_hline(yintercept=tot_ave_pol, size=1, color=ave.color.line) 
+        }), paste0("turn_", pad(1:length(listdat))))
+
+    timings <- round(exp(input[, "wc"]/(max(input[, "wc"])/time.constant)))
+    if(wc.time) {
+        ggplots <- rep(ggplots, timings)
+    }
+
+    ## starts with a blank object and end match the network Animate
+    theplot[["data"]][, "ave.polarity"] <- NaN
+    ggplots <- unlist(list(list(theplot), ggplots, 
+        ggplots[length(ggplots)]), recursive=FALSE)
+
+    len <- nchar(char2end(names(ggplots)[1], "_"))
+    names(ggplots)[1] <- sprintf("turn_%s", paste(rep(0, len), collapse=""))
+
+    ## add class info
+    class(ggplots) <- "animated_polarity"
+    attributes(ggplots)[["timings"]] <- timings
+    attributes(ggplots)[["network"]] <- FALSE
+    attributes(ggplots)[["legend"]] <- NULL
+    ggplots
+}
+
+
+row_dat <- function(input) {    
+    list_df2df(lapply(split(input, input[, "group"]), function(x) {
+           data.frame(wc = sum(x[, "wc"], na.rm = TRUE), 
+               ave.polarity = mean(x[, "polarity"], na.rm = TRUE))
+        }), "group")
+}
+
+
+ggbar <- function(dat, grp = grp, rng = rng) {
+
+    padding <- diff(rng)*.1
+
+    ggplot(dat, aes_string(x="group"))  +
+        geom_hline(yintercept=0, size=1.5, color="grey50", linetype="dashed") + 
+#        geom_hline(yintercept=tot_ave_pol, size=1, color=ave.color.line) + 
+        geom_bar(aes_string(weight="ave.polarity")) +
+        ylab("Average Polarity") + 
+        xlab(paste(sapply(unlist(strsplit(grp, "&")), Caps), collapse = " ")) +
+        ylim(c(rng[1] - padding, rng[2] + padding)) + theme_bw() +
+        ggtitle(sprintf("Average Discourse Polarity:  %s", "")) +
+        theme(axis.text.x=element_text(angle = 90, vjust = .4, hjust = 1, size=11),
+            plot.title=element_text(hjust=0, size=11, color="grey60")) + 
+        scale_x_discrete(drop=FALSE)
+
+}
+
+#' Animate Polarity
+#' 
+#' \code{Animate.polarity} - Animate a \code{\link[qdap]{polarity}} object.
+#' 
+#' polarity Method for Animate
+#' @param x A \code{\link[qdap]{polarity}} object.
+#' @param negative The color to use for negative polarity.
+#' @param positive The color to use for positive polarity.
+#' @param neutral The color to use for neutral polarity.
+#' @param edge.constant A constant to multiple edge width by.
+#' @param wc.time logical.  If \code{TRUE} weights duration of frame by word 
+#' count.
+#' @param time.constant A constant to divide the maximum word count by.  Time
+#' is calculated by `round(exp(WORD COUNT/(max(WORD COUNT)/time.constant)))`.  
+#' Therefore a larger constant will make the difference between the large and 
+#' small word counts greater.
+#' @param title The title to apply to the animated image(s).
+#' @param digits The number of digits to use in the current turn of talk 
+#' polarity.
+#' @param current.color The color to use for the current turn of talk polarity.
+#' @param current.speaker.color The color for the current speaker.
+#' @param non.speaker.color The color for the speakers not currently speaking.
+#' @param ave.color.line The color to use for the average color line if 
+#' \code{network = FALSE}.
+#' @param as.network logical.  If \code{TRUE} the animation is a network plot.
+#' If \code{FALSE} the animation is a hybrid dot plot.
+#' @param \ldots Other arguments passed to \code{\link[qdap]{discourse_map}}.
+#' @note The width of edges is based on words counts on that edge until that 
+#' moment divided by total number of words used until that moment.  Thicker 
+#' edges tend to thin as time passes.  The actual duration the current edge 
+#' stays as the \code{current.color} is based on word counts for that particular 
+#' flow of dialogue divided by total dialogue (words) used.  The edge label is
+#' the current polarity for that turn of talk (an aggregation of the sub 
+#' sentences of the current turn of talk).  The coloring of the current edge 
+#' polarity is produced at th sentence level, therefor a label may indicate a 
+#' positive current turn of talk, while the coloring may indicate a negative 
+#' sentences.
+#' @import igraph
+#' @importFrom ggplot2 ggplot geom_hline geom_bar ylab xlab theme ggtitle theme_bw ylim element_text scale_x_discrete 
+#' @export
+#' @method Animate polarity
+Animate.polarity <- function(x, negative = "blue", positive = "red", 
+    neutral = "yellow", edge.constant, wc.time = TRUE, time.constant = 2,
+    title = NULL, digits = 3, current.color = "black", 
+    current.speaker.color = NULL, non.speaker.color = NA, 
+    ave.color.line = "red", as.network = TRUE, ...){
+
+    if (as.network) {
+        Animate_polarity_net(x = x, negative = negative, positive = positive, 
+            neutral = neutral, edge.constant = edge.constant, wc.time = wc.time, 
+            time.constant = time.constant, title = title, digits = digits, 
+            current.speaker.color = current.speaker.color,
+            current.color = current.color, ...)
+    } else {
+        Animate_polarity_bar(x = x, wc.time = wc.time, 
+            time.constant = time.constant, digits = digits, 
+            ave.color.line = ave.color.line, ...)         
+    }
+
+}
+
+
+#' Prints a animated_polarity  Object
+#' 
+#' Prints a animated_polarity  object.
+#' 
+#' @param x The animated_polarity  object.
+#' @param title The title of the plot.
+#' @param layout \pkg{igraph} \code{layout} to use.
+#' @param seed The seed to use in plotting the graph.
+#' @param pause The length of time to pause between plots.
+#' @param legend The coordinates of the legend. See 
+#' \code{\link[plotrix]{color.legend}} for more information.
+#' @param legend.cex character expansion factor. \code{NULL} and \code{NA} are 
+#' equivalent to 1.0. See \code{\link[graphics]{mtext}} for more information.
+#' @param bg The color to be used for the background of the device region. See
+#' \code{\link[graphics]{par}} for more information. 
+#' @param \ldots Other Arguments passed to \code{\link[igraph]{plot.igraph}}.
+#' @import igraph
+#' @importFrom plotrix color.legend
+#' @method print animated_polarity 
+#' @S3method print animated_polarity 
+print.animated_polarity <- function(x, title = NULL, 
+    seed = sample(1:10000, 1), layout=layout.auto, pause = 0, 
+    legend = c(-.5, -1.5, .5, -1.45), legend.cex=1, bg=NULL, ...){
+    
+    if (is.null(title)) {
+        title <- attributes(x)[["title"]]
+    }
+
+    if (attributes(x)[["network"]]) {
+        invisible(lapply(x, function(y) {
+            set.seed(seed)
+            par(bg = bg)
+            plot.igraph(y, edge.curved=TRUE, layout=layout)
+            if (!is.null(title)) {
+                mtext(title, side=3)
+            }
+            if (!is.null(legend)) {
+                color.legend(legend[1], legend[2], legend[3], legend[4], 
+                    c("Negative", "Neutral", "Positive"), attributes(x)[["legend"]], 
+                    cex = legend.cex)
+            }
+            if (pause > 0) Sys.sleep(pause)
+        })) 
+    } else {
+        invisible(lapply(x, print))
+    }
+   
+}
+
+
+#' Plots a animated_polarity  Object
+#' 
+#' Plots a animated_polarity  object.
+#' 
+#' @param x The animated_polarity  object.
+#' @param \ldots Other arguments passed to \code{print.animated_polarity }.
+#' @method plot animated_polarity 
+#' @export
+plot.animated_polarity  <- function(x, ...){ 
+
+    print(x, ...)
+
+}
+

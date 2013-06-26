@@ -1,5 +1,7 @@
-#' Generates start and end times of supplied text selections (i.e., text 
-#' selections are determined by any number of grouping variables).
+#' Gantt Durations
+#' 
+#' \code{gantt} - Generates start and end times of supplied text selections 
+#' (i.e., text selections are determined by any number of grouping variables).
 #' 
 #' @param text.var The text variable    
 #' @param grouping.var The grouping variables. Also takes a single grouping 
@@ -57,6 +59,31 @@
 #' 
 #' dat <- gantt(mraja1$dialogue, list(mraja1$fam.aff, mraja1$sex),
 #'     units = "sentences", col.sep = "_")
+#'     
+#'     
+#' ## Animate It
+#' ##=================
+#' ani_gannt <- with(DATA.SPLIT, gantt(state, person))
+#' Animate(ani_gannt)
+#' Animate(plot(ani_gannt))
+#' 
+#' library(animation)
+#' loc <- folder(animation_gantt)
+#' 
+#' ## Set up the plotting function
+#' oopt <- animation::ani.options(interval = 0.1)
+#' 
+#' FUN <- function() {
+#'     out <- Animate(ani_gannt)
+#'     lapply(out, function(x) {
+#'         print(x)
+#'         animation::ani.pause()
+#'     })
+#' 
+#' }
+#' 
+#' type <- if(.Platform$OS.type == "windows") shell else system
+#' saveGIF(FUN(), interval = 0.1, outdir = loc, cmd.fun = type)
 #' }
 gantt <-
 function(text.var, grouping.var, units = "words", sums = FALSE, col.sep = "_"){
@@ -302,5 +329,70 @@ Caps <- function(x, all = FALSE) {
         x <- strsplit(x, " ")[[1]]
     } 
     paste(toupper(substring(x, 1,1)), substring(x, 2), sep="", collapse=" ") 
+}
+
+
+
+#' Gantt Durations
+#' 
+#' \code{gantt} - Animate discourse from \code{\link[qdap]{gantt}}.
+#' 
+#' gantt Method for Animate
+#' @param x The gantt object.
+#' @param wc.time logical.  If \code{TRUE} weights duration of frame by word 
+#' count.
+#' @param time.constant A constant to divide the maximum word count by.  Time
+#' is calculated by `round(exp(WORD COUNT/(max(WORD COUNT)/time.constant)))`.  
+#' Therefore a larger constant will make the difference between the large and 
+#' small word counts greater.
+#' @param colors An optional character vector of colors to color the Gantt bars.
+#' Must be length 1 (repeats the same color) or equal to the levels of the 
+#' grouping variable.
+#' @param \ldots Other arguments passed to \code{\link[qdap]{gantt_wrap}}.
+#' @export
+#' @method Animate gantt
+Animate.gantt <- function(x, wc.time = TRUE, time.constant = 2, colors = NULL, ...){
+
+    if (!"n" %in% colnames(x)) stop("x contains no column \"n\"")
+    z <- plot(x,  plot=FALSE) ###
+    z[[c("coordinates", "limits", "x")]] <- c(0, sum(x[, "n"]))
+       
+    plots <- lapply(0:nrow(x), function(i, myplot=z, dat = z[["data"]]) {
+
+        ## Starts the plot with no bars if i = 0
+        if (i == 0) {
+            thedat <- dat[1, , drop=FALSE]
+            thedat[, "end"] <- 0
+        } else {
+            thedat <- dat[1:i, , drop=FALSE]
+        }
+
+        ## Proper coloring
+        num <- ifelse(i == 0, 1, i)
+        colvar <- thedat[1:num, "new4"]
+        lvls <- levels(colvar)
+        if (is.null(colors)) {
+            lvls_cols <- gg_color_hue(length(lvls))
+        } else {
+            if (length(colors) == 1) {
+                lvls_cols <- rep(colors, length(lvls))
+            } else {
+                lvls_cols <- colors
+            }
+        }
+
+        colvars2 <- levels(unique(colvar))[levels(unique(colvar)) %in% unique(colvar)]
+        cols <- colvars2 %l% data.frame(lvls, lvls_cols, stringsAsFactors = FALSE)
+  
+        myplot[["data"]] <- thedat
+        myplot + scale_y_discrete(drop=FALSE) + scale_colour_manual(values=cols)
+
+    })
+        
+    timings <- round(exp(z[["data"]][, "n"]/(max(z[["data"]][, "n"])/time.constant)))
+    if(wc.time) {
+        plots <- rep(plots, c(1, timings))
+    }
+    plots
 }
 

@@ -9,6 +9,8 @@
 #' @param edge.constant A constant to multiple the edges by.  Defaults (if 
 #' \code{missing}) to 2.5 times the number of social actors.
 #' @param \ldots ignored
+#' @param condense logical.  If \code{TRUE} \code{sentCombine} is used to 
+#' condense text by grouping variable.
 #' @param sep The separator character to use between grouping variables.
 #' @return Returns a list:
 #' \item{raw}{The dataframe with to and from columns (the edges) + word counts}
@@ -21,7 +23,7 @@
 #' @details For an example of the video generated from the \code{Animate} 
 #' output of \code{discourse_map} see: 
 #' \url{https://www.youtube.com/watch?v=7LcqFZODXNo&feature=youtu.be}.  An HTML
-#' output can be view: 
+#' output can be viewed: 
 #' \url{http://trinker.github.io/qdap_examples/animation_dialogue}.
 #' @import igraph
 #' @examples
@@ -131,7 +133,7 @@
 #'         par(mar=c(0, 0, 1, 0))
 #'         set.seed(10)
 #'         plot.igraph(ans[[i]], edge.curved=TRUE, layout=layout.circle)
-#'         mtext("Discourse Plot", side=3)
+#'         mtext("Discourse Map", side=3)
 #'         animation::ani.pause()
 #'     })
 #' }
@@ -140,7 +142,7 @@
 #' type <- if(.Platform$OS.type == "windows") shell else system
 #' saveGIF(FUN(), interval = 0.1, outdir = loc, cmd.fun = type)
 #' 
-#' saveVideo(FUN(), interval = 0.1, outdir = loc)
+#' saveVideo(FUN(), video.name = "discourse_map.avi", interval = 0.1, outdir = loc)
 #' 
 #' saveLatex(FUN(), autoplay = TRUE, loop = FALSE, latex.filename = "tester.tex", 
 #'     caption = "animated dialogue", outdir = loc, ani.type = "pdf", 
@@ -173,10 +175,11 @@
 #'     outdir = file.path(loc2, "new"), single.opts =
 #'     "'controls': ['first', 'play', 'loop', 'speed'], 'delayMin': 0")
 #'     
-#' saveVideo(FUN3(), video.name = "discourse_map.avi", interval = 0.2, outdir = loc2)    
+#' saveVideo(FUN3(), video.name = "discourse_map.avi", interval = 0.2, 
+#'     outdir = loc2)    
 #' }
 discourse_map <- function(text.var, grouping.var, edge.constant, sep = "_", 
-    ...) {
+    condense = TRUE, ...) {
 
     if (is.list(grouping.var)) {
         m <- unlist(as.character(substitute(grouping.var))[-1])
@@ -202,7 +205,17 @@ discourse_map <- function(text.var, grouping.var, edge.constant, sep = "_",
         edge.constant <- length(unique(grouping)) * 2.5
     }
 
+    ## check if any grouping vars repeat and condense
+    if(condense) {
+        if (sum(rle(as.character(grouping.var))[["lengths"]] > 1) > 0){
+            dat <- sentCombine(text.var, grouping.var)
+            grouping <- dat[, 1]
+            text.var <- dat[, 2]
+        }
+    }
+
     DF <- map_df1(grouping, text.var) 
+
     DF2 <- map_df2(DF, qsep)
     DF3 <- map_df3(DF)
     g <- map_graph_qdap(DF2, edge.constant)
@@ -336,7 +349,7 @@ animated_discourse_map <- function(DF, edge.constant, sep = "_",
         DF2[, "color"] <- previous.color
         DF2[nrow(DF2), "color"] <- current.color
         DF2
-    }), paste0("Turn_", 1:nrow(DF)))
+    }), paste0("Turn_", pad(1:nrow(DF))))
 
     igraph_objs <- setNames(lapply(seq_along(igraph_weights), 
         function(i, grp =g, len=length(nms), sep=qsep){
@@ -357,18 +370,26 @@ animated_discourse_map <- function(DF, edge.constant, sep = "_",
         E(grp)$width <- NAer(ekey %l% wkey)
         E(grp)$color <- ekey %l% ckey
         grp
-    }), paste0("Turn_", 1:nrow(DF)))
+    }), paste0("Turn_", pad(1:nrow(DF))))
 
     timings <- round(exp(DF[, "wc"]/(max(DF[, "wc"])/time.constant)))
     if(wc.time) {
         igraph_objs <- rep(igraph_objs, timings)
     }
 
+    ## starts with a blank object
+    igraph_objs <- rep(igraph_objs, c(2, rep(1, length(igraph_objs) - 1)))
+    len <- nchar(char2end(names(igraph_objs)[1], "_"))
+    names(igraph_objs)[1] <- sprintf("turn_%s", paste(rep(0, len), collapse=""))
+    uncol <- E(igraph_objs[[1]])$color
+    E(igraph_objs[[1]])$color[!is.na(uncol)] <- NA
+
     class(igraph_objs) <- "animated_discourse_map"
     attributes(igraph_objs)[["title"]] <- title
     attributes(igraph_objs)[["timings"]] <- timings
     igraph_objs
 }
+
 #' Prints a animated_discourse_map  Object
 #' 
 #' Prints a animated_discourse_map  object.
@@ -382,14 +403,14 @@ animated_discourse_map <- function(DF, edge.constant, sep = "_",
 #' @method print animated_discourse_map 
 #' @S3method print animated_discourse_map 
 print.animated_discourse_map <- function(x, title = NULL, 
-    seed = sample(1:10000, 1), layout=layout.circle, ...){
+    seed = sample(1:10000, 1), layout=layout.auto, ...){
     
     if (is.null(title)) {
         title <- attributes(x)[["title"]]
     }
 
-    set.seed(seed)
     invisible(lapply(x, function(y) {
+        set.seed(seed)        
         plot.igraph(y, edge.curved=TRUE, layout=layout)
         if (!is.null(title)) {
             mtext(title, side=3)
@@ -410,9 +431,10 @@ map_df2b <- function(DF, qsep){
 }
 
 
-#'Discourse Map
+#' Discourse Map
 #' 
-#' \code{Animate.discourse_map} - View Animate from \code{\link[qdap]{discourse_map}}.
+#' \code{Animate.discourse_map} - Animate a discourse 
+#' \code{\link[qdap]{discourse_map}}.
 #' 
 #' discourse_map Method for Animate
 #' @param x The discourse_map object.
@@ -443,6 +465,6 @@ Animate.discourse_map <- function(x, edge.constant, sep = "_",
     animated_discourse_map(x[["raw"]], edge.constant = edge.constant, 
         sep = sep, current.color = current.color, 
         previous.color = previous.color, wc.time = wc.time, 
-        title = title, ...) 
+        title = title, ...)
 
 }

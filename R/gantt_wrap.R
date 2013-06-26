@@ -260,8 +260,73 @@ function(dataframe, plot.var, facet.vars = NULL, fill.var = NULL, title = NULL,
     if (!is.null(fill.var)){
         theplot <- theplot + guides(colour = guide_legend(fill.var))
     }
+    class(theplot)<-c(class(theplot), ifelse(is.null(facet.vars), "gantt_plot", 
+        "gantt_plot_m"))
     if (plot) {
         print(theplot)
     }
     invisible(theplot)
 }
+
+#' Gantt Plot
+#' 
+#' \code{gantt_plot} - Animate discourse from \code{\link[qdap]{gantt_wrap}},
+#' \code{\link[qdap]{gantt_plot}}, or any other Gantt plotting method.
+#' 
+#' gantt_plot Method for Animate
+#' @param x The gantt_plot object.
+#' @param wc.time logical.  If \code{TRUE} weights duration of frame by word 
+#' count.
+#' @param time.constant A constant to divide the maximum word count by.  Time
+#' is calculated by `round(exp(WORD COUNT/(max(WORD COUNT)/time.constant)))`.  
+#' Therefore a larger constant will make the difference between the large and 
+#' small word counts greater.
+#' @param colors An optional character vector of colors to color the Gantt bars.
+#' Must be length 1 (repeats the same color) or equal to the levels of the 
+#' grouping variable.
+#' @param \ldots ignored
+#' @export
+#' @method Animate gantt_plot
+Animate.gantt_plot <- function(x, wc.time = TRUE, time.constant = 2, 
+    colors = NULL, ...){
+
+    x[[c("coordinates", "limits", "x")]] <- c(0, sum(x[["data"]][, "n"]))
+
+    plots <- lapply(0:nrow(x[["data"]]), function(i, myplot=x, dat = x[["data"]]) {
+         
+        ## Starts the plot with no bars if i = 0
+        if (i == 0) {
+            thedat <- dat[1, , drop=FALSE]
+            thedat[, "end"] <- 0
+        } else {
+            thedat <- dat[1:i, , drop=FALSE]
+        }
+
+        ## Proper coloring
+        num <- ifelse(i == 0, 1, i)
+        colvar <- thedat[1:num, "new4"]
+        lvls <- levels(colvar)
+        if (is.null(colors)) {
+            lvls_cols <- gg_color_hue(length(lvls))
+        } else {
+            if (length(colors) == 1) {
+                lvls_cols <- rep(colors, length(lvls))
+            } else {
+                lvls_cols <- colors
+            }
+        }
+
+        colvars2 <- levels(unique(colvar))[levels(unique(colvar)) %in% unique(colvar)]
+        cols <- colvars2 %l% data.frame(lvls, lvls_cols, stringsAsFactors = FALSE)
+  
+        myplot[["data"]] <- thedat
+        myplot + scale_y_discrete(drop=FALSE) + scale_colour_manual(values=cols)
+    })
+
+    timings <- round(exp(x[["data"]][, "n"]/(max(x[["data"]][, "n"])/time.constant)))
+    if(wc.time) {
+        plots <- rep(plots, c(1, timings))
+    }
+    plots
+}
+
