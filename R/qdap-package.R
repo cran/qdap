@@ -414,3 +414,44 @@ NULL
 #' @usage data(sample.time.span) 
 #' @format A data frame with 9 rows and 6 variables 
 NULL
+
+#' Syllable Lookup Environment
+#' 
+#' A dataset containing a syllable lookup environment (see \code{DICTIONARY}).
+#' 
+#' @details For internal use.
+#' 
+#' @docType data 
+#' @keywords datasets 
+#' @name env.syl 
+#' @usage data(env.syl) 
+#' @format A environment with the DICTIONARY data set.  
+#' @references 
+#' \href{http://archive.ics.uci.edu/ml/machine-learning-databases/undocumented/connectionist-bench/nettalk/}{UCI Machine Learning Repository website}
+NULL
+
+#' Hamlet (Complete & Split by Sentence)
+#' 
+#' A dataset containing the complete dialogue of Hamlet with turns of talk split 
+#' into sentences.
+#'
+#' @details 
+#' \itemize{ 
+#'   \item act. The act (akin to repeated measures) 
+#'   \item tot. The turn of talk
+#'   \item scene. The scene (nested within an act)
+#'   \item location. Location of the scene
+#'   \item person. Character in the play
+#'   \item died. Logical coded death variable if yes the character dies in the 
+#'   play
+#'   \item dialogue. The spoken dialogue 
+#' } 
+#' 
+#' @docType data 
+#' @keywords datasets 
+#' @name hamlet 
+#' @usage data(hamlet) 
+#' @format A data frame with 2007 rows and 7 variables 
+#' @references 
+#' \url{http://www.gutenberg.org/ebooks/1524}
+NULL

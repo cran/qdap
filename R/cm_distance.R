@@ -82,6 +82,7 @@
 #' @keywords distance codes association
 #' @seealso \code{\link[qdap]{print.cm_distance}}
 #' @export
+#' @importFrom qdapTools v_outer
 #' @importFrom parallel parLapply makeCluster detectCores stopCluster clusterExport 
 #' @examples
 #' \dontrun{
@@ -244,7 +245,7 @@ function(dataframe, pvals = c(TRUE, FALSE), replications = 1000,
 #' console.
 #' @param \ldots ignored
 #' @method print cm_distance
-#' @S3method print cm_distance
+#' @export
 print.cm_distance <- function(x, mean.digits = 0, sd.digits = 2, 
     sd.mean.digits = 3, pval.digits = 3, new.order = NULL, na.replace = "-", 
     diag.replace = na.replace, print = TRUE, ...){
@@ -593,12 +594,13 @@ confup <- function(reps, alpha = .05) {
 #' @param \ldots Further arguments passed to the chosen \code{layout}.
 #' @importFrom reshape2 melt
 #' @import igraph
+#' @importFrom qdapTools vect2df
 #' @note This plotting method is not particularly well developed. It is 
 #' suggested that the user further develop the graph via direct use of the 
 #' \pkg{igraph} package. 
 #' @return Returns the \pkg{igraph} object.
 #' @method plot cm_distance
-#' @S3method plot cm_distance
+#' @export
 plot.cm_distance <- function(x, digits = 3, constant = 1, 
     label.dist = FALSE, layout = igraph::layout.fruchterman.reingold, 
     label.cex = 1, label.cex.scale.by.n = FALSE, alpha = NULL, 

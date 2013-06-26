@@ -18,6 +18,7 @@
 #' \code{r = NULL}.
 #' @keywords correlation, association 
 #' @export
+#' @importFrom qdapTools list_vect2df
 #' @references The plotting method for the list output was inspired by Ben 
 #' Marwick; see \url{http://stackoverflow.com/a/19925445/1000343} for more.
 #' @seealso \code{\link[qdap]{word_proximity}},
@@ -62,6 +63,7 @@
 #' 
 #' ## Find correlations between words per turn of talk by person
 #' ## Throws multiple warning because small data set
+#' library(qdapTools)
 #' lapply(DATA3, function(x) {
 #'     word_cor(x[, "state"], id(x), qcv(computer, i, no, good), r = NULL)
 #' })
@@ -177,7 +179,7 @@ word_cor <- function(text.var, grouping.var = NULL, word, r = .7,
 #' @param x The word_cor object
 #' @param digits The number of digits to print
 #' @param \ldots ignored
-#' @S3method print word_cor
+#' @export
 #' @method print word_cor
 print.word_cor <-
 function(x, digits = 3, ...) {
@@ -221,7 +223,7 @@ function(x, digits = 3, ...) {
 #' passed to \code{\link[ggplot2]{geom_point}} if a list.
 #' @importFrom ggplot2 ggplot aes facet_grid facet_wrap geom_point xlab ylab
 #' @method plot word_cor
-#' @S3method plot word_cor
+#' @export
 plot.word_cor <- function(x, label = TRUE, lab.digits = 3, high="red", 
     low="white", grid=NULL, ncol=NULL, ...) {
     

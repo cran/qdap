@@ -20,6 +20,7 @@
 #' proportional word count}
 #' \item{plot}{An \pkg{igraph} object}
 #' @export
+#' @importFrom qdapTools %l% matrix2df list2df list_df2df
 #' @details For an example of the video generated from the \code{Animate} 
 #' output of \code{discourse_map} see: 
 #' \url{https://www.youtube.com/watch?v=7LcqFZODXNo&feature=youtu.be}.  An HTML
@@ -42,6 +43,7 @@
 #' x
 #' 
 #' ## Augmenting the plot
+#' library(qdapTools)
 #' mygraph <- visual(x)
 #' 
 #' plot(mygraph, edge.curved=TRUE)
@@ -90,7 +92,7 @@
 #' 
 #'     V(THE_PLOT)$sex <- V(THE_PLOT)$name %l% raj.demographics[, 1:2]
 #'     V(THE_PLOT)$color <- ifelse(V(THE_PLOT)$sex=="f", "pink", "lightblue")
-#'     V(THE_PLOT)$family <- V(THE_PLOT)$name %l+% raj.demographics[, c(1, 3)]
+#'     V(THE_PLOT)$family <- V(THE_PLOT)$name %lc+% raj.demographics[, c(1, 3)]
 #'     V(THE_PLOT)$label.color <- lookup(V(THE_PLOT)$family, fam_key)
 #' 
 #'     plot(THE_PLOT, edge.curved=TRUE)
@@ -274,7 +276,7 @@ map_graph_qdap <- function(DF2, edgeconstant){
 #' @param \ldots Other Arguments passed to \code{\link[igraph]{plot.igraph}}.
 #' @import igraph
 #' @method print discourse_map
-#' @S3method print discourse_map
+#' @export
 print.discourse_map <- function(x, edge.curved = TRUE, title = NULL, ...) {
     plot.igraph(x[["plot"]], edge.curved = edge.curved, ...)
     if (!is.null(title)) {
@@ -402,7 +404,7 @@ animated_discourse_map <- function(DF, edge.constant, sep = "_",
 #' @param \ldots Other Arguments passed to \code{\link[igraph]{plot.igraph}}.
 #' @import igraph
 #' @method print animated_discourse_map 
-#' @S3method print animated_discourse_map 
+#' @export
 print.animated_discourse_map <- function(x, title = NULL, 
     seed = sample(1:10000, 1), layout=layout.auto, pause = 0, ...){
     

@@ -134,6 +134,18 @@
 #' plot(termco_obj, label = TRUE)
 #' plot(termco_obj, label = TRUE, text.color = "red")
 #' plot(termco_obj, label = TRUE, text.color="red", lab.digits=3)
+#' 
+#' ## REVERSE TERMCO (return raw words found per variable)
+#' df <- data.frame(x=1:6,
+#'     y = c("the fluffy little bat" , "the man was round like a ball",
+#'         "the fluffy little bat" , "the man was round like a ball",
+#'         "he ate the chair" , "cough, cough"),
+#'     stringsAsFactors=FALSE)
+#' 
+#' l <- list("bat" ,"man", "ball", "heavy")
+#' z <- counts(termco(df$y, qdapTools::id(df), l))[, -2]
+#' 
+#' counts2list(z[, -1], z[, 1])
 #' }
 termco <-
 function (text.var, grouping.var = NULL, match.list, short.term = TRUE,
@@ -459,7 +471,7 @@ termco2mat <-function (dataframe, drop.wc = TRUE, short.term = TRUE,
 #' @param zero.replace Value to replace 0 values with.  If NULL uses the value 
 #' from \code{\link[qdap]{termco}}.  Only used if \code{label} is TRUE.
 #' @param \ldots ignored
-#' @S3method print termco
+#' @export
 #' @method print termco
 print.termco <-
 function(x, digits = NULL, percent = NULL, zero.replace = NULL, ...) {

@@ -16,6 +16,7 @@
 #' doi:10.1214/aoms/1177729694
 #' @keywords Kullback-Leibler
 #' @export
+#' @importFrom qdapTools v_outer
 #' @examples
 #' \dontrun{
 #' p.df <- wfdf(DATA$state, DATA$person)
@@ -42,7 +43,7 @@ function(x, y = NULL){
         x <- x
     }
     if (is.null(y)) { 
-        z <- v_outer(x, "kl")
+        z <- v_outer(x, kl)
     } else {
         z <- kl(x = x, y = y)
     }
@@ -58,7 +59,7 @@ function(x, y = NULL){
 #' @param digits Number of decimal places to print. 
 #' @param \ldots ignored
 #' @method print kullback_leibler
-#' @S3method print kullback_leibler
+#' @export
 print.kullback_leibler <-
 function(x, digits = 3, ...) {
     if (length(x) == 1) {
@@ -84,7 +85,7 @@ function(x, digits = 3, ...) {
 #' @param digits Number of decimal places to print. 
 #' @param \ldots Other arguments passed to \code{qheat}
 #' @method plot kullback_leibler
-#' @S3method plot kullback_leibler
+#' @export
 plot.kullback_leibler <- function(x, digits = 3 , ...) {
     if (all(dim(x) == c(0, 1))) stop("Can not plot a single value")
     class(x) <- "matrix"

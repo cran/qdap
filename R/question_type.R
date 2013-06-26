@@ -59,6 +59,7 @@
 #' do/does/did label.  Those with undetermined sentence type are labeled unknown.
 #' @keywords question, question-count
 #' @export 
+#' @importFrom qdapTools lookup
 #' @seealso \code{\link[qdap]{colcomb2class}},
 #' \code{\link[qdap]{bracketX}}
 #' @examples
@@ -326,7 +327,7 @@ question_type <- function(text.var, grouping.var = NULL,
 #' 
 #' @param x The question_type object
 #' @param \ldots ignored
-#' @S3method print question_type
+#' @export
 #' @method print question_type
 print.question_type <-
 function(x, ...) {
@@ -551,7 +552,7 @@ plot.question_type_preprocessed <- function(x, ...){
     Max <- max(dat2[, "value"])
 
     plot2 <- ggplot(dat2, aes(x=Var1)) + 
-        geom_bar(aes(weights=value, fill=Var1)) + 
+        geom_bar(aes(weight=value, fill=Var1)) + 
         scale_y_continuous(expand = c(0,0), limits = c(0,Max + Max*.05)) +
         coord_flip() + xlab(NULL) + 
         ylab("Count") + theme_qdap() +

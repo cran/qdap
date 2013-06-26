@@ -7,6 +7,7 @@
 #' @param values logical.  If \code{TRUE} the cell values will be included on 
 #' the heatmap. 
 #' @param \ldots Other arguments passed to \code{\link[qdap]{qheat}}.
+#' @method plot table_score 
 #' @export
 plot.table_score <- function(x, values = TRUE, high = "red", ...){ 
 
@@ -47,6 +48,7 @@ plot.table_score <- function(x, values = TRUE, high = "red", ...){
 #' @param values logical.  If \code{TRUE} the cell values will be included on 
 #' the heatmap. 
 #' @param \ldots Other arguments passed to \code{\link[qdap]{qheat}}.
+#' @method plot table_proportion
 #' @export
 plot.table_proportion <- function(x, values = TRUE, high = "red", ...){ 
 
@@ -65,6 +67,7 @@ plot.table_proportion <- function(x, values = TRUE, high = "red", ...){
 #' @param values logical.  If \code{TRUE} the cell values will be included on 
 #' the heatmap. 
 #' @param \ldots Other arguments passed to \code{\link[qdap]{qheat}}.
+#' @method plot table_count
 #' @export
 plot.table_count <- function(x, values = TRUE, high = "red", ...){ 
 
@@ -78,7 +81,7 @@ plot.table_count <- function(x, values = TRUE, high = "red", ...){
 #' 
 #' @param x The table_score object
 #' @param \ldots ignored
-#' @S3method print table_score
+#' @export
 #' @method print table_score
 print.table_score <-
 function(x, ...) {
@@ -95,7 +98,7 @@ function(x, ...) {
 #' 
 #' @param x The table_count object
 #' @param \ldots ignored
-#' @S3method print table_count
+#' @export
 #' @method print table_count
 print.table_count <-
 function(x, ...) {
@@ -112,7 +115,7 @@ function(x, ...) {
 #' 
 #' @param x The table_proportion object
 #' @param \ldots ignored
-#' @S3method print table_proportion
+#' @export
 #' @method print table_proportion
 print.table_proportion <-
 function(x, ...) {

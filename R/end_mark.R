@@ -1,4 +1,4 @@
-#' Sentence End marks
+#' Sentence End Marks
 #' 
 #' 
 #' \code{end_mark} - Grab the sentence end marks for a transcript.  This can be 
@@ -32,6 +32,7 @@
 #' \item{"blank"}{Empty cell/NA.} 
 #' @keywords end-mark
 #' @export
+#' @importFrom qdapTools matrix2df
 #' @examples
 #' \dontrun{
 #' end_mark(DATA.SPLIT$state)
@@ -72,13 +73,14 @@ end_mark <- function(text.var, missing.end.mark = "_", missing.text = NA,
     last1
 }
 
-#' Sentence End marks
+#' Sentence End Marks
 #' 
 #' 
 #' \code{end_mark_by} - Grab the sentence end marks for a transcriptby grouping 
 #' variable(s).
 #' 
 #' @rdname end_mark
+#' @importFrom qdapTools mtabulate
 #' @export
 end_mark_by <- function(text.var, grouping.var, digits = 3, percent = FALSE, 
     zero.replace = 0, ...) {
@@ -133,7 +135,7 @@ end_mark_by <- function(text.var, grouping.var, digits = 3, percent = FALSE,
 #' 
 #' @param x The end_mark_by object
 #' @param \ldots ignored
-#' @S3method print end_mark_by
+#' @export
 #' @method print end_mark_by
 print.end_mark_by <-
 function(x, ...) {

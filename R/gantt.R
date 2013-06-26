@@ -191,7 +191,7 @@ function(text.var, grouping.var, units = "words", sums = FALSE, col.sep = "_"){
 #' @param x The sums_gantt object 
 #' @param \ldots ignored
 #' @method print sums_gantt
-#' @S3method print sums_gantt
+#' @export
 print.sums_gantt <- function(x, ...) {
    class(x) <- "list"
    print(x)
@@ -244,7 +244,7 @@ plot_gantt_base <- function(x, sums = NULL, fill.colors = NULL,
 #' @param \ldots Other arguments passed to \code{gantt_wrap} or 
 #' \code{plot_gantt_base}
 #' @method plot gantt
-#' @S3method plot gantt
+#' @export
 plot.gantt <- function(x, base = FALSE, title = NULL, ...) {
 
     units <- gsub("unit_", "", class(x)[grepl("unit_", class(x))])
@@ -270,7 +270,7 @@ plot.gantt <- function(x, base = FALSE, title = NULL, ...) {
 #' @param \ldots Other arguments passed to \code{gantt_wrap} or 
 #' \code{plot_gantt_base}
 #' @method plot sums_gantt
-#' @S3method plot sums_gantt
+#' @export
 plot.sums_gantt <- function(x, base = TRUE, title = NULL, ...) {
     units <- gsub("unit_", "", class(x[["gantt.df"]])[grepl("unit_", 
         class(x[["gantt.df"]]))])
@@ -350,6 +350,7 @@ Caps <- function(x, all = FALSE) {
 #' grouping variable.
 #' @param \ldots Other arguments passed to \code{\link[qdap]{gantt_wrap}}.
 #' @export
+#' @importFrom qdapTools %l%
 #' @method Animate gantt
 Animate.gantt <- function(x, wc.time = TRUE, time.constant = 2, colors = NULL, ...){
 

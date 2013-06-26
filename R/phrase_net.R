@@ -19,6 +19,7 @@
 #' @export
 #' @importFrom reshape2 melt
 #' @import igraph
+#' @importFrom qdapTools lookup
 #' @examples
 #' \dontrun{
 #' x <- "Questions must be at least 2 days old to be eligible for a bounty.
@@ -84,7 +85,7 @@ phrase_net <- function(text.var, freq=4, r = .35,
 #' @param edge.curved logical.  If \code{TRUE} edges are plotted with curves.
 #' @param \ldots Other Arguments passed to \code{\link[igraph]{plot.igraph}}.
 #' @method print phrase_net
-#' @S3method print phrase_net
+#' @export
 print.phrase_net <- function(x, edge.curved = TRUE, ...) {
     plot.igraph(x, edge.curved = edge.curved, ...)
 }

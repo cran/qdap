@@ -214,7 +214,7 @@ new_project <- function(project = "new", path = getwd(),
 
     ## Send to github
     if (github) {
-      try(qdap::repo2github(project.dir = x))
+      try(qdapTools::repo2github(project.dir = x))
     }
     
     ## Open Project in RStudio
@@ -231,7 +231,7 @@ new_project <- function(project = "new", path = getwd(),
 #' @param x The qdapProj object.
 #' @param \ldots ignored
 #' @method print qdapProj
-#' @S3method print qdapProj
+#' @export
 print.qdapProj <-
 function(x, ...) {
     class(x) <- NULL

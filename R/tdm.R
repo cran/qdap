@@ -438,6 +438,7 @@ tm2qdap <- function(x) {
 #' a qdap oriented dataframe.
 #' @rdname tdm
 #' @export
+#' @importFrom qdapTools list2df
 tm_corpus2df <- function(tm.corpus, col1 = "docs", col2 = "text", 
     sent.split = TRUE, ...) {
 
@@ -492,6 +493,7 @@ tm_corpus2wfm <- function(tm.corpus, col1 = "docs", col2 = "text", ...) {
 #' @return \code{df2tm_corpus} - Converts a qdap oriented dataframe and returns 
 #' a \code{\link[tm]{Corpus}}.
 #' @export
+#' @importFrom qdapTools list_df2df
 df2tm_corpus <- function(text.var, grouping.var = NULL, demographic.vars, ...){
 
     if(is.null(grouping.var)) {
@@ -589,7 +591,7 @@ compare <- function(v) all(sapply( as.list(v[-1]),
 #' 
 #' @param x The TermDocumentMatrix object
 #' @param \ldots ignored
-#' @S3method t TermDocumentMatrix
+#' @export
 #' @method t TermDocumentMatrix
 t.TermDocumentMatrix <- function(x, ...) {
      
@@ -621,7 +623,7 @@ t.TermDocumentMatrix <- function(x, ...) {
 #' 
 #' @param x The DocumentTermMatrix object
 #' @param \ldots ignored
-#' @S3method t DocumentTermMatrix
+#' @export
 #' @method t DocumentTermMatrix
 t.DocumentTermMatrix <- function(x, ...) {
      
@@ -702,8 +704,10 @@ apply_as_tm <- function(wfm.obj, tmfun, ..., to.qdap = TRUE){
 #' characters.
 #' @param ignore.case logical.  If \code{TRUE} stop words will be removed 
 #' regardless of case.  
-#' @note \code{aply_ad_df} coerces to a dataframe with columns named `docs` and 
+#' @note \code{aply_as_df} coerces to a dataframe with columns named `docs` and 
 #' the other named `text`.
+#' @return \code{apply_as_df} - Returns the output typical of the applied 
+#' \pkg{qdap} function.
 #' @seealso \code{\link[qdap]{Filter}}
 #' @export
 #' @rdname tdm

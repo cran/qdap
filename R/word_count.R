@@ -58,7 +58,15 @@
 #'     guides(fill = guide_legend(nrow = 5, byrow = TRUE)) +
 #'     theme(legend.position="bottom") +
 #'     ggtitle("Mean Difference")
+#'   
 #'     
+#' raj$wc <- wc(raj$dialogue)
+#' raj$cum.wc <- unlist(with(raj, tapply(wc, act, cumsum)))
+#' raj$turn <- unlist(with(raj, tapply(act, act, seq_along)))
+#' ggplot(raj, aes(y=cum.wc, x=turn)) + 
+#'     geom_step(direction = "hv") + 
+#'     facet_wrap(~act)
+#'         
 #' ## CHARACTER COUNTS
 #' character_count(DATA$state)
 #' character_count(DATA$state, byrow=FALSE)
@@ -170,7 +178,7 @@ function(text.var, byrow = TRUE, missing = NA, apostrophe.remove = TRUE,
 #' \item{zero.replace}{The value of zero.replace used for plotting purposes.}
 #' @rdname word_count
 #' @export
-character_table <- function(text.var, grouping.var, percent = TRUE, 
+character_table <- function(text.var, grouping.var=NULL, percent = TRUE, 
     prop.by.row = TRUE, zero.replace = 0, digits = 2, ...) {
 
     if(is.null(grouping.var)) {
@@ -236,6 +244,7 @@ character_table <- function(text.var, grouping.var, percent = TRUE,
     )
     out
 }
+
 #' Prints a character_table object
 #' 
 #' Prints a character_table object.
@@ -251,7 +260,7 @@ character_table <- function(text.var, grouping.var, percent = TRUE,
 #' \code{TRUE}.
 #' @param \ldots ignored
 #' @method print character_table
-#' @S3method print character_table 
+#' @export
 print.character_table <-
 function(x, digits = 2, percent = NULL, zero.replace = NULL, ...) {
     WD <- options()[["width"]]
@@ -300,7 +309,7 @@ function(x, digits = 2, percent = NULL, zero.replace = NULL, ...) {
 #' \code{TRUE}.
 #' @param \ldots Other arguments passed to \code{\link[qdap]{qheat}}
 #' @method plot character_table 
-#' @S3method plot character_table 
+#' @export
 plot.character_table <- function(x, label = FALSE, lab.digits = 1, percent = NULL, 
     zero.replace = NULL, ...) {
     if (label) {

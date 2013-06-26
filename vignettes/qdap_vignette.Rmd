@@ -5,10 +5,10 @@
 
 ```{r setup, include=FALSE}
 # set global chunk options
-library(knitr); library(qdap); library(tm)
+library(knitr); library(tm); library(qdap); #library(reports)
 opts_chunk$set(cache=FALSE, tidy=FALSE, warning=FALSE)
-library(knitcitations)#; library(reports)
-bib <- read.bibtex(dir()[tools::file_ext(dir()) == "bib"][1])
+#library(knitcitations); library(reports); library(qdapTools)
+#bib <- read.bibtex(dir()[tools::file_ext(dir()) == "bib"][1])
 
 source("funs/utils_functions.txt")
 source("funs/extra_functions.txt")    
@@ -20,15 +20,16 @@ FUN <- function(fun, fun2 = fun, base=BU) HR2(LN(fun2), paste0("<code>", fun,"</
 BU2 <- "http://trinker.github.io/qdapDictionaries/" #switch before upload
 LN2 <- function(fun, base=BU2) paste0(BU2, fun, ".html")
 FUN2 <- function(fun, base=BU2) HR2(LN2(fun), paste0("<code>", fun,"</code>"))
-yt <- function(url) {
-  paste0("<a href=\"", url, "\" target=\"_blank\" style=\"text-decoration: none\"><b><font size=\"5\" color=\"#B22222\">[YT]</font></b></a>\n")
+yt <- function(URL) {
+  paste0("<a href=\"", URL, "\" target=\"_blank\" style=\"text-decoration: none\"><b><font size=\"5\" color=\"#B22222\">[YT]</font></b></a>\n")
 }
 #cite in text using `r citet(bib[1])`
 ```
+
 # qdap Package Vignette
 # Tyler Rinker
 
-qdap `r citep(bib[["Rinker2013a"]])` is an R package designed to assist in quantitative discourse analysis. The package stands as a bridge between qualitative transcripts of dialogue and statistical analysis and visualization.  qdap was born out of a frustration with current discourse analysis programs. Packaged programs are a closed system, meaning the researcher using the method has little, if any, influence on the program applied to her data.
+qdap (<a href="http://github.com/trinker/qdap">Rinker, 2013</a>) is an R package designed to assist in quantitative discourse analysis. The package stands as a bridge between qualitative transcripts of dialogue and statistical analysis and visualization.  qdap was born out of a frustration with current discourse analysis programs. Packaged programs are a closed system, meaning the researcher using the method has little, if any, influence on the program applied to her data.
 
 R already has thousands of excellent packages for statistics and visualization. qdap is designed to stand as a bridge between the qualitative discourse of a transcript and the computational power and freedom that R offers. As qdap returns the power to the researcher it will also allow the researcher to be more efficient and thus effective and productive in data analysis.  The qdap package provides researchers with the tools to analyze data and more importantly is a dynamic system governed by the data, shaped by theory, and continuously refined by the field.
 
@@ -73,64 +74,65 @@ The following vignette is a loose chronological road map for utilizing the tools
 <br style="clear:both;"/>
 
 ```{r, echo=FALSE, eval=FALSE}
-library(qdap)
-dat <- data.frame(
-    x = c("project", "import_export", "tools", "cleaning", "viewing", 
-        "reshaping", "word", "coding", "counts", "measures", "visualization", 
-        "id", "data", "dict", "install"),
-    
-    y = c("Starting a New Project", "Import/Export Discourse Data", 
-        "Generic qdap Tools", "Cleaning/Preparing the Data", "View the Data", 
-        "Reshaping the Data", "Extract/Analyze Words", "Qualitative Coding System", 
-        "Word Counts and Descriptive Statistics", "Word Measures and Scoring", 
-        "Visualizing Discourse Data", "ID Sentences", 
-        "Data Sets", "Dictionaries and Word Lists", "Installation Issues")
-)
+## library(qdap)
+## dat <- data.frame(
+##     x = c("project", "import_export", "tools", "cleaning", "viewing", 
+##         "reshaping", "word", "coding", "counts", "measures", "visualization", 
+##         "id", "data", "dict", "install"),
+##     
+##     y = c("Starting a New Project", "Import/Export Discourse Data", 
+##         "Generic qdap Tools", "Cleaning/Preparing the Data", "View the Data", 
+##         "Reshaping the Data", "Extract/Analyze Words", "Qualitative Coding System", 
+##         "Word Counts and Descriptive Statistics", "Word Measures and Scoring", 
+##         "Visualizing Discourse Data", "ID Sentences", 
+##         "Data Sets", "Dictionaries and Word Lists", "Installation Issues")
+## )
+## 
+## FUN <- function(x, y) {
+##     cat("\n\n")
+##     m <- paste0("<div>", 1:length(x), ".  `r HR(\"#", x, "\", \"", y, "\")`    </div> ")
+##     cat(paste(m, collapse="\n")); cat("\n")
+##     cat("\n\n")
+##     n <- paste0("<h3 id=\"", x, "\">", y, "</h3>")
+##     cat(paste(n, collapse="\n")); cat("\n")
+## }
+## 
+## FUN(dat[, 1], dat[, 2])
+## 
+## path <- "C:/Users/trinker/GitHub/trinker.github.com/qdap_dev"
+## #  path <- "C:/Users/trinker/GitHub/trinker.github.com/qdap"
+## URL <- "http://trinker.github.io/qdap_dev/"
+## #  url <- "http://trinker.github.io/qdap"
+## 
+## inds <- readLines(file.path(path, "index.html"))
+## h3s <- grep("<h3", inds)
+## h2s <- grep("<h2", inds)
+## 
+## inds <- inds[head(h3s, 1):(tail(h2s, 1) - 1)]
+## inds <- inds[12: tail(grep("</ul>", inds), 1)]
+## h3s <- grep("<h3", inds)
+## dat2 <- data.frame(start = h3s + 4, end = c(tail(h3s, -1) - 1, length(inds)))
+## 
+## inds <- substring(inds, 5)
+## 
+## 
+## 
+## invisible(lapply(1:nrow(dat2), function(i) {
+##     rws <- inds[dat2[i, 1]:dat2[i, 2]]
+##     
+##     funs <- unlist(genXtract(rws, ".html\">", "</a>"))
+##     descripts <- unlist(genXtract(rws, "<br />", "</li>"))
+##     
+##     rws <- rws[grepl("<code>", rws)]
+##     rws <- paste0("<form action=\"", file.path(URL, paste0(funs, ".html")), " target=\"_blank\" \">
+##     <input type=\"submit\" value=\"", funs, "\"> - ", descripts, "\n</form>", "\n") 
+##     
+##     
+##     cat(paste0("============\nfun group", i, "\n============\n"))
+##     cat(paste0("The following functions will be utilized in this section (click to view more):    \n\n"))
+##     cat(paste(rws, collapse = "\n")); cat("\n")
+## }))
 
-FUN <- function(x, y) {
-    cat("\n\n")
-    m <- paste0("<div>", 1:length(x), ".  `r HR(\"#", x, "\", \"", y, "\")`    </div> ")
-    cat(paste(m, collapse="\n")); cat("\n")
-    cat("\n\n")
-    n <- paste0("<h3 id=\"", x, "\">", y, "</h3>")
-    cat(paste(n, collapse="\n")); cat("\n")
-}
-
-FUN(dat[, 1], dat[, 2])
-
-path <- "C:/Users/trinker/GitHub/trinker.github.com/qdap_dev"
-#  path <- "C:/Users/trinker/GitHub/trinker.github.com/qdap"
-URL <- "http://trinker.github.io/qdap_dev/"
-#  url <- "http://trinker.github.io/qdap"
-
-inds <- readLines(file.path(path, "index.html"))
-h3s <- grep("<h3", inds)
-h2s <- grep("<h2", inds)
-
-inds <- inds[head(h3s, 1):(tail(h2s, 1) - 1)]
-inds <- inds[12: tail(grep("</ul>", inds), 1)]
-h3s <- grep("<h3", inds)
-dat2 <- data.frame(start = h3s + 4, end = c(tail(h3s, -1) - 1, length(inds)))
-
-inds <- substring(inds, 5)
-
-
-
-invisible(lapply(1:nrow(dat2), function(i) {
-    rws <- inds[dat2[i, 1]:dat2[i, 2]]
-    
-    funs <- unlist(genXtract(rws, ".html\">", "</a>"))
-    descripts <- unlist(genXtract(rws, "<br />", "</li>"))
-    
-    rws <- rws[grepl("<code>", rws)]
-    rws <- paste0("<form action=\"", file.path(URL, paste0(funs, ".html")), " target=\"_blank\" \">
-    <input type=\"submit\" value=\"", funs, "\"> - ", descripts, "\n</form>", "\n") 
-    
-    
-    cat(paste0("============\nfun group", i, "\n============\n"))
-    cat(paste0("The following functions will be utilized in this section (click to view more):    \n\n"))
-    cat(paste(rws, collapse = "\n")); cat("\n")
-}))
 
 ```
 
@@ -145,7 +147,7 @@ The following functions will be utilized in this section (click to view more):
 </div>
 
 
-The function `r FUN("new_project")` is designed to generate project template of multiple nested directories that organize and guide the researcher through a qualitative study, from data collection to analysis and report/presentation generation.  This workflow framework will enable the researcher to be better organized and more efficient in all stages of the research process.  `r FUN("new_project")` utilizes the `r HR2("http://cran.r-project.org/web/packages/reports/reports.pdf", "reports package")` `r citep(bib[["Rinker2013b"]])` 
+The function `r FUN("new_project")` is designed to generate project template of multiple nested directories that organize and guide the researcher through a qualitative study, from data collection to analysis and report/presentation generation.  This workflow framework will enable the researcher to be better organized and more efficient in all stages of the research process.  `r FUN("new_project")` utilizes the `r HR2("http://cran.r-project.org/web/packages/reports/reports.pdf", "reports package")` (<a href="http://github.com/trinker/reports">Rinker, 2013b</a>) 
 
 Please see the following links for PDF descriptions of the contents of the `r FUN("new_project")` and the reports directory. `r VS(2)`
 
@@ -555,7 +557,7 @@ The following functions will be utilized in this section (click to view more):<b
 </form>
 
 <form action="http://trinker.github.io/qdap_dev/hash.html" target="_blank">
-    <input type="submit" value="hash"><input type="submit" value="hash_look"><input type="submit" value="%ha%"> - `r HR("#hash", "Hash Table/Dictionary Lookup")`
+    <input type="submit" value="hash"><input type="submit" value="hash_look"><input type="submit" value="%hl%"> - `r HR("#hash", "Hash Table/Dictionary Lookup")`
 </form>
 
 
@@ -585,7 +587,7 @@ qcv(terms = "mpg cyl  disp  hp drat    wt  qsec vs am gear carb")
 
 <h4 id="hash">Dictionary/Lookup</h4>  
 
-Often the researcher who deals with text data will have the need to lookup values quickly and return an accompanying value.  This is often called a dictionary, hash, or lookup.  This can be used to find corresponding values or recode variables etc.  The `r FUN("lookup")` & `r HR2("%l%")` functions provide a fast environment lookup for single usage. The `r FUN("hash")` & `r HR2("http://trinker.github.io/qdap_dev/hash.html", "hash_lookup")`/`r HR2("http://trinker.github.io/qdap_dev/hash.html", "%ha%")` functions provide a fast environment lookup for multiple uses of the same hash table.
+Often the researcher who deals with text data will have the need to lookup values quickly and return an accompanying value.  This is often called a dictionary, hash, or lookup.  This can be used to find corresponding values or recode variables etc.  The `r FUN("lookup")` & `r HR2("%l%")` functions provide a fast environment lookup for single usage. The `r FUN("hash")` & `r HR2("http://trinker.github.io/qdap_dev/hash.html", "hash_lookup")`/`r HR2("http://trinker.github.io/qdap_dev/hash.html", "%hl%")` functions provide a fast environment lookup for multiple uses of the same hash table.
 
 `r FT(orange, 5, text="&diams;")` **`r FUN("lookup")`**- *Dictionary/Look Up Examples* `r FT(orange, 5, text="&diams;")`
 
@@ -639,9 +641,9 @@ hashTab <- hash(DF)
 ## Create a vector to lookup
 x <- sample(DF[, 1], 20, TRUE)
 
-## Lookup x in the hash with `hash_look` or `%ha%`
+## Lookup x in the hash with `hash_look` or `%hl%`
 hash_look(x, hashTab)
-x %ha% hashTab
+x %hl% hashTab
 ```
 
 <h4 id="time">Time Conversion</h4>  
@@ -956,7 +958,7 @@ x
 replace_contraction(x)
 ```
 
-The `r FUN("replace_number")` function utilizes The work of John `r citet(bib["Fox2005"])` to turn numeric representations of numbers into their textual equivalents.  This is useful for word statistics that require the text version of dialogue.
+The `r FUN("replace_number")` function utilizes The work of John <a href="">Fox (2005)</a> to turn numeric representations of numbers into their textual equivalents.  This is useful for word statistics that require the text version of dialogue.
 
 `r FT(orange, 5, text="&diams;")` **Replace Numbers**-*Numeral Representation*`r FT(orange, 5, text="&diams;")`
 ```{r}
@@ -3528,7 +3530,8 @@ plot(x, label = TRUE, high = "red", lab.digits = 1, zero.replace = "")
 library(ggplot2);library(reshape2)
 dat <- char_table(DATA$state, list(DATA$sex, DATA$adult))
 dat2 <- colsplit2df(melt(dat$raw), keep.orig = TRUE)
-dat2$adult2 <- lookup(dat2$adult, c(0, 1), c("child", "adult"))
+dat2$adult2 <- lookup(as.numeric(as.character(dat2$adult)), 
+    c(0, 1), c("child", "adult"))
 head(dat2, 15)
 ```
 
@@ -4061,9 +4064,9 @@ Note that formality utilize parts of speech tagging. This is computationally exp
 
 
 ```{r, include = FALSE}
-citep(bib["Heylighen1999a"])
-citep(bib["Heylighen1999b"])
-citep(bib["Heylighen2002"])
+#citep(bib["Heylighen1999a"])
+#citep(bib["Heylighen1999b"])
+#citep(bib["Heylighen2002"])
 ```
 
 <p>`r FT(orange, 5, text="&diams;")` **`r FUN("formality")` Example**`r FT(orange, 5, text="&diams;")`</p >
@@ -4100,11 +4103,11 @@ Polarity assignment, a form of sentiment analysis, is using an algorithm to dete
 <b>`r FT(red, 4, text="It is assumed you have run <font face=\"courier\">sentSplit</font> on the data.<br>If this is not the case the counts will not be accurate.")`</b>
 </div>
 
-The polarity score generated by `r FUN("polarity")` is dependent upon the polarity dictionary used.  This function defaults to the word polarity dictionary used by `r HR("http://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html", "Hu & Liu (2004)")`, however, this may not be appropriate for the context of children in a classroom.  For instance the word <font color="green">"sick"</font> in a high school setting may mean that something is good, whereas <font color="green">"sick"</font> used by a typical adult indicates something is not right or negative connotation.  The user may (is encouraged) to provide/augment/alter the dictionary (see the `r FUN("polarity_frame", "polarity")` function).  Development of context specific dictionaries, that are better suited for spoken dialogue in a school setting, is an exciting prospect that could lead to greater understanding of the emotional aspects of the spoken word on students.  The user may add a dictionary with optional weights as a dataframe within an environment.  The `r FUN("polarity_frame", "polarity")` function aides the user in creating the polarity environment. 
+The polarity score generated by `r FUN("polarity")` is dependent upon the polarity dictionary used.  This function defaults to the word polarity dictionary used by `r HR("http://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html", "Hu & Liu (2004)")`, however, this may not be appropriate for the context of children in a classroom.  For instance the word <font color="green">"sick"</font> in a high school setting may mean that something is good, whereas <font color="green">"sick"</font> used by a typical adult indicates something is not right or negative connotation.  The user may (is encouraged) to provide/augment/alter the dictionary (see the `r FUN("sentiment_frame", "polarity")` function).  Development of context specific dictionaries, that are better suited for spoken dialogue in a school setting, is an exciting prospect that could lead to greater understanding of the emotional aspects of the spoken word on students.  The user may add a dictionary with optional weights as a dataframe within an environment.  The `r FUN("sentiment_frame", "polarity")` function aides the user in creating the polarity environment. 
 
 
 ```{r, include=FALSE}
-citep(bib["Hu2004"])
+#citep(bib["Hu2004"])
 ```
 
 The equation used by the algorithm to assign value to polarity of each sentence fist utilizes the sentiment dictionary (Hu & Liu, 2004) to tag polarized words.  A context cluster of words is pulled from around this polarized word (default 4 words before and two words after) to be considered as valence shifters.  The words in this context cluster are tagged as neutral ($x_i^{0}$), negator ($x_i^{N}$), amplifier ($x_i^{a}$), or de-amplifier ($x_i^{d}$). Neutral words hold no value in the equation but do affect word count ($n$).  Each polarized word is then weighted $w$ based on the weights from the <b><font color="green" face="courier new">polarity.frame</font></b> argument and then further weighted by the number and position of the valence shifters directly surrounding the positive or negative word.  The researcher may provide a weight $c$ to be utilized with amplifiers/de-amplifiers (default is .8; deamplifier weight is constrained to -1 lower bound).  Last,  these context cluster ($x_i^{T}$) are summed and divided by the square root of the word count ($\sqrt{n}$) yielding an unbounded polarity score 
@@ -4125,25 +4128,19 @@ x_i^{A}=\sum{(w_{neg}\cdot x_i^{a})}
 $$
 <br>
 $$
-x_{i}^D=\left\{\begin{array}{cc}
- x_{i}^D & x_{i}^D \geq  -1         \\\\ 
- -1 & x_{i}^D < -1
- \end{array}\right.
+x_i^D = \max(x_i^{D'}, -1)
 $$ 
 <br>
 $$
-x_i^{D}=\sum{(- w_{neg}\cdot x_i^{a} + x_i^{d})}
+x_i^{D'}=\sum{(- w_{neg}\cdot x_i^{a} + x_i^{d})}
 $$ 
 <br>
 $$
-w_{neg}=\left\{\begin{array}{cc}
-1 & \sum{x_i^{N}}>0         \\\\ 
-0 & \sum{x_i^{N}}=0
-\end{array}\right.
+w_{neg}= \left(\sum{x_i^{N}}\right) \bmod {2}
 $$
 
 
-The following examples demonstrate how the `r FUN("polarity")` and `r FUN("polarity_frame", "polarity")` functions operate.  Here the polarity for the `r FUN("mraja1spl")` data set (Act 1 of Romeo and Juliet).  The gender, family affiliation and binary died/didn't die are used as the grouping variables.
+The following examples demonstrate how the `r FUN("polarity")` and `r FUN("sentiment_frame", "polarity")` functions operate.  Here the polarity for the `r FUN("mraja1spl")` data set (Act 1 of Romeo and Juliet).  The gender, family affiliation and binary died/didn't die are used as the grouping variables.
 
 <p id="polarity1">`r FT(orange, 5, text="&diams;")` **`r FUN("polarity")` Example**`r FT(orange, 5, text="&diams;")`</p >
 
@@ -4194,10 +4191,10 @@ plot(poldat)
 qheat(poldat[["group"]], high="blue", low="yellow", grid=NULL, order.b="ave.polarity")
 ```
 
-<p id="polarity5">`r FT(orange, 5, text="&diams;")` **`r FUN("polarity_frame")`** - *Specify Your Own Polarity Environment*`r FT(orange, 5, text="&diams;")`</p >
+<p id="polarity5">`r FT(orange, 5, text="&diams;")` **`r FUN("sentiment_frame")`** - *Specify Your Own Polarity Environment*`r FT(orange, 5, text="&diams;")`</p >
 
 ```{r, comment=NA}
-(POLENV <- polarity_frame(positive.words, negative.words))
+(POLENV <- sentiment_frame(positive.words, negative.words))
 ls(POLENV)[1:20]
 ```
 
@@ -4424,7 +4421,7 @@ The following functions will be utilized in this section (click to view more): <
 qdap offers a number of plot methods for various outputs from functions (use <b><font color="green" face="courier new">plot(qdap_FUNCTION_OUTPUT)</font></b>).  In addition to the numerous plot methods qdap also has several functions dedicated solely to plotting purposes.  Many of these functions rely on the `r HR("http://docs.ggplot2.org/current/", "ggplot2 package")` (Wickham, 2009) to produce plots.
 
 ```{r, include = FALSE}
-citep(bib["Wickham2009"])
+#citep(bib["Wickham2009"])
 ```
 
 <h4 id="dispersion">Lexical Dispersion Plot</h4>
@@ -5260,6 +5257,11 @@ The following data sets are included with qdap for demonstration purposes (click
 </form>
 </div>
 
+<form action="http://trinker.github.io/qdap_dev/hamlet.html" target="_blank">
+    <input type="submit" value="hamlet"> - Hamlet (Complete & Split)
+</form>
+</div>
+
 ```{r eval=FALSE, echo = FALSE}
 path <- "C:/Users/trinker/GitHub/trinker.github.com/qdapDictionaries"
 #  path <- "C:/Users/trinker/GitHub/trinker.github.com/qdap"
@@ -5332,12 +5334,12 @@ The following dictionaries/word lists are utilized by qdap (click to view more)
     <input type="submit" value="emoticon"> - Emoticons Data Set
 </form>
 
-<form action="http://trinker.github.io/qdapDictionaries/env.syl.html" target="_blank" ">
-    <input type="submit" value="env.syl"> - Syllable Lookup Environment
+<form action="http://trinker.github.io/qdapDictionaries/key.syl.html" target="_blank" ">
+    <input type="submit" value="key.syl"> - Syllable Lookup Key
 </form>
 
-<form action="http://trinker.github.io/qdapDictionaries/env.syn.html" target="_blank" ">
-    <input type="submit" value="env.syn"> - Syllable Lookup Environment
+<form action="http://trinker.github.io/qdapDictionaries/key.syn.html" target="_blank" ">
+    <input type="submit" value="key.syn"> - Synonyms Lookup Key
 </form>
 
 <form action="http://trinker.github.io/qdapDictionaries/Fry_1000" target="_blank" ">
@@ -5475,7 +5477,7 @@ If the reader spots an error in this Vignette or would like to suggest an improv
 
 <hr> 
 
-*<em><font size="3">Vignette created with the reports package `r citep(bib["Rinker2013b"])`</font><em>
+*<em><font size="3">Vignette created with the reports package (<a href="http://github.com/trinker/reports">Rinker, 2013b</a>)</font><em>
 
 
 ```{r css, echo = FALSE}
@@ -5483,6 +5485,14 @@ options(markdown.HTML.stylesheet = "css/style.css")
 ```
 
 ## References
-```{r, echo=FALSE, results='asis'}
-bibliography("html") 
-```
+<ul>
+<li> Fox, J. (2005). Programmer&#39;s niche: How do you spell that number?.  <em>R News, 5</em>(1), 51-55.</li>
+<li> Heylighen, F. (1999). Advantages and limitations of formal expression.  <em>Foundations of Science, 5</em>, 25-56. <a href="http://dx.doi.org/10.1023/A:1009686703349">10.1023/A:1009686703349</a></li>
+<li>Heylighen, F. &  Dewaele, J.-M. (1999). Formality of language: Definition, measurement and behavioral determinants.  <a href="http://pespmc1.vub.ac.be/Papers/Formality.pdf"><a href="http://pespmc1.vub.ac.be/Papers/Formality.pdf">http://pespmc1.vub.ac.be/Papers/Formality.pdf</a></a></li>
+<li>Heylighen, F. &  Dewaele, J.-M. (2002). Variation in the contextuality of language: An empirical measure.  <em>Foundations of Science, 7</em>(3),  293-340. <a href="http://dx.doi.org/10.1023/A:1019661126744">doi: 10.1023/A:1019661126744</a></li>
+<li>Hu, M. & Liu, B. (2004). Mining Opinion features in customer reviews.  <a href="http://www.cs.uic.edu/~liub/publications/aaai04-featureExtract.pdf"><a href="http://www.cs.uic.edu/%7Eliub/publications/aaai04-featureExtract.pdf">http://www.cs.uic.edu/~liub/publications/aaai04-featureExtract.pdf</a></a></li>
+<li>Rinker,  T. (2013). qdap: Quantitative discourse analysis package.  <a href="http://github.com/trinker/qdap"><a href="http://github.com/trinker/qdap">http://github.com/trinker/qdap</a></a></li>
+<li>Rinker, T. (2013). reports: Package to asssist in report writing.  <a href="http://github.com/trinker/reports"><a href="http://github.com/trinker/reports">http://github.com/trinker/reports</a></a></li>
+<li> Wickham, H. (2009). ggplot2: Elegant graphics for data analysis.  <a href="http://had.co.nz/ggplot2/book"><a href="http://had.co.nz/ggplot2/book">http://had.co.nz/ggplot2/book</a></a></li>
+</ul>
+
