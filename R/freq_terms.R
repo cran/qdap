@@ -24,8 +24,28 @@
 #' freq_terms(DATA$state)
 #' freq_terms(DATA$state, extend = FALSE)
 #' freq_terms(DATA$state, at.least = 4)
-#' (x <- freq_terms(pres_debates2012$dialogue, stopwords = Top200Words))
-#' plot(x)
+#' (out <- freq_terms(pres_debates2012$dialogue, stopwords = Top200Words))
+#' plot(out)
+#' 
+#' x <- raj$dialogue
+#' ## All words by sentence (row)
+#' list_df2df(setNames(lapply(x, freq_terms, top=Inf), seq_along(x)), "row")
+#' list_df2df(setNames(lapply(x, freq_terms, top=10, stopwords = Dolch), 
+#'     seq_along(x)), "Title")
+#' 
+#' 
+#' ## All words by person
+#' FUN <- function(x, n=Inf) freq_terms(paste(x, collapse=" "), top=n)
+#' list_df2df(lapply(split(x, raj$person), FUN), "person")
+#' 
+#' ## Plot it
+#' out <- lapply(split(x, raj$person), FUN, n=10)
+#' pdf("Freq Terms by Person.pdf", width=13) 
+#' lapply(seq_along(out), function(i) {
+#'     ## dev.new()
+#'     plot(out[[i]], plot=FALSE) + ggtitle(names(out)[i])
+#' })
+#' dev.off()
 #' }
 freq_terms <- 
 function(text.var, top = 20, at.least = 1, stopwords = NULL, 
