@@ -2,31 +2,29 @@ Package: qdap
 Type: Package
 Title: Bridging the gap between qualitative data and quantitative
         analysis
-Version: 0.2.3
-Date: 2013-05-18
+Version: 0.2.5
+Date: 2013-08-20
 Author: Tyler Rinker
 Maintainer: Tyler Rinker <tyler.rinker@gmail.com>
-Depends: R (>= 3.0.0), gdata, ggplot2 (>= 0.9.3.1), grid, reports,
-        scales
-Imports: gridExtra, chron, grDevices, RColorBrewer, igraph, tm,
-        wordcloud, venneuler, openNLPmodels.en, Snowball, SnowballC,
-        gplots, gridExtra, openNLP, plotrix, XML, RCurl, reshape2,
-        parallel, tools
-Suggests: lsa, plyr, koRpus
+Depends: R (>= 3.0.0), ggplot2 (>= 0.9.3.1), RColorBrewer
+Imports: chron, gdata, grid, gridExtra, igraph, RCurl, openNLP (>=
+        0.2-1), NLP, parallel, plotrix, reports, reshape2, scales, tm,
+        tools, venneuler, wordcloud, XML
+Suggests: koRpus, knitcitations, knitr, lda, lsa, plyr
 LazyData: TRUE
 Description: This package automates many of the tasks associated with
-        quantitative discourse analysis of transcripts containing
-        discourse including frequency counts of sentence types, words,
-        sentences, turns of talk, syllables and other assorted analysis
-        tasks.  The package provides parsing tools for preparing
-        transcript data.  Many functions enable the user to aggregate
-        data by any number of grouping variables providing analysis and
-        seamless integration with other R packages that undertake
-        higher level analysis and visualization of text.  This affords
-        the user a more efficient and targeted analysis.  qdap is
-        designed for transcript analysis, however, many functions are
-        applicable to other areas of Text Mining /Natural Language
-        Processing
+    quantitative discourse analysis of transcripts containing
+    discourse including frequency counts of sentence types, words,
+    sentences, turns of talk, syllables and other assorted analysis
+    tasks.  The package provides parsing tools for preparing
+    transcript data.  Many functions enable the user to aggregate
+    data by any number of grouping variables providing analysis and
+    seamless integration with other R packages that undertake
+    higher level analysis and visualization of text.  This affords
+    the user a more efficient and targeted analysis.  qdap is
+    designed for transcript analysis, however, many functions are
+    applicable to other areas of Text Mining /Natural Language
+    Processing
 Acknowledgments: I would like to thank the many folks at talkstats.com
         and stackoverflow.com for their help in answering many R
         questions related to qdap.  I'd like to particularly thank
@@ -73,7 +71,7 @@ Collate: 'adjacency_matrix.R' 'all_words.R'
         'url_dl.R' 'v.outer.R' 'wfm.R' 'word.count.R'
         'word.network.plot.R' 'word_associate.R' 'word_diff_list.R'
         'word_list.R' 'word_stats.R' 'words.R' 'xnoy.R' 'list2df.R'
-Packaged: 2013-06-26 20:10:48 UTC; trinker
+Packaged: 2013-09-01 01:55:58 UTC; trinker
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2013-06-26 22:43:18
+Date/Publication: 2013-09-01 06:51:34

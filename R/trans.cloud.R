@@ -63,7 +63,7 @@
 #' \code{\link[qdap]{gradient_cloud}}
 #' @keywords wordcloud
 #' @export
-#' @import wordcloud
+#' @importFrom wordcloud wordcloud
 #' @examples
 #' \dontrun{
 #' terms <- list(

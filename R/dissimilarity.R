@@ -18,6 +18,7 @@
 #' @seealso \code{\link[stats]{dist}}
 #' @keywords dissimilarity
 #' @export
+#' @importFrom stats dist
 #' @examples 
 #' \dontrun{
 #' with(DATA, dissimilarity(state, list(sex, adult)))

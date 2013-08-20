@@ -25,6 +25,7 @@
 #' \code{\link[qdap]{cm_df.temp}}
 #' @keywords transcript
 #' @export
+#' @importFrom reports delete
 #' @examples
 #' \dontrun{
 #' with(DATA, cm_df.transcript(state, person))

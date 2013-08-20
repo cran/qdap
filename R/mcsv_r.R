@@ -84,6 +84,7 @@ function(files, a.names = NULL, l.name = NULL, list = TRUE, pos = 1,
 #' Silently returns the path of the directory.
 #' @rdname multicsv
 #' @export
+#' @importFrom reports folder
 mcsv_w <-
 function(..., dir = NULL, open = FALSE){
     x <- match.call(expand.dots = FALSE)

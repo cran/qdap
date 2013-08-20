@@ -11,7 +11,7 @@
 #' @details Similar to the \code{tm} package's \code{\link[tm]{TermDocumentMatrix}} 
 #' though not identical.
 #' @export
-#' @import reshape2
+#' @importFrom reshape2 melt
 #' @examples
 #' \dontrun{
 #' x <- wfm(DATA$state, DATA$person)

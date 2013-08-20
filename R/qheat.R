@@ -34,7 +34,10 @@
 #' exploratory qdap usage.
 #' @keywords heatmap
 #' @export
-#' @import ggplot2 gridExtra scales RColorBrewer reshape2
+#' @import RColorBrewer 
+#' @importFrom gridExtra grid.arrange
+#' @importFrom reshape2 melt 
+#' @importFrom scales alpha 
 #' @examples
 #' \dontrun{
 #' dat <- sentSplit(DATA, "state")
