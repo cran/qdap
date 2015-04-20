@@ -281,9 +281,11 @@ formality <- function(text.var, grouping.var = NULL,
     } else {                                                                         
         pos.list <- suppressWarnings(pos_by(text.var = text.var,                     
             grouping.var = NULL, digits = digits, ...))                                   
-    }                                                                              
-    text.var <- pos.list$text                                                        
-    WOR <- word_count(text.var)                                                      
+    } 
+                                                                             
+    text.var <- pos.list$text        
+    WOR <- pos.list[["POStagged"]][["word.count"]]
+##   WOR <- word_count(text.var)                                                      
     X <- pos.list[["pos.by.freq"]]                                                   
     nameX <- rownames(X)                                                             
     X <- data.frame(X)                                                               
@@ -372,7 +374,9 @@ formality <- function(text.var, grouping.var = NULL,
     colnames(dat)[1] <- "grouping"   
     ON <- sum(dat[, "pos"] == "other")
     dat[, "form.class"] <- c(rep(c("formal", "contectual"), 
-        each = (nrow(dat) - ON)/2), rep("other", ON))      
+        each = (nrow(dat) - ON)/2), rep("other", ON)) 
+
+     
     dat <- dat[rep(seq_len(dim(dat)[1]), dat[, 4]), -4]                              
     dat[, "pos"] <- factor(dat[, "pos"], levels=unique(dat[, "pos"]))                
     dat[, "form.class"] <- factor(dat[, "form.class"],                               
@@ -913,7 +917,7 @@ Animate_formality_net <- function(x, contextual, formal,
     class(igraph_objs) <- "animated_formality"
     attributes(igraph_objs)[["title"]] <- title
     attributes(igraph_objs)[["timings"]] <- timings
-    attributes(igraph_objs)[["network"]] <- TRUE
+    attributes(igraph_objs)[["type"]] <- "network"
     attributes(igraph_objs)[["legend"]] <- cols
     attributes(igraph_objs)[["data"]] <- list_formality
     igraph_objs
@@ -1045,7 +1049,7 @@ Animate_formality_bar <- function(x, wc.time = TRUE, time.constant = 2,
     ## add class info
     class(ggplots) <- "animated_formality"
     attributes(ggplots)[["timings"]] <- timings
-    attributes(ggplots)[["network"]] <- FALSE
+    attributes(ggplots)[["type"]] <- "bar"
     attributes(ggplots)[["legend"]] <- NULL
     attributes(ggplots)[["data"]] <- listdat
     ggplots
@@ -1105,6 +1109,49 @@ ggbar_form <- function(dat, grp = grp, rng = rng, colors) {
 
 }
 
+Animate_formality_text <- function(x, wc.time = TRUE, time.constant = 2, 
+    width,  just, coord, ...) {
+
+    txt <- lapply(x[["text"]], function(x){
+            paste(strwrap(x, width), collapse="\n")
+        }) %>% unlist
+
+    theplot <- ggplot2::ggplot(data.frame(x=0:1, y=0:1), ggplot2::aes(x, x, y=y)) + 
+        ggplot2::geom_blank() + ggplot2::theme_bw() +
+        ggplot2::theme( 
+            panel.grid.major = ggplot2::element_blank(),
+            panel.grid.minor = ggplot2::element_blank(),
+            axis.ticks = ggplot2::element_blank(),
+            axis.text = ggplot2::element_blank()
+        ) + 
+        ggplot2::ylab(NULL) + 
+        ggplot2::xlab(NULL) 
+
+    ggplots <- lapply(txt, function(z){
+        theplot + ggplot2::annotate("text", x = coord[1], 
+            y = coord[2], label = z, vjust = just[2], hjust = just[1], ...)
+    })
+    
+    y <- preprocessed(x)
+
+    timings <- round(exp(y[["word.count"]]/(max(y[["word.count"]], na.rm=TRUE)/time.constant)))
+
+    if(wc.time) {
+        ggplots <- rep(ggplots, replace_nan(timings, is.na, 1))
+    }
+
+    ## starts with a blank object and end match the network Animate
+    ggplots <- unlist(list(list(theplot), ggplots, 
+        list(theplot)), recursive=FALSE)
+
+    ## add class info
+    class(ggplots) <- "animated_formality"
+    attributes(ggplots)[["timings"]] <- timings
+    attributes(ggplots)[["type"]] <- "text"
+    attributes(ggplots)[["legend"]] <- NULL
+    attributes(ggplots)[["data"]] <- NULL
+    ggplots
+}
 
 #' Animate Formality
 #' 
@@ -1136,9 +1183,15 @@ ggbar_form <- function(dat, grp = grp, rng = rng, colors) {
 #' 299 words per Heylighen & Dewaele's (2002) minimum word recommendations.
 #' @param under.300.color The bar color to use for grouping variables less 
 #' than 300 words per Heylighen & Dewaele's (2002) minimum word recommendations.
-#' @param as.network logical.  If \code{TRUE} the animation is a network plot.
-#' If \code{FALSE} the animation is a hybrid dot plot.
-#' @param \ldots Other arguments passed to \code{\link[qdap]{discourse_map}}.
+#' @param type  Character string of either \code{"network"} (as a network 
+#' plot), \code{"bar"} (as a bar plot), or \code{"text"} (as a simple 
+#' colored text plot).
+#' @param width The width to break text at if \code{type = "text"}.
+#' @param coord The x/y coordinate to plot the text if \code{type = "text"}.
+#' @param just The \code{hjust} and \code{vjust} values to use for the text if 
+#' \code{type = "text"}.
+#' @param \ldots Other arguments passed to \code{\link[qdap]{discourse_map}} or
+#' \code{\link[ggplot2]{annotate}} if \code{type = "text"}.
 #' @note The width of edges is based on words counts on that edge until that 
 #' moment divided by total number of words used until that moment.  Thicker 
 #' edges tend to thin as time passes.  The actual duration the current edge 
@@ -1159,21 +1212,29 @@ Animate.formality <- function(x, contextual = "yellow", formal = "red",
     edge.constant, wc.time = TRUE, time.constant = 2, title = NULL, digits = 3, 
     current.color = "black", current.speaker.color = NULL, non.speaker.color = NA,
     missing.color = "purple", all.color.line = "red", plus.300.color = "grey40", 
-    under.300.color = "grey88", as.network = TRUE, ...){
-
-    if (as.network) {
-        Animate_formality_net(x = x, contextual = contextual, formal = formal, 
-            edge.constant = edge.constant, wc.time = wc.time, time.constant = time.constant, 
-            title = title, digits = digits, current.color = current.color, 
-            current.speaker.color = current.speaker.color, 
-            non.speaker.color = non.speaker.color, missing.color = missing.color , 
-            ...)
-    } else {
-        Animate_formality_bar(x = x, wc.time = wc.time, 
-            time.constant = time.constant, digits = digits, 
-            all.color.line = all.color.line, plus.300.color = plus.300.color, 
-            under.300.color = under.300.color, ...)         
-    }
+    under.300.color = "grey88", type = "network", width = 65, coord = c(.0, .5), 
+    just = c(.0, .5), ...){
+    
+    switch(type,
+        network = {
+            Animate_formality_net(x = x, contextual = contextual, formal = formal, 
+                edge.constant = edge.constant, wc.time = wc.time, time.constant = time.constant, 
+                title = title, digits = digits, current.color = current.color, 
+                current.speaker.color = current.speaker.color, 
+                non.speaker.color = non.speaker.color, missing.color = missing.color , 
+                ...)
+        },
+        bar = {
+            Animate_formality_bar(x = x, wc.time = wc.time, 
+                time.constant = time.constant, digits = digits, 
+                all.color.line = all.color.line, plus.300.color = plus.300.color, 
+                under.300.color = under.300.color, ...)         
+            },
+        text = {
+           Animate_formality_text(x = x, wc.time = wc.time, 
+               coord = coord, just = just, width=width, ...)
+        }, stop("`type` must be \"network\", \"bar\", or \"text\"")
+    )
 
 }
 
@@ -1208,26 +1269,32 @@ print.animated_formality <- function(x, title = NULL,
         title <- attributes(x)[["title"]]
     }
 
-    if (attributes(x)[["network"]]) {
-        invisible(lapply(x, function(y) {
-            set.seed(seed)
-            par(bg = bg)
-            plot.igraph(y, edge.curved=TRUE, layout=layout)
-            if (!is.null(title)) {
-                mtext(title, side=3)
-            }
-            if (!is.null(legend)) {
-                color.legend(legend[1], legend[2], legend[3], legend[4], 
-                    c("Contextual", "Formal"), attributes(x)[["legend"]], 
-                    cex = legend.cex, col=net.legend.color, ...)
-            }
-            if (pause > 0) Sys.sleep(pause)
-        })) 
-    } else {
-        invisible(lapply(x, print))
-    }
-   
+    switch(attributes(x)[["type"]],
+        network = {
+            invisible(lapply(x, function(y) {
+                set.seed(seed)
+                par(bg = bg)
+                plot.igraph(y, edge.curved=TRUE, layout=layout)
+                if (!is.null(title)) {
+                    mtext(title, side=3)
+                }
+                if (!is.null(legend)) {
+                    color.legend(legend[1], legend[2], legend[3], legend[4], 
+                        c("Contextual", "Formal"), attributes(x)[["legend"]], 
+                        cex = legend.cex, col=net.legend.color, ...)
+                }
+                if (pause > 0) Sys.sleep(pause)
+            })) 
+        },
+        bar = {
+            invisible(lapply(x, print))
+        },
+        text = {
+            invisible(lapply(x, print))
+        }, stop("`type` must be \"network\", \"bar\", or \"text\"")
+    )  
 }
+
 
 
 #' Plots a animated_formality  Object
@@ -1382,6 +1449,17 @@ Network.formality <- function(x, contextual = "yellow", formal = "red",
     E(theplot)$label <-lookup(theedges, df_formality[, "from|to"], 
         numbformat(df_formality[, "prop_formal"], digits))
 
+    ## Set up widths and colors
+    df_formality[, "prop_wc"] <- df_formality[, "wc"]/sum(df_formality[, "wc"])
+    df_formality[, "width"] <- edge.constant*df_formality[, "prop_wc"]
+    tcols <- df_formality[, c("from", "to", "color"), drop=FALSE]
+    widths <- df_formality[, c("from", "to", "width"), drop=FALSE]
+    widths[, "width"] <- ceiling(widths[, "width"])
+    ekey <- paste2(edge_capture(theplot), sep=qsep)
+    ckey <- colpaste2df(tcols, 1:2, sep = qsep, keep.orig=FALSE)[, 2:1]
+    wkey <- colpaste2df(widths, 1:2, sep = qsep, keep.orig=FALSE)[, 2:1]
+    E(theplot)$width <- NAer(ekey %l% wkey, 1)    
+    
     ## add class info
     class(theplot) <- c("Network", class(theplot))
     attributes(theplot)[["title"]] <- title
@@ -1613,4 +1691,3 @@ grab_ave_formality <- function(x, left="Total Discourse Formality:",
     Trim() %>% 
     as.numeric() 
 }
-
