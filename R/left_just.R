@@ -39,7 +39,7 @@ function(dataframe, column = NULL, keep.class = FALSE) {
     if (is.null(column)) column <- colnames(dataframe)
     lj <- function(DF2, column) {
         if (is.null(column)) column <- colnames(DF2)
-        Q <- max(nchar(c(as.character(DF2[, column]), names(DF2)[column])))
+        Q <- max(nchar(c(as.character(DF2[, column]), column)))
         DF2 <- data.frame(rbind(colnames(DF2), do.call(cbind,
             lapply(DF2, as.character))), check.names = FALSE)
         DF2[, column] <- left.j(as.character(DF2[, column]))     
@@ -88,7 +88,7 @@ function(dataframe, column = NULL, keep.class = FALSE) {
                 Date=as.Date(d[[i]], origin='1970-01-01'), 
                 POSIXct=as.POSIXct(d[[i]], origin='1970-01-01'), 
                 factor=as.factor(d[[i]]),
-                as(d[[i]], colClasses[i]) ))
+                methods::as(d[[i]], colClasses[i]) ))
             d
         }
         DF3 <- colClasses(DF3, CLASS)

@@ -16,13 +16,37 @@ And constructed with the following guidelines:
   (and resets the patch)
 * Bug fixes and misc. changes bumps the patch
 
+CHANGES IN qdap VERSION 2.2.2
+----------------------------------------------------------------
+
+BUG FIXES
+
+* `type_token_ratio` was misnamed as `type_text_ratio`, this has been corrected.
+  The plot for this class also contained a misspelling "type-toke ratio" which
+  has been corrected as well.
+
+NEW FEATURES
+
+* `inspect_text` added to allow for pretty printed viewing of text strings and
+  **tm** `Corpus`es.
+
+MINOR FEATURES
+
+IMPROVEMENTS
+
+CHANGES
+
+* The following functions had been previously deprecated and now have been 
+  removed: `df2tm_corpus`, `tm2qdap`, `tm_corpus2wfm`, `tm_corpus2df`, `tdm`, 
+  `dtm`, and `polarity_frame`.
+
 
 CHANGES IN qdap VERSION 2.2.1
 ----------------------------------------------------------------
 
 BUG FIXES
 
-* The internal vignette `An Introduction to qdap` produced errors when compiled 
+* The internal vignette "An Introduction to qdap" produced errors when compiled 
   by `build_qdap_vignete`.  This behavior has been fixed by using static 
   reporting.  The root of the behavior is the ability of `cm_` functions to
   grab data from the global environment, which may not be the case in a `knitr`/

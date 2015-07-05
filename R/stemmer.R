@@ -1,6 +1,6 @@
 #' Stem Text
 #' 
-#' \code{stemmer} - Stems a vector of text strings (A wrapper for the pkg{tm} 
+#' \code{stemmer} - Stems a vector of text strings (A wrapper for the \pkg{tm} 
 #' package's \code{\link[tm]{stemDocument}}.
 #' 
 #' @param text.var  The text variable.  In \code{\link[qdap]{stemmer}} this is a 
@@ -55,7 +55,7 @@ function(text.var, rm.bracket = TRUE, capitalize = TRUE, warn = TRUE,
         ifelse(end.mark1 %in% c(".", "?", "!", "|"), end.mark1,    
         ifelse(is.na(end.mark1), NA, "")))
     bl <- sent.type == ""
-    if (any(na.omit(bl)) & warn) {
+    if (any(stats::na.omit(bl)) & warn) {
         warning(paste(
             "The following row(s) do have standard qdap punctuation endmarks:\n", 
             " rows:", paste(which(bl), collapse = ", "), "\n"))

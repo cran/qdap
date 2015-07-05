@@ -441,6 +441,7 @@ plot(out)
 (x <- with(DATA2, as.Corpus(state, list(person, class, day))))
 library(tm)
 inspect(x)
+inspect_text(x)
 class(x)
 
 (y <- with(pres_debates2012, as.Corpus(dialogue, list(person, time))))
@@ -526,7 +527,7 @@ dat <- data.frame(
 dat[[2]] <- rm_default(dat[[2]], pattern=pastex("@rm_url", "#apple\\\\b"))
 
 
-myCorp <- tm::tm_map(myCorp, tm::removeWords, stopwords)
+myCorp <- tm::tm_map(crude, tm::removeWords, Top200Words)
 myCorp \%>\% as.dtm() \%>\% tm::inspect()
 }
 }

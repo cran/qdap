@@ -28,6 +28,6 @@ name2sex <- function(names.list, USE.NAMES = FALSE, ...) {
         sapply("[[", "gender") %lc_qdap% 
         genkey %>% 
         as.factor() %>% 
-        setNames(nm=nms)
+        stats::setNames(nm=nms)
 
 }
