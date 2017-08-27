@@ -2,9 +2,9 @@
 % Please edit documentation in R/check_spelling.R
 \name{check_spelling}
 \alias{check_spelling}
+\alias{which_misspelled}
 \alias{check_spelling_interactive}
 \alias{correct}
-\alias{which_misspelled}
 \title{Check Spelling}
 \usage{
 check_spelling(text.var, range = 2, assume.first.correct = TRUE,
@@ -187,9 +187,8 @@ stats::setNames(lapply(meths, function(x) check_spelling(strings, method=x)), me
 }
 \references{
 \url{http://stackoverflow.com/a/24454727/1000343} \cr
-\url{http://journal.r-project.org/archive/2011-2/RJournal_2011-2_Hornik+Murdoch.pdf}
+\url{https://journal.r-project.org/archive/2011-2/RJournal_2011-2_Hornik+Murdoch.pdf}
 }
 \seealso{
 \code{\link[stringdist]{stringdist}}
 }
-
