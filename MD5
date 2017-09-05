@@ -1,4 +1,4 @@
-85d71da9dac2abd61941603aa6c8baa9 *DESCRIPTION
+e180b79aac920c2d4a338a77df92d4ac *DESCRIPTION
 408a1d25b8afed576e28327a60b8ebb9 *NAMESPACE
 7cae3d9c1ea528c12c22617789ef4cc1 *NEWS
 112d1e2e9661fbae28096f405f3065e0 *R/Animate.R
@@ -13,7 +13,7 @@ bc54a781e249d0a847a7baa4a6c6be53 *R/add_incomplete.R
 1f85c58ff1a7612e75377e9750793a6f *R/add_s.R
 6c75600c80bf715b4ed82a10b1ad85cb *R/adjacency_matrix.R
 53c30a6b563c9e5f59bf76bba7cbfb3d *R/all_words.R
-576d0768f4cb53f2c4194a5fc3582b68 *R/as.tdm.R
+4a7d24174e19eab175b25e782660385e *R/as.tdm.R
 149dcac3a2f0e6f920de1647995a6fd1 *R/automated_readability_index.R
 6fe710eaf84e8d9af0dd8ebc8ee77eef *R/bag_o_words.R
 028bb09b11fe40937b1a69316f9ade15 *R/beg2char.R
@@ -212,7 +212,7 @@ cc6d64cc941f94cee90c596a04a9167b *data/raj.rda
 c7cb448bcc22f8308d85bd335f2e6ab1 *data/rajSPLIT.rda
 9e030ea1b793f928d08a5b4a72aed658 *data/raw.time.span.rda
 b620c92a76d4a6482d2e4d197282fe94 *data/sample.time.span.rda
-87362f43d2873737ff52809abedab94d *inst/CITATION
+b96abcf21047920b542d1a6ba2c9837c *inst/CITATION
 e36673a08848add40828eb6f93f035d0 *inst/Rmd_vignette/css/style.css
 51c1c53d02c25f9daa799452cb5dead0 *inst/Rmd_vignette/data/polarity.example.rds
 05381332243dd8174921dd0d01273484 *inst/Rmd_vignette/data/poldat4.rds
@@ -229,13 +229,13 @@ a25e41b24960d6deccab53024df662d9 *inst/Rmd_vignette/imgs/tm_imgs/img2.png
 5e0bdfe17fc119c8029f36e5f4a60184 *inst/Rmd_vignette/qdap_vignette.Rmd
 ebe22ad72f208613078ea4a6fdb368f2 *inst/doc/cleaning_and_debugging.R
 cfc4fd7d50a0146e3e9bacd17c58b5ca *inst/doc/cleaning_and_debugging.Rnw
-f50866be28b420f375c6bae626d534b0 *inst/doc/cleaning_and_debugging.pdf
+d032562c116bf10dca955ccfb3d6bd14 *inst/doc/cleaning_and_debugging.pdf
 14c6190be87c332b0d749216063cc268 *inst/doc/qdap_vignette.R
 2967a32a8189aae7808443b9d80a9b68 *inst/doc/qdap_vignette.Rmd
 c206c2f2beb6838342408564c374a6cc *inst/doc/qdap_vignette.html
 3166d6410421f812be1a1c8311aae064 *inst/doc/tm_package_compatibility.R
 406334818fedf9ab7ac2a25286c035a5 *inst/doc/tm_package_compatibility.Rnw
-a1477b0643883ba71cf91dba1f645a46 *inst/doc/tm_package_compatibility.pdf
+f3e62d1c4a0e1326874e402912a2a194 *inst/doc/tm_package_compatibility.pdf
 d96c55a66e0abdc38a549992e66f27b2 *inst/extdata/docs/PROJECT_WORKFLOW_GUIDE.pdf
 8ea5dc0949fe6433d5942c29bd6f1a1a *inst/extdata/docs/Rprofile.txt
 887af5d5691c297ad427987dbaa2a7de *inst/extdata/docs/TEMP.txt
