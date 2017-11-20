@@ -20,8 +20,9 @@ pdf.options(useDingbats = TRUE)
 
 ## ----freq_dat---------------------------------------------------------------------------
 tm_dat <- qdap_dat <- DATA[1:4, c(1, 4)]
-rownames(tm_dat) <- paste("docs", 1:nrow(tm_dat))
-tm_dat <- Corpus(DataframeSource(tm_dat[, 2, drop=FALSE]))
+tm_dat['doc_id'] <- paste("docs", 1:nrow(tm_dat))
+colnames(tm_dat)[2] <- c('text')
+tm_dat <- Corpus(DataframeSource(tm_dat))
 
 ## ----freq_dat_view, echo=FALSE----------------------------------------------------------
 qdap_dat
@@ -63,12 +64,13 @@ TermDocumentMatrix(tm_dat,
 summary(with(qdap_dat, wfm(state, person)))
 
 ## ----data_set_up------------------------------------------------------------------------
-tm_dat <- qdap_dat <- DATA[1:4, c (1, 4) ]
-rownames (tm_dat) <- paste ("docs", 1: nrow (tm_dat))
-tm_dat <- Corpus(DataframeSource (tm_dat[, 2, drop=FALSE]))
+tm_dat <- qdap_dat <- DATA[1:4, c(1, 4)]
+tm_dat['doc_id'] <- paste("docs", 1:nrow(tm_dat))
+colnames(tm_dat)[2] <- c('text')
+tm_dat <- Corpus(DataframeSource(tm_dat))
 
 qdap_wfm <- with (qdap_dat, wfm (state, person))
-tm_tdm <- TermDocumentMatrix (tm_dat,
+tm_tdm <- TermDocumentMatrix(tm_dat,
     control = list (
         removePunctuation = TRUE,
         wordLengths= c (0, Inf)
