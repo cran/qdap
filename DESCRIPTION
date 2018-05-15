@@ -2,8 +2,7 @@ Package: qdap
 Type: Package
 Title: Bridging the Gap Between Qualitative Data and Quantitative
         Analysis
-Version: 2.2.9
-Date: 2017-11-17
+Version: 2.3.0
 Authors@R: c(person("Bryan", "Goodrich", role = "ctb"), person("Dason", "Kurkiewicz", role =
           "ctb"), person("Tyler", "Rinker", email = "tyler.rinker@gmail.com", role = c("aut",
           "cre")))
@@ -32,9 +31,9 @@ URL: http://trinker.github.com/qdap/
 BugReports: http://github.com/trinker/qdap/issues
 RoxygenNote: 6.0.1
 NeedsCompilation: no
-Packaged: 2017-11-20 02:06:02 UTC; Tyler
+Packaged: 2018-05-15 06:07:06 UTC; Tyler
 Author: Bryan Goodrich [ctb],
   Dason Kurkiewicz [ctb],
   Tyler Rinker [aut, cre]
 Repository: CRAN
-Date/Publication: 2017-11-20 11:40:14 UTC
+Date/Publication: 2018-05-15 06:59:03 UTC
