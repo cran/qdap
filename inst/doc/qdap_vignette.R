@@ -1,17 +1,17 @@
-## ----setup, include=FALSE------------------------------------------------
+## ----setup, include=FALSE-----------------------------------------------------
 # set global chunk options
 library(knitr)
 
-## ----eval=FALSE----------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  browseVignettes(package = 'qdap')
 
-## ----eval=FALSE----------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  build_qdap_vignette()
 
-## ----eval=FALSE----------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  build_qdap_vignette(TRUE)
 
-## ----eval=FALSE----------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  path <- system.file("Rmd_vignette", package = "qdap")
 #  path2 <- system.file("doc", package = "qdap")
 #  
@@ -24,7 +24,7 @@ library(knitr)
 #      options=c("use_xhtml","smartypants","mathjax","highlight_code", "base64_images"))
 #  file.copy(new[1], old[1], overwrite = TRUE)
 
-## ----eval=FALSE----------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  knitr::knit(new[1], output = old[3], tangle=TRUE)
 #  file.copy(new[1], old[1], overwrite = TRUE)
 #  

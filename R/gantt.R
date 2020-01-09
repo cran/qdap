@@ -19,7 +19,7 @@
 #' @note For non-repeated measures data use \code{\link[qdap]{gantt}}.  For
 #' more flexible plotting needs use \code{\link[qdap]{gantt_wrap}} over the 
 #' generic plotting method.
-#' @author DigEmAll (\url{stackoverflow.com}) and Tyler Rinker <tyler.rinker@@gmail.com>.
+#' @author DigEmAll (stackoverflow.com) and Tyler Rinker <tyler.rinker@@gmail.com>.
 #' @seealso \code{\link[qdap]{gantt_rep}},
 #' \code{\link[qdap]{gantt_wrap}},
 #' \code{\link[qdap]{gantt_plot}} 

@@ -2,9 +2,12 @@ Package: qdap
 Type: Package
 Title: Bridging the Gap Between Qualitative Data and Quantitative
         Analysis
-Version: 2.3.2
-Authors@R: c(person("Bryan", "Goodrich", role = "ctb"), person("Dason", "Kurkiewicz", role = "ctb"), person("Tyler", "Rinker",
-              email = "tyler.rinker@gmail.com", role = c("aut", "cre")))
+Version: 2.3.6
+Authors@R: c(
+             person("Tyler", "Rinker", email = "tyler.rinker@gmail.com", role = c("aut", "cre")),
+             person("Bryan", "Goodrich", role = "ctb"), 
+             person("Dason", "Kurkiewicz", role = "ctb")
+            )
 Maintainer: Tyler Rinker <tyler.rinker@gmail.com>
 Depends: R (>= 3.1.0), qdapDictionaries (>= 1.0.2), qdapRegex (>=
         0.1.2), qdapTools (>= 1.3.1), RColorBrewer
@@ -26,11 +29,11 @@ Description: Automates many of the tasks associated with quantitative discourse 
 License: GPL-2
 URL: http://trinker.github.com/qdap/
 BugReports: http://github.com/trinker/qdap/issues
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 NeedsCompilation: no
-Packaged: 2019-01-02 12:55:28 UTC; trinker
-Author: Bryan Goodrich [ctb],
-  Dason Kurkiewicz [ctb],
-  Tyler Rinker [aut, cre]
+Packaged: 2020-01-08 13:15:19 UTC; trinker
+Author: Tyler Rinker [aut, cre],
+  Bryan Goodrich [ctb],
+  Dason Kurkiewicz [ctb]
 Repository: CRAN
-Date/Publication: 2019-01-02 13:40:07 UTC
+Date/Publication: 2020-01-09 18:30:06 UTC

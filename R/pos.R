@@ -39,7 +39,7 @@
 #' treated as a pronoun, verb and adjective respectively for "She + is + cool".
 #' @seealso \code{\link[openNLP]{Maxent_POS_Tag_Annotator}},
 #' \code{\link[qdap]{colcomb2class}}
-#' @references \href{openNLP}{http:/opennlp.apache.org}
+#' @references http:/opennlp.apache.org
 #' @keywords parts-of-speech
 #' @export
 #' @importFrom parallel parLapply makeCluster detectCores stopCluster clusterEvalQ clusterExport
