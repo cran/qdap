@@ -97,7 +97,7 @@ Animate(ani_gannt)
 Animate(plot(ani_gannt))
 
 library(animation)
-loc <- reports::folder(animation_gantt)
+loc <- folder(animation_gantt)
 
 ## Set up the plotting function
 oopt <- animation::ani.options(interval = 0.1)
