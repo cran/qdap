@@ -867,7 +867,7 @@ weight.wfm <- function(x, type = "prop", ...) {
 #' 
 #' @rdname Word_Frequency_Matrix
 #' @export
-#' @method weight wfm
+#' @method weight wfdf
 weight.wfdf <- function(x, type = "prop", ...) {
 
     if (methods::is(x, "wfdf") && !methods::is(x, "f.df")) {

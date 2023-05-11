@@ -12,7 +12,7 @@ data(raj)
 }
 \description{
 A dataset containing the original transcript from Romeo and Juliet as it was 
-scraped from: \url{http://shakespeare.mit.edu/romeo_juliet/full.html}.
+scraped from: http://shakespeare.mit.edu/romeo_juliet/full.html.
 }
 \details{
 \itemize{ 
@@ -22,6 +22,6 @@ scraped from: \url{http://shakespeare.mit.edu/romeo_juliet/full.html}.
 }
 }
 \references{
-\url{http://shakespeare.mit.edu/romeo_juliet/full.html}
+http://shakespeare.mit.edu/romeo_juliet/full.html
 }
 \keyword{datasets}

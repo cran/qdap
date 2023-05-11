@@ -20,6 +20,6 @@ A dataset containing Romeo and Juliet: Act 1.
 }
 }
 \references{
-\url{http://shakespeare.mit.edu/romeo_juliet/full.html}
+http://shakespeare.mit.edu/romeo_juliet/full.html
 }
 \keyword{datasets}

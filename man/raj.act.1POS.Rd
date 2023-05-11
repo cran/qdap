@@ -10,7 +10,7 @@ A dataset containing a list from \code{\link[qdap]{pos_by}} using the
 more information).}
 \format{
 A list with 10 elements 
-\url{http://shakespeare.mit.edu/romeo_juliet/full.html}
+http://shakespeare.mit.edu/romeo_juliet/full.html
 }
 \usage{
 data(raj.act.1POS)

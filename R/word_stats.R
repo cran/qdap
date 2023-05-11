@@ -140,7 +140,7 @@ function(text.var, grouping.var = NULL, tot = NULL, parallel = FALSE,
             grouping <- unlist(grouping.var)
         } 
     } 
-    if (class(text.var) != "word_stats"){
+    if (!inherits(text.var, "word_stats")){
         t.o.t. <- if(is.null(tot)){
             paste0(1:length(text.var), ".", 1)
         } else {
@@ -255,7 +255,7 @@ function(text.var, grouping.var = NULL, tot = NULL, parallel = FALSE,
             if (identical(A, character(0))) {
                 return (c(DIS=0, HAPAX=0, ALL=0))
             } else {
-                if (A=="") {
+                if (length(A) == 1 && A=="") {
                     return (c(DIS=0, HAPAX=0, ALL=0))
                 } else {
                     B <- data.frame(table(unblanker(A)))
@@ -282,7 +282,7 @@ function(text.var, grouping.var = NULL, tot = NULL, parallel = FALSE,
     DF2 <- DF2[order(-DF2$n.tot, -DF2$n.sent), ]
     rownames(DF2) <- NULL
     DF3 <- DF
-    if (class(text.var) != "word_stats") {
+    if (!inherits(text.var, "word_stats")) {
         DF3 <- DF3[order(DF3$n.sent), ]
     } else {
         DF3 <- DF3[order(DF3$sent.num), ]

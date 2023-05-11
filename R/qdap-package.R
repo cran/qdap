@@ -101,7 +101,7 @@ NULL
 #' @usage data(mraja1) 
 #' @format A data frame with 235 rows and 5 variables 
 #' @references 
-#' \url{http://shakespeare.mit.edu/romeo_juliet/full.html}
+#' http://shakespeare.mit.edu/romeo_juliet/full.html
 NULL
 
 #' Romeo and Juliet: Act 1 Parts of Speech by Person
@@ -129,7 +129,7 @@ NULL
 #' @name raj.act.1POS 
 #' @usage data(raj.act.1POS) 
 #' @format A list with 10 elements 
-#' \url{http://shakespeare.mit.edu/romeo_juliet/full.html}
+#' http://shakespeare.mit.edu/romeo_juliet/full.html
 NULL
 
 #' 2012 U.S. Presidential Debates
@@ -192,13 +192,13 @@ NULL
 #' @usage data(mraja1spl) 
 #' @format A data frame with 508 rows and 7 variables 
 #' @references 
-#' \url{http://shakespeare.mit.edu/romeo_juliet/full.html}
+#' http://shakespeare.mit.edu/romeo_juliet/full.html
 NULL
  
 #' Romeo and Juliet (Unchanged & Complete)
 #' 
 #' A dataset containing the original transcript from Romeo and Juliet as it was 
-#' scraped from: \url{http://shakespeare.mit.edu/romeo_juliet/full.html}.
+#' scraped from: http://shakespeare.mit.edu/romeo_juliet/full.html.
 #' 
 #' @details 
 #' \itemize{ 
@@ -213,7 +213,7 @@ NULL
 #' @usage data(raj) 
 #' @format A data frame with 840 rows and 3 variables 
 #' @references 
-#' \url{http://shakespeare.mit.edu/romeo_juliet/full.html}
+#' http://shakespeare.mit.edu/romeo_juliet/full.html
 NULL
  
 #' Romeo and Juliet: Act 1
@@ -232,7 +232,7 @@ NULL
 #' @usage data(raj.act.1) 
 #' @format A data frame with 235 rows and 2 variables 
 #' @references 
-#' \url{http://shakespeare.mit.edu/romeo_juliet/full.html}
+#' http://shakespeare.mit.edu/romeo_juliet/full.html
 NULL
  
 #' Romeo and Juliet: Act 2
@@ -251,7 +251,7 @@ NULL
 #' @usage data(raj.act.2) 
 #' @format A data frame with 205 rows and 2 variables 
 #' @references 
-#' \url{http://shakespeare.mit.edu/romeo_juliet/full.html}
+#' http://shakespeare.mit.edu/romeo_juliet/full.html
 NULL
  
 #' Romeo and Juliet: Act 3
@@ -270,7 +270,7 @@ NULL
 #' @usage data(raj.act.3) 
 #' @format A data frame with 197 rows and 2 variables 
 #' @references 
-#' \url{http://shakespeare.mit.edu/romeo_juliet/full.html}
+#' http://shakespeare.mit.edu/romeo_juliet/full.html
 NULL
  
 #' Romeo and Juliet: Act 4
@@ -289,7 +289,7 @@ NULL
 #' @usage data(raj.act.4) 
 #' @format A data frame with 115 rows and 2 variables 
 #' @references 
-#' \url{http://shakespeare.mit.edu/romeo_juliet/full.html}
+#' http://shakespeare.mit.edu/romeo_juliet/full.html
 NULL
  
 #' Romeo and Juliet: Act 5
@@ -308,7 +308,7 @@ NULL
 #' @usage data(raj.act.5) 
 #' @format A data frame with 88 rows and 2 variables 
 #' @references 
-#' \url{http://shakespeare.mit.edu/romeo_juliet/full.html}
+#' http://shakespeare.mit.edu/romeo_juliet/full.html
 NULL
  
 #' Romeo and Juliet Demographics
@@ -331,7 +331,7 @@ NULL
 #' @usage data(raj.demographics) 
 #' @format A data frame with 34 rows and 4 variables 
 #' @references 
-#' \url{http://shakespeare.mit.edu/romeo_juliet/full.html}
+#' http://shakespeare.mit.edu/romeo_juliet/full.html
 NULL
  
 #' Romeo and Juliet Split in Parts of Speech
@@ -354,7 +354,7 @@ NULL
 #' @usage data(rajPOS) 
 #' @format A list with 4 elements 
 #' @references 
-#' \url{http://shakespeare.mit.edu/romeo_juliet/full.html}
+#' http://shakespeare.mit.edu/romeo_juliet/full.html
 NULL
  
 #' Romeo and Juliet (Complete & Split)
@@ -380,7 +380,7 @@ NULL
 #' @usage data(rajSPLIT) 
 #' @format A data frame with 2151 rows and 8 variables 
 #' @references 
-#' \url{http://shakespeare.mit.edu/romeo_juliet/full.html}
+#' http://shakespeare.mit.edu/romeo_juliet/full.html
 NULL
  
 #' Minimal Raw Time Span Data Set 
@@ -427,7 +427,7 @@ NULL
 #' @usage data(env.syl) 
 #' @format A environment with the DICTIONARY data set.  
 #' @references 
-#' \href{http://archive.ics.uci.edu/ml/machine-learning-databases/undocumented/connectionist-bench/nettalk/}{UCI Machine Learning Repository website}
+#' \href{https://archive.ics.uci.edu/ml/machine-learning-databases/undocumented/connectionist-bench/nettalk/}{UCI Machine Learning Repository website}
 NULL
 
 #' Hamlet (Complete & Split by Sentence)

@@ -17,6 +17,6 @@ A dataset containing a syllable lookup environment (see \code{DICTIONARY}).
 For internal use.
 }
 \references{
-\href{http://archive.ics.uci.edu/ml/machine-learning-databases/undocumented/connectionist-bench/nettalk/}{UCI Machine Learning Repository website}
+\href{https://archive.ics.uci.edu/ml/machine-learning-databases/undocumented/connectionist-bench/nettalk/}{UCI Machine Learning Repository website}
 }
 \keyword{datasets}

@@ -1,15 +1,14 @@
-citHeader("To cite qdap in publications, please use:")
+## R package reference generated from DESCRIPTION metadata
+citation(auto = meta)
 
-
-citEntry(entry = "manual",
+## NLME book
+bibentry(bibtype = "Manual",
     title = "{qdap}: {Q}uantitative Discourse Analysis Package",
     author = "Tyler W. Rinker",
     address = "Buffalo, New York",
-    note = "2.4.2",
-    year = "2020",
-    url = "https://github.com/trinker/qdap", 
-    textVersion  = paste("Rinker, T. W. (2020).",
-        "qdap: Quantitative Discourse Analysis Package.",
-        "2.4.2. Buffalo, New York.",
-        "https://github.com/trinker/qdap")
-)
+    note = "2.4.6",
+    year = "2023",
+    url = "https://github.com/trinker/qdap")
+         
+         
+

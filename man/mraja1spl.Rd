@@ -27,6 +27,6 @@ and turns of talk split into sentences.
 }
 }
 \references{
-\url{http://shakespeare.mit.edu/romeo_juliet/full.html}
+http://shakespeare.mit.edu/romeo_juliet/full.html
 }
 \keyword{datasets}

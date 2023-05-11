@@ -199,7 +199,7 @@ function(dataframe, pvals = c(TRUE, FALSE), replications = 1000,
             vars <- c("L1", "DIST", "code.var",
                 "causal", "replications", "v_outer", "mgsub", "vdists1",
                 "vdists2", "vs2df", "Nget", "remix", "pvals.n", "pvals.c",
-                "pvals", "FUN_apply", "scale.all", "paste2")
+                "pvals", "FUN_apply", "scale_all", "paste2")
 
             clusterExport(cl=cl, varlist=vars, envir = environment())
             output <- parLapply(cl, L1, DIST, cvar = code.var, cause = causal, 
@@ -484,7 +484,7 @@ FUN_apply2 <- function(a, b, FUN, ..., cause = FALSE) {
 }
 
 ## scale each column
-scale.all <- function(x) {
+scale_all <- function(x) {
     dims <- dim(x)
     dnms <- dimnames(x)
     x <- matrix(scale(c(x), center = FALSE), dims)
@@ -499,9 +499,9 @@ DIST <- function(dataframe, cvar, cause, reps, pvals) {
     df <- droplevels(dataframe[, c("start", "end", cvar)])
 
     ## get unique codes and then all possible combinations
-    cds <- sort(levels(df[, cvar]))
+    cds <- sort(unique(df[[cvar]]))
     xy <- expand.grid(cds, cds)
-    xy <- xy[xy[, 1] != xy[, 2], 2:1]
+    xy <- xy[xy[[1]] != xy[[2]], 2:1]
 
     ## split apart dataframe bycodes
     codesplits <- lapply(lapply(split(df, df[, cvar]), "[", -3), 
@@ -514,7 +514,7 @@ DIST <- function(dataframe, cvar, cause, reps, pvals) {
     N <- sapply(codesplits, Nget)
 
     o <- list(mean = Means, sd = Sds, n = N, 
-        stan.mean = scale.all(Means)*scale.all(Sds))
+        stan.mean = scale_all(Means)*scale_all(Sds))
 
     Pvals <- NULL
     ## the simulations to derive p values for the means.
@@ -535,9 +535,9 @@ DIST2 <- function(dataframe, cvar, cause, reps, pvals, time.var) {
     df <- dataframe[, c("start", "end", cvar, time.var)]
 
     ## get unique codes and then all possible combinations
-    cds <- sort(levels(df[, cvar]))
+    cds <- sort(unique(df[, cvar]))
     xy <- expand.grid(cds, cds)
-    xy <- xy[xy[, 1] != xy[, 2], 2:1]
+    xy <- xy[xy[[1]] != xy[[2]], 2:1]
 
     ## split apart dataframe bycodes
     codesplits <- lapply(lapply(split(df, df[, cvar]), "[", -3), 
@@ -550,7 +550,7 @@ DIST2 <- function(dataframe, cvar, cause, reps, pvals, time.var) {
     N <- sapply(codesplits, length)
 
     o <- list(mean = Means, sd = Sds, n = N, 
-        stan.mean = scale.all(Means)*scale.all(Sds))
+        stan.mean = scale_all(Means)*scale_all(Sds))
 
     Pvals <- NULL
     ## the simulations to derive p values for the means.

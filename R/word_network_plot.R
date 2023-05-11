@@ -101,7 +101,7 @@ function(text.var, grouping.var = 1:length(text.var), target.words = NULL,
     title.color = "black", legend = NULL, legend.cex = .8, 
     legend.location = c(-1.54, 1.41), plot = TRUE, char2space = "~~", ...) { 
 
-    if (class(text.var) == "adjacency_matrix") { #actually takes an adjaceny matrix   
+    if (inherits(text.var, "adjacency_matrix")) { #actually takes an adjaceny matrix   
        adj.mat.object <- text.var[["adjacency"]]                                      
     } else {    
         z <- wfm(text.var = text.var, grouping.var = grouping.var,       

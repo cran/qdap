@@ -2,7 +2,7 @@ Package: qdap
 Type: Package
 Title: Bridging the Gap Between Qualitative Data and Quantitative
         Analysis
-Version: 2.4.3
+Version: 2.4.6
 Authors@R: c(
              person("Tyler", "Rinker", email = "tyler.rinker@gmail.com", role = c("aut", "cre")),
              person("Bryan", "Goodrich", role = "ctb"), 
@@ -26,13 +26,14 @@ Description: Automates many of the tasks associated with quantitative discourse 
               and targeted analysis. 'qdap' is designed for transcript analysis, however, many functions are applicable to other
               areas of Text Mining/ Natural Language Processing.
 License: GPL-2
-URL: http://trinker.github.io/qdap/
+URL: https://trinker.github.io/qdap/
 BugReports: https://github.com/trinker/qdap/issues
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
+Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2020-09-26 22:09:43 UTC; trinker
+Packaged: 2023-05-10 17:16:06 UTC; tylerrinker
 Author: Tyler Rinker [aut, cre],
   Bryan Goodrich [ctb],
   Dason Kurkiewicz [ctb]
 Repository: CRAN
-Date/Publication: 2020-09-27 17:10:09 UTC
+Date/Publication: 2023-05-11 06:10:02 UTC

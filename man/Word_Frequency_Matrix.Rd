@@ -74,7 +74,7 @@ wfm_combine(wf.obj, word.lists, matrix = TRUE)
 
 \method{weight}{wfm}(x, type = "prop", ...)
 
-\method{weight}{wfm}(x, type = "prop", ...)
+\method{weight}{wfdf}(x, type = "prop", ...)
 
 as.wfm(x, ...)
 
